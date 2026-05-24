@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ピックルボール部 ポータル＆出欠管理</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap');
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+        }
+        /* スクロールバーのカスタマイズ */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-16">
+
+    <!-- 接続ステータスバー -->
+    <div id="sync-banner" class="bg-emerald-600 text-white text-xs py-1.5 px-4 text-center font-bold flex items-center justify-center gap-2 transition-all">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
+        <span id="sync-text">リアルタイム同期中 (Firebase Cloud Database)</span>
+    </div>
+
+    <!-- ヘッダー -->
+    <header class="bg-gradient-to-r from-lime-500 to-emerald-600 text-white shadow-md">
+        <div class="max-w-4xl mx-auto px-4 py-6 md:py-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="text-center sm:text-left">
+                <div class="inline-flex items-center gap-2 bg-lime-400/30 text-lime-100 text-xs font-bold px-3 py-1 rounded-full mb-2">
+                    <i data-lucide="users" class="w-4 h-4"></i> ピックルボール部ポータル
+                </div>
+                <h1 class="text-2xl md:text-3xl font-black tracking-tight">PICKLEBALL PORTAL</h1>
+                <p class="text-lime-100 text-sm mt-1">誰が参加するか、一目でわかる出欠管理サイト</p>
+            </div>
+            <!-- クイック統計 -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20 min-w-[220px]">
+                <p class="text-xs text-lime-200">次回練習日</p>
+                <div id="next-practice-date" class="text-base font-black mt-1">取得中...</div>
+                <div id="next-practice-countdown" class="text-xs text-emerald-100 mt-1 bg-emerald-700/50 py-0.5 px-2 rounded-full inline-block">--:--:--</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-6 space-y-6">
+
+        <!-- アプリの案内と切り替えタブ -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-3 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
+            <div class="flex border-b border-slate-100 w-full sm:w-auto overflow-x-auto">
+                <button id="tab-calendar" onclick="switchView('calendar')" class="flex-1 sm:flex-initial px-5 py-2.5 text-center font-bold text-sm border-b-2 border-emerald-600 text-emerald-600 transition flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i data-lucide="calendar" class="w-4 h-4"></i> 練習カレンダー
+                </button>
+                <button id="tab-attendance" onclick="switchView('attendance')" class="flex-1 sm:flex-initial px-5 py-2.5 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i data-lucide="check-square" class="w-4 h-4"></i> 出欠回答＆集計
+                </button>
+                <button id="tab-admin" onclick="switchView('admin')" class="flex-1 sm:flex-initial px-5 py-2.5 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i data-lucide="settings" class="w-4 h-4"></i> 管理者モード
+                </button>
+            </div>
+            <!-- 現在のアカウント情報 -->
+            <div id="user-info-badge" class="text-xs text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+                ゲスト接続
+            </div>
+        </div>
+
+        <!-- 1. カレンダービュー -->
+        <section id="view-calendar" class="space-y-6">
+            
+            <!-- ⚡ 直近練習の「みんなの参加状況」サマリーカード -->
+            <div class="bg-white rounded-3xl border border-slate-100 p-5 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg">
+                            <i data-lucide="sparkles" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="font-extrabold text-slate-800 text-sm sm:text-base">直近の練習日＆参加表明メンバー</h3>
+                    </div>
+                    <span class="text-xs text-slate-400 font-medium hidden sm:inline">リアルタイム集計中</span>
+                </div>
+                
+                <!-- サマリーカードコンテナ -->
+                <div id="quick-attendance-summary" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="col-span-full text-center py-6 text-xs text-slate-400 font-medium">
+                        練習日程を読み込み中、または登録されていません...
+                    </div>
+                </div>
+            </div>
+
+            <!-- カレンダー本体 -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 sm:p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <button onclick="prevMonth()" class="p-2 hover:bg-slate-100 rounded-xl transition text-slate-600 border border-slate-100 shadow-sm">
+                        <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                    </button>
+                    <h2 id="calendar-month-year" class="text-lg sm:text-xl font-black text-slate-800 tracking-tight">2026年 7月</h2>
+                    <button onclick="nextMonth()" class="p-2 hover:bg-slate-100 rounded-xl transition text-slate-600 border border-slate-100 shadow-sm">
+                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- 曜日表記 -->
+                <div class="calendar-grid text-center text-xs font-bold text-slate-400 border-b border-slate-100 pb-3 mb-3">
+                    <div class="text-red-500">日</div>
+                    <div>月</div>
+                    <div>火</div>
+                    <div>水</div>
+                    <div>木</div>
+                    <div>金</div>
+                    <div class="text-sky-500">土</div>
+                </div>
+
+                <!-- 日付枠 -->
+                <div id="calendar-days" class="calendar-grid gap-1.5 sm:gap-2.5">
+                    <!-- JSで動的に生成 -->
+                </div>
+
+                <!-- カレンダー凡例 -->
+                <div class="mt-6 flex flex-wrap gap-4 text-[11px] sm:text-xs border-t border-slate-100 pt-5 justify-center">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3.5 h-3.5 bg-emerald-500 rounded-lg inline-block shadow-sm"></span>
+                        <span class="text-slate-600 font-semibold">月曜定期枠 (18:30~21:00)</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3.5 h-3.5 bg-sky-500 rounded-lg inline-block shadow-sm"></span>
+                        <span class="text-slate-600 font-semibold">土曜特別枠 (14:00~17:00)</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3.5 h-3.5 bg-slate-100 rounded-lg inline-block border border-slate-200"></span>
+                        <span class="text-slate-600 font-semibold">練習なし</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 出欠登録・確認ビュー -->
+        <section id="view-attendance" class="hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 出欠登録フォーム -->
+                <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 h-fit space-y-4">
+                    <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+                        <div class="p-1.5 bg-emerald-500 text-white rounded-lg">
+                            <i data-lucide="edit-3" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800">出欠を回答する</h3>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1.5">1. お名前</label>
+                        <input type="text" id="att-name" placeholder="部員名を入力" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1.5">2. 練習日程を選択</label>
+                        <select id="att-schedule-id" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            <!-- JSで動的に追加 -->
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1.5">3. 参加状況</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" onclick="setFormStatus('出席')" id="status-btn-出席" class="py-2.5 rounded-xl border border-slate-200 text-xs font-bold transition bg-white hover:bg-slate-50 text-slate-700">🟢 出席</button>
+                            <button type="button" onclick="setFormStatus('未定')" id="status-btn-未定" class="py-2.5 rounded-xl border border-slate-200 text-xs font-bold transition bg-white hover:bg-slate-50 text-slate-700">🟡 未定</button>
+                            <button type="button" onclick="setFormStatus('欠席')" id="status-btn-欠席" class="py-2.5 rounded-xl border border-slate-200 text-xs font-bold transition bg-white hover:bg-slate-50 text-slate-700">🔴 欠席</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1.5">4. 一言・連絡事項 (任意)</label>
+                        <input type="text" id="att-comment" placeholder="遅刻します、ラケット借ります等" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+
+                    <button onclick="submitAttendance()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-md">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        <span>出欠を登録する</span>
+                    </button>
+                </div>
+
+                <!-- 出欠確認リスト -->
+                <div class="md:col-span-2 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="p-1.5 bg-sky-500 text-white rounded-lg">
+                                <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-800">日程別の詳細な出欠集計</h3>
+                        </div>
+                    </div>
+
+                    <!-- 日程一覧リスト＆参加人数 -->
+                    <div id="attendance-summary-list" class="space-y-4 max-h-[600px] overflow-y-auto pr-1">
+                        <!-- JSで動的生成 -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 管理者モードビュー -->
+        <section id="view-admin" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-6">
+            <!-- パスコード認証画面 -->
+            <div id="admin-auth-panel" class="py-12 flex flex-col items-center justify-center space-y-4">
+                <div class="p-3 bg-rose-50 text-rose-600 rounded-full">
+                    <i data-lucide="lock" class="w-8 h-8"></i>
+                </div>
+                <div class="text-center">
+                    <h3 class="text-lg font-bold text-slate-800">管理者認証が必要です</h3>
+                    <p class="text-xs text-slate-400 mt-1">練習日の追加・削除を行うにはパスコードを入力してください</p>
+                </div>
+                <div class="flex gap-2 max-w-xs w-full">
+                    <!-- 🔐 プレースホルダーから初期値の案内を消去 -->
+                    <input type="password" id="admin-passcode" placeholder="パスコードを入力" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-center tracking-widest focus:ring-2 focus:ring-rose-500 focus:outline-none">
+                    <button onclick="authenticateAdmin()" class="bg-rose-500 hover:bg-rose-600 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition">解除</button>
+                </div>
+                <div id="auth-error" class="hidden text-xs text-rose-500 font-bold">※パスコードが違います。</div>
+            </div>
+
+            <!-- 認証後管理者操作パネル -->
+            <div id="admin-control-panel" class="hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 bg-rose-50 text-rose-700 text-xs font-bold px-2.5 py-1 rounded-full mb-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> 管理者権限 有効
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800">練習スケジュールの管理</h3>
+                    </div>
+                    <button onclick="lockAdmin()" class="text-xs font-bold text-slate-500 hover:text-slate-800 px-3 py-1.5 border border-slate-200 rounded-lg">管理者モードを終了</button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- スケジュール追加フォーム -->
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-4">
+                        <h4 class="font-bold text-slate-700 text-sm flex items-center gap-1.5">
+                            <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-600"></i> 新しい練習日程を追加
+                        </h4>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">日程</label>
+                            <input type="date" id="new-sched-date" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">開始時間</label>
+                                <input type="time" id="new-sched-start" value="18:30" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">終了時間</label>
+                                <input type="time" id="new-sched-end" value="21:00" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">練習区分</label>
+                            <select id="new-sched-label" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="月曜定期枠">月曜定期枠 (18:30~21:00)</option>
+                                <option value="土曜特別枠">土曜特別枠 (14:00~17:00)</option>
+                                <option value="その他臨時枠">その他臨時枠</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">補足事項 (任意)</label>
+                            <input type="text" id="new-sched-note" placeholder="例：3面使用、ラケット無料貸出など" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+
+                        <button onclick="addSchedule()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-sm transition">
+                            日程を追加して保存
+                        </button>
+                    </div>
+
+                    <!-- スケジュール一括生成（便利機能） -->
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-4">
+                        <h4 class="font-bold text-slate-700 text-sm flex items-center gap-1.5">
+                            <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i> カレンダー初期化＆バッチ追加
+                        </h4>
+                        <p class="text-xs text-slate-500 leading-relaxed">
+                            初めて利用する際やテストをしたい場合に、2026年後半期の月曜日（定期）と土曜日（7/4、8/22、9/12）の日程データをワンクリックで一括生成します。
+                        </p>
+                        <button onclick="seedInitialData()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
+                            <i data-lucide="play" class="w-4 h-4"></i>
+                            <span>2026年後半期の通常スケジュールを一括追加</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- スケジュール一覧・削除 -->
+                <div class="space-y-3">
+                    <h4 class="font-bold text-slate-700 text-sm">現在登録済みの全スケジュール (${allSchedules.length}件)</h4>
+                    <div id="admin-schedule-list" class="space-y-2 max-h-[400px] overflow-y-auto border border-slate-100 rounded-xl p-3 bg-slate-50">
+                        <!-- JSで動的生成 -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 4. 詳細ポップアップ / 参加部員確認モーダル -->
+    <div id="detail-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform scale-95 transition-all">
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-2">
+                    <span id="modal-label" class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">月曜定期練習</span>
+                </div>
+                <button onclick="closeModal()" class="p-1.5 hover:bg-slate-100 rounded-lg transition text-slate-400">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <h3 id="modal-date" class="text-xl font-black text-slate-800">2026年7月6日 (月)</h3>
+            <p id="modal-time" class="text-sm text-slate-500 flex items-center gap-1.5 mt-1">
+                <i data-lucide="clock" class="w-4 h-4 text-slate-400 shrink-0"></i> 18:30 ~ 21:00
+            </p>
+
+            <div class="mt-4 p-3 bg-slate-50 rounded-xl text-xs space-y-1 text-slate-600">
+                <p>📍 <strong>場所:</strong> 体育館 (3面)</p>
+                <p>📦 <strong>備品:</strong> バドミントン用ポール、ネット（現地）</p>
+                <p id="modal-note">📝 <strong>メモ:</strong> </p>
+            </div>
+
+            <!-- 出欠ビジュアルメーター -->
+            <div class="mt-4 space-y-1">
+                <div class="flex justify-between text-[11px] font-bold text-slate-400">
+                    <span>回答比率</span>
+                    <span id="modal-stats" class="text-slate-600">出席: 0人 / 未定: 0人 / 欠席: 0人</span>
+                </div>
+                <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden flex">
+                    <div id="modal-bar-ok" class="bg-emerald-500 h-full transition-all" style="width: 0%"></div>
+                    <div id="modal-bar-maybe" class="bg-amber-400 h-full transition-all" style="width: 0%"></div>
+                    <div id="modal-bar-no" class="bg-rose-400 h-full transition-all" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- 出席者リスト -->
+            <div class="mt-5 space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex justify-between">
+                    <span>登録部員一覧</span>
+                </h4>
+                
+                <div id="modal-attendance-list" class="space-y-2 max-h-[180px] overflow-y-auto pr-1">
+                    <!-- JSで動的に出席者を表示 -->
+                </div>
+            </div>
+
+            <!-- アクション -->
+            <div class="mt-6 flex flex-col gap-2">
+                <div class="flex gap-2">
+                    <button onclick="closeModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition text-sm">
+                        閉じる
+                    </button>
+                    <a id="modal-gcal" target="_blank" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition text-sm text-center flex items-center justify-center gap-1.5">
+                        <i data-lucide="plus" class="w-4 h-4"></i> カレンダー登録
+                    </a>
+                </div>
+                <!-- LINE共有用コピーボタン -->
+                <button id="modal-copy-list" onclick="copyAttendanceSummaryText()" class="w-full py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> この日の参加者リストをコピー (LINE共有用)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI共通トースト表示 -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2">
+        <i data-lucide="info" class="w-4 h-4 text-emerald-400"></i>
+        <span id="toast-message">メッセージ</span>
+    </div>
+
+    <!-- Firebase Core / Auth / Firestore SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ----------------- ENVIRONMENT & MOCK FALLBACK -----------------
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pickleball-club-portal';
+        
+        let firebaseConfig;
+        if (typeof __firebase_config !== 'undefined') {
+            firebaseConfig = JSON.parse(__firebase_config);
+        } else {
+            // ローカル・プレビュー用ダミー構成
+            firebaseConfig = {
+                apiKey: "dummy-api-key",
+                authDomain: "dummy-auth.firebaseapp.com",
+                projectId: "dummy-project",
+                storageBucket: "dummy-storage.appspot.com",
+                messagingSenderId: "12345678",
+                appId: "1:1234:web:1234"
+            };
+        }
+
+        // Firebase 初期化
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // ----------------- STATE -----------------
+        let user = null;
+        let allSchedules = [];
+        let allAttendance = [];
+        let currentYear = 2026;
+        let currentMonth = 6; // 0-indexed (6 = 7月)
+        let selectedStatus = '出席'; 
+        let currentOpenScheduleId = null; 
+
+        // UI表示用の関数をグローバルに接続
+        window.switchView = switchView;
+        window.prevMonth = prevMonth;
+        window.nextMonth = nextMonth;
+        window.setFormStatus = setFormStatus;
+        window.submitAttendance = submitAttendance;
+        window.authenticateAdmin = authenticateAdmin;
+        window.lockAdmin = lockAdmin;
+        window.addSchedule = addSchedule;
+        window.deleteSchedule = deleteSchedule;
+        window.seedInitialData = seedInitialData;
+        window.showDetailModal = showDetailModal;
+        window.closeModal = closeModal;
+        window.copyAttendanceSummaryText = copyAttendanceSummaryText;
+
+        // ----------------- RULE 3: AUTHENTICATION FIRST -----------------
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.warn("Auth initialization error, working with simulated environment:", err);
+                onUserLoaded({ uid: 'local-test-user-' + Math.random().toString(36).substr(2, 9) });
+            }
+        };
+
+        onAuthStateChanged(auth, (userData) => {
+            if (userData) {
+                user = userData;
+                document.getElementById('user-info-badge').innerText = `部員ID: ${user.uid.substring(0, 8)}...`;
+                onUserLoaded(user);
+            } else {
+                document.getElementById('user-info-badge').innerText = `未接続`;
+            }
+        });
+
+        // ----------------- FIRESTORE DATA FLOW -----------------
+        const onUserLoaded = (currentUser) => {
+            if (!currentUser) return;
+
+            // RULE 1: /artifacts/{appId}/public/data/{collectionName}
+            const schedulesRef = collection(db, 'artifacts', appId, 'public', 'data', 'schedules');
+            const attendanceRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance');
+
+            // リアルタイムリスナー: スケジュール一覧の同期
+            onSnapshot(schedulesRef, (snapshot) => {
+                allSchedules = [];
+                snapshot.forEach((doc) => {
+                    allSchedules.push({ id: doc.id, ...doc.data() });
+                });
+                // メモリ上でのソート (RULE 2)
+                allSchedules.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                // UIアップデート
+                renderCalendar();
+                updateAttendanceFormSchedules();
+                renderAttendanceSummary();
+                renderAdminScheduleList();
+                updateNextPracticeWidget();
+                renderQuickSummaryCard();
+            }, (err) => {
+                console.error("Schedule load error", err);
+                showToast("スケジュールの読み込みに失敗しました");
+            });
+
+            // リアルタイムリスナー: 出欠データの同期
+            onSnapshot(attendanceRef, (snapshot) => {
+                allAttendance = [];
+                snapshot.forEach((doc) => {
+                    allAttendance.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // UIアップデート
+                renderCalendar();
+                renderAttendanceSummary();
+                renderQuickSummaryCard();
+                if (currentOpenScheduleId) {
+                    const sched = allSchedules.find(s => s.id === currentOpenScheduleId);
+                    if (sched) showDetailModal(currentOpenScheduleId);
+                }
+            }, (err) => {
+                console.error("Attendance load error", err);
+            });
+        };
+
+        // ⚡ 直近の練習の参加状況をカードに集計してパッと見せる
+        function renderQuickSummaryCard() {
+            const container = document.getElementById('quick-attendance-summary');
+            container.innerHTML = '';
+
+            const now = new Date();
+            // 本日以降の直近3日程を取得
+            const upcoming = allSchedules.filter(s => new Date(s.date + ' 23:59:59') >= now).slice(0, 3);
+
+            if (upcoming.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-6 text-sm text-slate-400 font-bold bg-slate-50 rounded-2xl">
+                        現在、予定されている練習日程がありません。
+                    </div>
+                `;
+                return;
+            }
+
+            upcoming.forEach(s => {
+                const sAtts = allAttendance.filter(a => a.scheduleId === s.id);
+                const attList = sAtts.filter(a => a.status === '出席');
+                const maybeList = sAtts.filter(a => a.status === '未定');
+
+                const d = new Date(s.date);
+                const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col justify-between hover:border-emerald-200 hover:bg-emerald-50/10 cursor-pointer transition-all duration-300";
+                card.onclick = () => showDetailModal(s.id);
+
+                const listNames = attList.length > 0 
+                    ? attList.map(a => a.name).join('、') 
+                    : 'なし';
+
+                card.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded ${
+                                s.label === '月曜定期枠' ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'
+                            }">${s.label}</span>
+                            <span class="text-[11px] font-bold text-slate-500">${s.time.split('~')[0]}</span>
+                        </div>
+                        <h4 class="text-sm font-black text-slate-800">${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})</h4>
+                        
+                        <div class="flex gap-2 text-xs font-bold pt-1">
+                            <span class="text-emerald-600">🟢 出席: ${attList.length}人</span>
+                            <span class="text-amber-600">🟡 未定: ${maybeList.length}人</span>
+                        </div>
+
+                        <!-- 出席予定メンバーの名前チラ見せ -->
+                        <div class="text-[10px] text-slate-400 mt-2 line-clamp-2 leading-relaxed bg-white/70 p-2 rounded-lg border border-slate-200/50">
+                            <strong>出席者:</strong> ${listNames}
+                        </div>
+                    </div>
+                    <div class="text-[10px] text-right text-emerald-600 font-bold mt-3 flex items-center justify-end gap-1">
+                        <span>詳細・参加登録</span> <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        // ----------------- CALENDAR LOGIC -----------------
+        function renderCalendar() {
+            const monthYearLabel = document.getElementById('calendar-month-year');
+            const daysContainer = document.getElementById('calendar-days');
+            daysContainer.innerHTML = '';
+
+            monthYearLabel.innerText = `${currentYear}年 ${currentMonth + 1}月`;
+
+            const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+            const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            // 前月のブランクスペース
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'h-16 sm:h-24 border border-transparent';
+                daysContainer.appendChild(emptyCell);
+            }
+
+            // 日付を描画
+            for (let day = 1; day <= totalDays; day++) {
+                const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                const dayCell = document.createElement('button');
+                dayCell.className = `h-16 sm:h-24 rounded-xl sm:rounded-2xl flex flex-col justify-between items-stretch p-1 sm:p-2 transition text-xs font-bold relative border border-slate-100 hover:border-slate-300 bg-white shadow-xs overflow-hidden`;
+
+                // 日付表示
+                const dateNum = document.createElement('span');
+                dateNum.innerText = day;
+                dateNum.className = 'text-left inline-block w-full px-1';
+                
+                const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
+                if (dayOfWeek === 0) dateNum.classList.add('text-red-500');
+                else if (dayOfWeek === 6) dateNum.classList.add('text-sky-500');
+                else dateNum.classList.add('text-slate-700');
+
+                dayCell.appendChild(dateNum);
+
+                // 日程情報があるか確認
+                const schedule = allSchedules.find(s => s.date === dateString);
+                if (schedule) {
+                    // 出欠集計を取得
+                    const dayAtts = allAttendance.filter(a => a.scheduleId === schedule.id);
+                    const attList = dayAtts.filter(a => a.status === '出席');
+                    const maybeList = dayAtts.filter(a => a.status === '未定');
+
+                    // 枠のデザイン変更
+                    if (schedule.label === '月曜定期枠') {
+                        dayCell.classList.add('bg-emerald-50/80', '!border-emerald-200', 'hover:bg-emerald-100/90');
+                        dateNum.classList.add('bg-emerald-500', 'text-white', 'rounded-md', 'px-1.5', 'py-0.5', 'w-auto', 'text-center');
+                    } else if (schedule.label === '土曜特別枠') {
+                        dayCell.classList.add('bg-sky-50/80', '!border-sky-200', 'hover:bg-sky-100/90');
+                        dateNum.classList.add('bg-sky-500', 'text-white', 'rounded-md', 'px-1.5', 'py-0.5', 'w-auto', 'text-center');
+                    } else {
+                        dayCell.classList.add('bg-slate-50', '!border-slate-300', 'hover:bg-slate-100');
+                        dateNum.classList.add('bg-slate-700', 'text-white', 'rounded-md', 'px-1.5', 'py-0.5', 'w-auto', 'text-center');
+                    }
+
+                    // 👥 出席者の名前ミニチップ（カレンダー上に直接リスト表示する）
+                    const namesContainer = document.createElement('div');
+                    namesContainer.className = 'flex flex-col gap-0.5 text-[8px] sm:text-[10px] mt-1 overflow-y-auto max-h-[40px] select-none text-left w-full';
+                    
+                    if (attList.length > 0) {
+                        // 最大2名まで名前を小さく表示。それ以上は「他○人」と表記
+                        const maxDisplay = 2;
+                        attList.slice(0, maxDisplay).forEach(att => {
+                            const badge = document.createElement('span');
+                            badge.className = 'bg-emerald-100 text-emerald-800 px-1 py-0.2 rounded truncate font-medium border border-emerald-200/50';
+                            badge.innerText = att.name.substring(0, 4); 
+                            namesContainer.appendChild(badge);
+                        });
+
+                        if (attList.length > maxDisplay) {
+                            const moreBadge = document.createElement('span');
+                            moreBadge.className = 'text-slate-400 font-bold text-[7px] sm:text-[9px] px-1';
+                            moreBadge.innerText = `他 ${attList.length - maxDisplay}人 🟢`;
+                            namesContainer.appendChild(moreBadge);
+                        }
+                    } else if (maybeList.length > 0) {
+                        const maybeBadge = document.createElement('span');
+                        maybeBadge.className = 'text-amber-500 font-bold text-[8px] px-1 truncate';
+                        maybeBadge.innerText = `未定 ${maybeList.length}人 🟡`;
+                        namesContainer.appendChild(maybeBadge);
+                    } else {
+                        const emptyBadge = document.createElement('span');
+                        emptyBadge.className = 'text-slate-300 font-bold text-[8px] px-1 text-center';
+                        emptyBadge.innerText = '登録0人';
+                        namesContainer.appendChild(emptyBadge);
+                    }
+                    
+                    dayCell.appendChild(namesContainer);
+                    dayCell.onclick = () => showDetailModal(schedule.id);
+                } else {
+                    dayCell.classList.add('hover:bg-slate-100');
+                    dayCell.onclick = () => {
+                        showToast(`${currentMonth + 1}月${day}日は現在予定がありません。`);
+                    };
+                }
+
+                daysContainer.appendChild(dayCell);
+            }
+        }
+
+        function prevMonth() {
+            if (currentMonth === 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else {
+                currentMonth--;
+            }
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            if (currentMonth === 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else {
+                currentMonth++;
+            }
+            renderCalendar();
+        }
+
+        // ----------------- TAB SWAP -----------------
+        function switchView(view) {
+            const tabs = ['calendar', 'attendance', 'admin'];
+            tabs.forEach(t => {
+                const tabBtn = document.getElementById(`tab-${t}`);
+                const section = document.getElementById(`view-${t}`);
+                if (t === view) {
+                    tabBtn.className = "flex-1 sm:flex-initial px-5 py-2.5 text-center font-bold text-sm border-b-2 border-emerald-600 text-emerald-600 transition flex items-center justify-center gap-2 whitespace-nowrap";
+                    section.classList.remove('hidden');
+                } else {
+                    tabBtn.className = "flex-1 sm:flex-initial px-5 py-2.5 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-2 whitespace-nowrap";
+                    section.classList.add('hidden');
+                }
+            });
+        }
+
+        // ----------------- ATTENDANCE LOGIC -----------------
+        function setFormStatus(status) {
+            selectedStatus = status;
+            ['出席', '未定', '欠席'].forEach(s => {
+                const btn = document.getElementById(`status-btn-${s}`);
+                if (s === status) {
+                    if (s === '出席') btn.className = "py-2.5 rounded-xl border border-emerald-500 text-xs font-bold transition bg-emerald-500 text-white shadow-sm";
+                    if (s === '未定') btn.className = "py-2.5 rounded-xl border border-amber-500 text-xs font-bold transition bg-amber-500 text-white shadow-sm";
+                    if (s === '欠席') btn.className = "py-2.5 rounded-xl border border-rose-500 text-xs font-bold transition bg-rose-500 text-white shadow-sm";
+                } else {
+                    btn.className = "py-2.5 rounded-xl border border-slate-200 text-xs font-bold transition bg-white hover:bg-slate-50 text-slate-700";
+                }
+            });
+        }
+
+        function updateAttendanceFormSchedules() {
+            const select = document.getElementById('att-schedule-id');
+            select.innerHTML = '';
+            
+            const upcoming = allSchedules.filter(s => new Date(s.date + ' 23:59:59') >= new Date());
+            
+            if (upcoming.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.innerText = "登録されている予定はありません";
+                select.appendChild(opt);
+                return;
+            }
+
+            upcoming.forEach(s => {
+                const d = new Date(s.date);
+                const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
+                const label = `${d.getMonth() + 1}/${d.getDate()}(${dayWeek}) ${s.time.split('~')[0]}【${s.label}】`;
+                
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.innerText = label;
+                select.appendChild(opt);
+            });
+        }
+
+        // 出欠提出
+        async function submitAttendance() {
+            if (!user) {
+                showToast("ログイン初期化中です。少々お待ちください。");
+                return;
+            }
+
+            const name = document.getElementById('att-name').value.trim();
+            const schedId = document.getElementById('att-schedule-id').value;
+            const comment = document.getElementById('att-comment').value.trim();
+
+            if (!name) {
+                showToast("お名前を入力してください");
+                return;
+            }
+            if (!schedId) {
+                showToast("登録可能な日程が選択されていません");
+                return;
+            }
+
+            const responseId = `${name}_${schedId}`.replace(/\s+/g, '');
+
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'attendance', responseId);
+                await setDoc(docRef, {
+                    scheduleId: schedId,
+                    name: name,
+                    status: selectedStatus,
+                    comment: comment,
+                    timestamp: new Date().toISOString()
+                });
+
+                showToast(`出欠を「${selectedStatus}」で登録しました！`);
+                document.getElementById('att-comment').value = ''; 
+            } catch (err) {
+                console.error("出欠送信失敗", err);
+                showToast("送信に失敗しました。");
+            }
+        }
+
+        // 各日程の出欠集計リストレンダリング
+        function renderAttendanceSummary() {
+            const container = document.getElementById('attendance-summary-list');
+            container.innerHTML = '';
+
+            const targetSchedules = allSchedules.filter(s => new Date(s.date + ' 23:59:59') >= new Date());
+
+            if (targetSchedules.length === 0) {
+                container.innerHTML = `<p class="text-center py-8 text-sm text-slate-400 font-bold">今後予定されている練習日程はありません。</p>`;
+                return;
+            }
+
+            targetSchedules.forEach(s => {
+                const sAtts = allAttendance.filter(a => a.scheduleId === s.id);
+                const attList = sAtts.filter(a => a.status === '出席');
+                const maybeList = sAtts.filter(a => a.status === '未定');
+                const absentList = sAtts.filter(a => a.status === '欠席');
+
+                const totalAnswers = sAtts.length || 1;
+                const okPercent = Math.round((attList.length / totalAnswers) * 100);
+                const maybePercent = Math.round((maybeList.length / totalAnswers) * 100);
+                const noPercent = Math.round((absentList.length / totalAnswers) * 100);
+
+                const d = new Date(s.date);
+                const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
+
+                const div = document.createElement('div');
+                div.className = "p-4 bg-slate-50 border border-slate-150 rounded-2xl space-y-3";
+
+                div.innerHTML = `
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-200/60 pb-2">
+                        <div>
+                            <span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">${s.label}</span>
+                            <h4 class="text-sm font-black text-slate-800">${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek}) ${s.time}</h4>
+                        </div>
+                        <div class="flex gap-2 text-xs font-bold text-slate-500">
+                            <span class="bg-emerald-50 px-2 py-1 rounded text-emerald-700">出席: ${attList.length}人</span>
+                            <span class="bg-amber-50 px-2 py-1 rounded text-amber-700">未定: ${maybeList.length}人</span>
+                            <span class="bg-rose-50 px-2 py-1 rounded text-rose-700">欠席: ${absentList.length}人</span>
+                        </div>
+                    </div>
+
+                    <!-- 進捗ゲージで視覚化 -->
+                    <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden flex">
+                        <div class="bg-emerald-500 h-full" style="width: ${sAtts.length > 0 ? okPercent : 0}%"></div>
+                        <div class="bg-amber-400 h-full" style="width: ${sAtts.length > 0 ? maybePercent : 0}%"></div>
+                        <div class="bg-rose-400 h-full" style="width: ${sAtts.length > 0 ? noPercent : 0}%"></div>
+                    </div>
+
+                    <!-- メンバーのタグ表示 -->
+                    <div class="space-y-1.5 pt-1">
+                        <div class="text-[11px] font-bold text-slate-400 flex justify-between">
+                            <span>出席メンバー:</span>
+                            <span class="text-slate-500">出席率: ${sAtts.length > 0 ? okPercent : 0}%</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            ${attList.length > 0 ? attList.map(a => `
+                                <span class="group relative inline-flex items-center gap-1 text-xs bg-white border border-slate-200 px-2.5 py-1 rounded-lg text-slate-700 shadow-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    <span>${a.name}</span>
+                                    ${a.comment ? `<span class="text-[10px] text-slate-400">(${a.comment})</span>` : ''}
+                                </span>
+                            `).join('') : '<span class="text-xs text-slate-400">回答なし</span>'}
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(div);
+            });
+        }
+
+        // 次の練習日カウンター更新
+        function updateNextPracticeWidget() {
+            const now = new Date();
+            const future = allSchedules.filter(s => new Date(s.date + ' ' + s.time.split('~')[0].trim()) > now);
+
+            if (future.length === 0) {
+                document.getElementById('next-practice-date').innerText = "未設定";
+                document.getElementById('next-practice-countdown').innerText = "全日程終了";
+                return;
+            }
+
+            const next = future[0];
+            const nextD = new Date(next.date);
+            const dayWeek = ['日','月','火','水','木','金','土'][nextD.getDay()];
+            document.getElementById('next-practice-date').innerText = `${nextD.getMonth() + 1}月${nextD.getDate()}日(${dayWeek}) ${next.time.split('~')[0]}`;
+
+            const targetTime = new Date(`${next.date} ${next.time.split('~')[0].trim()}:00`);
+            
+            function runTimer() {
+                const diff = targetTime - new Date();
+                if (diff <= 0) {
+                    document.getElementById('next-practice-countdown').innerText = "練習中！";
+                    return;
+                }
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+                document.getElementById('next-practice-countdown').innerText = `${days}日 ${hours}時間 ${mins}分`;
+            }
+
+            runTimer();
+            setTimeout(updateNextPracticeWidget, 60000);
+        }
+
+        // ----------------- ADMIN SYSTEM -----------------
+        function authenticateAdmin() {
+            const pass = document.getElementById('admin-passcode').value;
+            // 🔐 管理者認証パスコード
+            if (pass === '0516') {
+                document.getElementById('admin-auth-panel').classList.add('hidden');
+                document.getElementById('admin-control-panel').classList.remove('hidden');
+                document.getElementById('auth-error').classList.add('hidden');
+                showToast("管理者ログインに成功しました。");
+                renderAdminScheduleList();
+            } else {
+                document.getElementById('auth-error').classList.remove('hidden');
+            }
+        }
+
+        function lockAdmin() {
+            document.getElementById('admin-auth-panel').classList.remove('hidden');
+            document.getElementById('admin-control-panel').classList.add('hidden');
+            document.getElementById('admin-passcode').value = '';
+        }
+
+        async function addSchedule() {
+            const date = document.getElementById('new-sched-date').value;
+            const start = document.getElementById('new-sched-start').value;
+            const end = document.getElementById('new-sched-end').value;
+            const label = document.getElementById('new-sched-label').value;
+            const note = document.getElementById('new-sched-note').value.trim();
+
+            if (!date) {
+                showToast("日付を選択してください");
+                return;
+            }
+
+            const timeStr = `${start} ~ ${end}`;
+            const schedId = `sched_${date.replace(/-/g, '')}`;
+
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'schedules', schedId);
+                await setDoc(docRef, {
+                    date: date,
+                    time: timeStr,
+                    label: label,
+                    note: note
+                });
+
+                showToast("スケジュールを追加しました！");
+                document.getElementById('new-sched-date').value = '';
+                document.getElementById('new-sched-note').value = '';
+            } catch (err) {
+                console.error("スケジュールの追加失敗", err);
+                showToast("追加に失敗しました。");
+            }
+        }
+
+        async function deleteSchedule(schedId) {
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'schedules', schedId);
+                await deleteDoc(docRef);
+                showToast("スケジュールを削除しました。");
+            } catch (err) {
+                console.error("削除失敗", err);
+                showToast("削除に失敗しました。");
+            }
+        }
+
+        function renderAdminScheduleList() {
+            const container = document.getElementById('admin-schedule-list');
+            container.innerHTML = '';
+
+            if (allSchedules.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">現在、登録されている予定はありません。</p>`;
+                return;
+            }
+
+            allSchedules.forEach(s => {
+                const d = new Date(s.date);
+                const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
+
+                const item = document.createElement('div');
+                item.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200/60 shadow-xs text-xs";
+                item.innerHTML = `
+                    <div>
+                        <span class="inline-block text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 mr-2 font-bold">${s.label}</span>
+                        <strong class="text-slate-800">${d.getMonth() + 1}/${d.getDate()}(${dayWeek})</strong> 
+                        <span class="text-slate-500">${s.time}</span>
+                    </div>
+                    <button onclick="deleteSchedule('${s.id}')" class="text-red-500 hover:text-red-700 font-bold px-2 py-1 hover:bg-red-50 rounded-lg transition">
+                        削除
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        async function seedInitialData() {
+            if (!confirm("2026年7月〜12月の一括データ（月曜日および指定の土曜日）を作成してクラウドへ一括保存します。よろしいですか？")) return;
+
+            showToast("データを作成中です。お待ちください...");
+
+            const sats = ['2026-07-04', '2026-08-22', '2026-09-12'];
+            
+            const mondays = [];
+            let current = new Date('2026-07-06');
+            const end = new Date('2026-12-28');
+            while (current <= end) {
+                const y = current.getFullYear();
+                const m = String(current.getMonth() + 1).padStart(2, '0');
+                const d = String(current.getDate()).padStart(2, '0');
+                mondays.push(`${y}-${m}-${d}`);
+                current.setDate(current.getDate() + 7);
+            }
+
+            try {
+                for (let sat of sats) {
+                    const id = `sched_${sat.replace(/-/g, '')}`;
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', id), {
+                        date: sat,
+                        time: '14:00 ~ 17:00',
+                        label: '土曜特別枠',
+                        note: '画像確認済みの土曜確定枠です'
+                    });
+                }
+
+                for (let mon of mondays) {
+                    const id = `sched_${mon.replace(/-/g, '')}`;
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', id), {
+                        date: mon,
+                        time: '18:30 ~ 21:00',
+                        label: '月曜定期枠',
+                        note: '毎週月曜日の定期練習枠です'
+                    });
+                }
+
+                showToast("初期データの一括展開に成功しました！");
+            } catch (err) {
+                console.error("シードに失敗", err);
+                showToast("一括追加に失敗しました。");
+            }
+        }
+
+        // ----------------- MODAL POPUP & DETAIL VIEW -----------------
+        function showDetailModal(schedId) {
+            currentOpenScheduleId = schedId;
+            const schedule = allSchedules.find(s => s.id === schedId);
+            if (!schedule) return;
+
+            const modal = document.getElementById('detail-modal');
+            const label = document.getElementById('modal-label');
+            const dateStr = document.getElementById('modal-date');
+            const timeStr = document.getElementById('modal-time');
+            const noteStr = document.getElementById('modal-note');
+            const statsStr = document.getElementById('modal-stats');
+            const attListContainer = document.getElementById('modal-attendance-list');
+            const gcalBtn = document.getElementById('modal-gcal');
+
+            // 3つのプログレスバー
+            const barOk = document.getElementById('modal-bar-ok');
+            const barMaybe = document.getElementById('modal-bar-maybe');
+            const barNo = document.getElementById('modal-bar-no');
+
+            const d = new Date(schedule.date);
+            const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
+            dateStr.innerText = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})`;
+            timeStr.innerHTML = `<i data-lucide="clock" class="w-4 h-4 text-slate-400 shrink-0"></i> ${schedule.time}`;
+            noteStr.innerHTML = `📝 <strong>メモ:</strong> ${schedule.note || '特になし'}`;
+
+            label.innerText = schedule.label;
+            if (schedule.label === '月曜定期枠') {
+                label.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800";
+            } else {
+                label.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-sky-100 text-sky-800";
+            }
+
+            gcalBtn.href = generateGoogleCalendarUrl(schedule.date, schedule.time, schedule.label);
+
+            const sAtts = allAttendance.filter(a => a.scheduleId === schedId);
+            const atts = sAtts.filter(a => a.status === '出席');
+            const maybes = sAtts.filter(a => a.status === '未定');
+            const absents = sAtts.filter(a => a.status === '欠席');
+
+            const total = sAtts.length || 1;
+            statsStr.innerText = `出席: ${atts.length}人 / 未定: ${maybes.length}人 / 欠席: ${absents.length}人`;
+
+            // 出欠率ゲージアニメーション
+            if (sAtts.length > 0) {
+                barOk.style.width = `${(atts.length / total) * 100}%`;
+                barMaybe.style.width = `${(maybes.length / total) * 100}%`;
+                barNo.style.width = `${(absents.length / total) * 100}%`;
+            } else {
+                barOk.style.width = '0%';
+                barMaybe.style.width = '0%';
+                barNo.style.width = '0%';
+            }
+
+            // 出席者一覧生成
+            attListContainer.innerHTML = '';
+            if (sAtts.length === 0) {
+                attListContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">回答がまだありません。右側の出欠登録・確認タブから出席登録をお願いします！</p>`;
+            } else {
+                sAtts.forEach(a => {
+                    const line = document.createElement('div');
+                    line.className = "flex items-start justify-between bg-slate-50 p-2.5 rounded-xl text-xs gap-2";
+                    
+                    let statusDot = '🟢';
+                    if (a.status === '未定') statusDot = '🟡';
+                    if (a.status === '欠席') statusDot = '🔴';
+
+                    line.innerHTML = `
+                        <div class="space-y-0.5">
+                            <div class="font-bold text-slate-700">${statusDot} ${a.name}</div>
+                            ${a.comment ? `<div class="text-[10px] text-slate-400 font-medium">${a.comment}</div>` : ''}
+                        </div>
+                        <span class="text-[10px] bg-white border border-slate-200 px-1.5 py-0.5 rounded font-bold">${a.status}</span>
+                    `;
+                    attListContainer.appendChild(line);
+                });
+            }
+
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+            currentOpenScheduleId = null;
+        }
+
+        // LINE共有用の集計テキストコピー機能
+        function copyAttendanceSummaryText() {
+            if (!currentOpenScheduleId) return;
+            const schedule = allSchedules.find(s => s.id === currentOpenScheduleId);
+            if (!schedule) return;
+
+            const d = new Date(schedule.date);
+            const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
+
+            const sAtts = allAttendance.filter(a => a.scheduleId === currentOpenScheduleId);
+            const atts = sAtts.filter(a => a.status === '出席');
+            const maybes = sAtts.filter(a => a.status === '未定');
+            const absents = sAtts.filter(a => a.status === '欠席');
+
+            let text = `【練習参加状況シェア】\n`;
+            text += `📅 日程: ${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek}) ${schedule.time}\n`;
+            text += `🏷️ 区分: ${schedule.label}\n`;
+            text += `--------------------\n`;
+            text += `🟢 出席 (${atts.length}人):\n${atts.length > 0 ? atts.map(a => `・${a.name}${a.comment ? ` (${a.comment})` : ''}`).join('\n') : '・なし'}\n\n`;
+            text += `🟡 未定 (${maybes.length}人):\n${maybes.length > 0 ? maybes.map(a => `・${a.name}`).join('\n') : '・なし'}\n\n`;
+            text += `🔴 欠席 (${absents.length}人):\n${absents.length > 0 ? absents.map(a => `・${a.name}`).join('\n') : '・なし'}\n\n`;
+            text += `👉 最新状況＆出席回答はこちら：\n${window.location.href}`;
+
+            // クリップボードにコピー
+            const tempEl = document.createElement('textarea');
+            tempEl.value = text;
+            document.body.appendChild(tempEl);
+            tempEl.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempEl);
+
+            showToast("LINE共有用の出席集計をコピーしました！");
+        }
+
+        function generateGoogleCalendarUrl(dateStr, timeStr, label) {
+            const cleanDate = dateStr.replace(/-/g, '');
+            const startTimeStr = timeStr.split('~')[0].trim().replace(':', '');
+            const endTimeStr = timeStr.split('~')[1].trim().replace(':', '');
+            
+            const startUTC = `${cleanDate}T${startTimeStr}00`;
+            const endUTC = `${cleanDate}T${endTimeStr}00`;
+            
+            const title = encodeURIComponent(`ピックルボール部 練習 (${label})`);
+            const location = encodeURIComponent("体育館 (3面)");
+            const details = encodeURIComponent("利用備品: バドミントンポール、ネット");
+
+            return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startUTC}/${endUTC}&details=${details}&location=${location}&ctz=Asia/Tokyo`;
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            const m = document.getElementById('toast-message');
+            m.innerText = msg;
+            t.classList.remove('translate-y-20', 'opacity-0');
+            t.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                t.classList.remove('translate-y-0', 'opacity-100');
+                t.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        initAuth();
+    </script>
+</body>
+</html>
