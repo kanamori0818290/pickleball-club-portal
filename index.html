@@ -168,7 +168,7 @@
                 <!-- 出欠登録フォーム -->
                 <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 h-fit space-y-4">
                     <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
-                        <div class="p-1.5 bg-amber-500 text-white rounded-lg">
+                        <div class="p-1.5 bg-amber-50 text-white rounded-lg">
                             <i data-lucide="edit-3" class="w-5 h-5"></i>
                         </div>
                         <h3 class="font-bold text-slate-800">出欠を回答する</h3>
@@ -706,9 +706,36 @@
             return !firebaseConfig || firebaseConfig.apiKey === "dummy-api-key" || !firebaseConfig.apiKey;
         }
 
+        // 🔐 【テストモード用】データの保存・ロード機能
+        function saveTestData() {
+            if (isFirebaseDummy()) {
+                localStorage.setItem('rm_portal_schedules', JSON.stringify(allSchedules));
+                localStorage.setItem('rm_portal_attendance', JSON.stringify(allAttendance));
+                localStorage.setItem('rm_portal_tournaments', JSON.stringify(allTournaments));
+                localStorage.setItem('rm_portal_entries', JSON.stringify(allEntries));
+            }
+        }
+
+        function loadTestData() {
+            if (isFirebaseDummy()) {
+                allSchedules = JSON.parse(localStorage.getItem('rm_portal_schedules')) || [];
+                allAttendance = JSON.parse(localStorage.getItem('rm_portal_attendance')) || [];
+                allTournaments = JSON.parse(localStorage.getItem('rm_portal_tournaments')) || [];
+                allEntries = JSON.parse(localStorage.getItem('rm_portal_entries')) || [];
+            }
+        }
+
         // ----------------- RULE 3: AUTHENTICATION FIRST -----------------
         const initAuth = async () => {
             try {
+                // 🔐 【バグ修正】プレビュー環境などのダミー環境では、直接テストモードユーザーを立ち上げてFirestore接続をスキップする
+                if (isFirebaseDummy()) {
+                    user = { uid: 'local-test-user-' + Math.random().toString(36).substr(2, 9) };
+                    document.getElementById('user-info-badge').innerText = `部員ID: ${user.uid.substring(0, 8)}... (テストモード)`;
+                    onUserLoaded(user);
+                    return;
+                }
+
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
@@ -716,7 +743,7 @@
                 }
             } catch (err) {
                 console.warn("Auth initialization error, working with simulated environment:", err);
-                // 🔐 【バグ修正】ここでダミーのuserオブジェクトをグローバルに確実にセットする
+                // 🔐 【バグ修正】認証失敗時にもテストモードとして確実に登録できるようにする
                 user = { uid: 'local-test-user-' + Math.random().toString(36).substr(2, 9) };
                 document.getElementById('user-info-badge').innerText = `部員ID: ${user.uid.substring(0, 8)}... (テストモード)`;
                 onUserLoaded(user);
@@ -742,6 +769,21 @@
         const onUserLoaded = (currentUser) => {
             if (!currentUser) return;
 
+            // 🔐 【致命的なバグの修正】
+            // テストモード（プレビュー等）の場合は、Firebaseの実接続監視(onSnapshot)を完全にスキップします。
+            // これにより、ダミー接続による空データ上書き（登録したデータが一瞬で消える現象）を100%防ぎます。
+            if (isFirebaseDummy()) {
+                loadTestData();
+                refreshAllUI();
+                renderTournamentCards();
+                renderAdminTournamentList();
+                // 接続ステータスバー表示の調整
+                document.getElementById('sync-banner').className = "bg-amber-600 text-white text-xs py-1.5 px-4 text-center font-bold flex items-center justify-center gap-2 transition-all border-b border-amber-500/20";
+                document.getElementById('sync-text').innerText = "テストモード動作中 (ブラウザ保存機能を使用)";
+                return;
+            }
+
+            // 以下は本番環境（リアルなFirebase接続時）のみ実行される
             // RULE 1: /artifacts/{appId}/public/data/{collectionName}
             const schedulesRef = collection(db, 'artifacts', appId, 'public', 'data', 'schedules');
             const attendanceRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance');
@@ -813,12 +855,13 @@
             renderAttendanceSummary();
             renderAdminScheduleList();
             updateNextPracticeWidget();
-            renderQuickSummaryCard();
+            refreshQuickSummaryCard();
         }
 
         // 直近の練習の参加状況をサマリーカードにレンダリング
-        function renderQuickSummaryCard() {
+        function refreshQuickSummaryCard() {
             const container = document.getElementById('quick-attendance-summary');
+            if (!container) return;
             container.innerHTML = '';
 
             const now = new Date();
@@ -882,6 +925,7 @@
         function renderCalendar() {
             const monthYearLabel = document.getElementById('calendar-month-year');
             const daysContainer = document.getElementById('calendar-days');
+            if (!daysContainer) return;
             daysContainer.innerHTML = '';
 
             monthYearLabel.innerText = `${currentYear}年 ${currentMonth + 1}月`;
@@ -921,7 +965,7 @@
 
                 if (schedule || tournament) {
                     if (tournament) {
-                        // 🏆 【新機能】大会予定日があるセルのデザイン（ライジングムーン・ゴールド）
+                        // 🏆 大会予定日があるセルのデザイン（ライジングムーン・ゴールド）
                         dayCell.classList.add('bg-amber-50/90', '!border-amber-300', 'hover:bg-amber-100');
                         dateNum.classList.add('bg-amber-500', 'text-slate-950', 'rounded-md', 'px-1.5', 'py-0.5', 'w-auto', 'text-center');
 
@@ -1036,6 +1080,7 @@
             tabs.forEach(t => {
                 const tabBtn = document.getElementById(`tab-${t}`);
                 const section = document.getElementById(`view-${t}`);
+                if (!tabBtn || !section) return;
                 if (t === view) {
                     tabBtn.className = "flex-1 sm:flex-initial px-4 py-2.5 text-center font-bold text-sm border-b-2 border-amber-500 text-amber-600 transition flex items-center justify-center gap-2 whitespace-nowrap";
                     section.classList.remove('hidden');
@@ -1049,6 +1094,7 @@
         // ----------------- 大会情報カードの表示レンダリング -----------------
         function renderTournamentCards() {
             const container = document.getElementById('tournament-cards-container');
+            if (!container) return;
             container.innerHTML = '';
 
             if (allTournaments.length === 0) {
@@ -1196,6 +1242,7 @@
                 else allTournaments.push(newData);
                 
                 allTournaments.sort((a, b) => new Date(a.date) - new Date(b.date));
+                saveTestData(); // 💾 ローカル保存
                 showToast("【テストモード】大会案内を新しく登録・公開しました！");
 
                 document.getElementById('tourn-title').value = '';
@@ -1247,6 +1294,7 @@
             if (isFirebaseDummy()) {
                 allTournaments = allTournaments.filter(t => t.id !== tournId);
                 allEntries = allEntries.filter(e => e.tournamentId !== tournId);
+                saveTestData(); // 💾 ローカル保存
                 showToast("【テストモード】大会情報を削除しました。");
 
                 renderCalendar();
@@ -1274,6 +1322,7 @@
 
         function renderAdminTournamentList() {
             const container = document.getElementById('admin-tournament-list');
+            if (!container) return;
             container.innerHTML = '';
 
             if (allTournaments.length === 0) {
@@ -1305,7 +1354,8 @@
         }
 
         function closeEntryModal() {
-            document.getElementById('entry-modal').classList.add('hidden');
+            const modal = document.getElementById('entry-modal');
+            if (modal) modal.classList.add('hidden');
             document.getElementById('entry-name').value = '';
             document.getElementById('entry-category').value = '';
             document.getElementById('entry-comment').value = '';
@@ -1338,6 +1388,7 @@
                 if (index > -1) allEntries[index] = newData;
                 else allEntries.push(newData);
 
+                saveTestData(); // 💾 ローカル保存
                 showToast("【テストモード】大会へのエントリー希望を表明しました！");
                 closeEntryModal();
                 renderTournamentCards();
@@ -1369,13 +1420,14 @@
             // 🔐 【テストモードフォールバック】
             if (isFirebaseDummy()) {
                 allEntries = allEntries.filter(e => e.id !== entryId);
+                saveTestData(); // 💾 ローカル保存
                 showToast("【テストモード】表明をキャンセルしました。");
                 renderTournamentCards();
                 renderCalendar();
                 
                 // モーダルが現在開いていれば再描画
                 const modal = document.getElementById('tournament-detail-modal');
-                if (!modal.classList.contains('hidden')) {
+                if (modal && !modal.classList.contains('hidden')) {
                     const tId = document.getElementById('entry-target-tourn-id').value;
                     if (tId) showTournamentDetailModal(tId);
                 }
@@ -1392,12 +1444,11 @@
             }
         }
 
-        // 🏆 【新設】カレンダー側から直接大会詳細＆エントリー可能にするポップアップ表示
+        // 🏆 カレンダー側から直接大会詳細＆エントリー可能にするポップアップ表示
         function showTournamentDetailModal(tournId) {
             const tournament = allTournaments.find(t => t.id === tournId);
             if (!tournament) return;
 
-            // 内部エントリー登録用にIDを格納
             document.getElementById('entry-target-tourn-id').value = tournId;
 
             const modal = document.getElementById('tournament-detail-modal');
@@ -1472,7 +1523,8 @@
         }
 
         function closeTournamentDetailModal() {
-            document.getElementById('tournament-detail-modal').classList.add('hidden');
+            const modal = document.getElementById('tournament-detail-modal');
+            if (modal) modal.classList.add('hidden');
         }
 
 
@@ -1481,6 +1533,7 @@
             selectedStatus = status;
             ['出席', '未定', '欠席'].forEach(s => {
                 const btn = document.getElementById(`status-btn-${s}`);
+                if (!btn) return;
                 if (s === status) {
                     if (s === '出席') btn.className = "py-2.5 rounded-xl border border-emerald-500 text-xs font-bold transition bg-emerald-500 text-white shadow-sm";
                     if (s === '未定') btn.className = "py-2.5 rounded-xl border border-amber-500 text-xs font-bold transition bg-amber-500 text-white shadow-sm";
@@ -1493,6 +1546,7 @@
 
         function updateAttendanceFormSchedules() {
             const select = document.getElementById('att-schedule-id');
+            if (!select) return;
             select.innerHTML = '';
             
             const upcoming = allSchedules.filter(s => new Date(s.date + ' 23:59:59') >= new Date());
@@ -1547,6 +1601,7 @@
                 if (index > -1) allAttendance[index] = newData;
                 else allAttendance.push(newData);
 
+                saveTestData(); // 💾 ローカル保存
                 showToast(`【テストモード】出欠を「${selectedStatus}」で登録しました！`);
                 document.getElementById('att-comment').value = '';
                 refreshAllUI();
@@ -1578,6 +1633,7 @@
 
         function renderAttendanceSummary() {
             const container = document.getElementById('attendance-summary-list');
+            if (!container) return;
             container.innerHTML = '';
 
             const targetSchedules = allSchedules.filter(s => new Date(s.date + ' 23:59:59') >= new Date());
@@ -1648,30 +1704,34 @@
             const now = new Date();
             const future = allSchedules.filter(s => new Date(s.date + ' ' + s.time.split('~')[0].trim()) > now);
 
+            const dateWidget = document.getElementById('next-practice-date');
+            const countdownWidget = document.getElementById('next-practice-countdown');
+            if (!dateWidget || !countdownWidget) return;
+
             if (future.length === 0) {
-                document.getElementById('next-practice-date').innerText = "未設定";
-                document.getElementById('next-practice-countdown').innerText = "全日程終了";
+                dateWidget.innerText = "未設定";
+                countdownWidget.innerText = "全日程終了";
                 return;
             }
 
             const next = future[0];
             const nextD = new Date(next.date);
             const dayWeek = ['日','月','火','水','木','金','土'][nextD.getDay()];
-            document.getElementById('next-practice-date').innerText = `${nextD.getMonth() + 1}月${nextD.getDate()}日(${dayWeek}) ${next.time.split('~')[0]}`;
+            dateWidget.innerText = `${nextD.getMonth() + 1}月${nextD.getDate()}日(${dayWeek}) ${next.time.split('~')[0]}`;
 
             const targetTime = new Date(`${next.date} ${next.time.split('~')[0].trim()}:00`);
             
             function runTimer() {
                 const diff = targetTime - new Date();
                 if (diff <= 0) {
-                    document.getElementById('next-practice-countdown').innerText = "練習中！";
+                    countdownWidget.innerText = "練習中！";
                     return;
                 }
                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-                document.getElementById('next-practice-countdown').innerText = `${days}日 ${hours}時間 ${mins}分`;
+                countdownWidget.innerText = `${days}日 ${hours}時間 ${mins}分`;
             }
 
             runTimer();
@@ -1763,6 +1823,7 @@
                 else allSchedules.push(newData);
                 
                 allSchedules.sort((a, b) => new Date(a.date) - new Date(b.date));
+                saveTestData(); // 💾 ローカル保存
                 showToast("【テストモード】スケジュールを単発で追加しました！");
                 document.getElementById('sched-single-date').value = '';
                 document.getElementById('sched-note').value = '';
@@ -1864,6 +1925,7 @@
                 });
                 
                 allSchedules.sort((a, b) => new Date(a.date) - new Date(b.date));
+                saveTestData(); // 💾 ローカル保存
                 showToast(`【テストモード】${targetDates.length}件の定期スケジュールを登録しました！`);
 
                 document.getElementById('sched-recur-start').value = '';
@@ -1908,6 +1970,7 @@
         function resetRecurDaysUI() {
             for (let i = 0; i < 7; i++) {
                 const btn = document.getElementById(`day-btn-${i}`);
+                if (!btn) continue;
                 if (i === 0) btn.className = "py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-red-500 transition";
                 else if (i === 6) btn.className = "py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-sky-500 transition";
                 else btn.className = "py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-slate-700 transition";
@@ -1920,6 +1983,8 @@
             // 🔐 【テストモードフォールバック】
             if (isFirebaseDummy()) {
                 allSchedules = allSchedules.filter(s => s.id !== schedId);
+                allAttendance = allAttendance.filter(a => a.scheduleId !== schedId);
+                saveTestData(); // 💾 ローカル保存
                 showToast("【テストモード】スケジュールを削除しました。");
                 refreshAllUI();
                 return;
@@ -1937,6 +2002,7 @@
 
         function renderAdminScheduleList() {
             const container = document.getElementById('admin-schedule-list');
+            if (!container) return;
             container.innerHTML = '';
 
             if (allSchedules.length === 0) {
@@ -2013,6 +2079,7 @@
                 });
                 
                 allSchedules.sort((a, b) => new Date(a.date) - new Date(b.date));
+                saveTestData(); // 💾 ローカル保存
                 showToast("【テストモード】初期スケジュールをローカルにロードしました！");
                 refreshAllUI();
                 return;
@@ -2126,7 +2193,8 @@
         }
 
         function closeModal() {
-            document.getElementById('detail-modal').classList.add('hidden');
+            const modal = document.getElementById('detail-modal');
+            if (modal) modal.classList.add('hidden');
             currentOpenScheduleId = null;
         }
 
@@ -2180,6 +2248,7 @@
         function showToast(msg) {
             const t = document.getElementById('toast');
             const m = document.getElementById('toast-message');
+            if (!t || !m) return;
             m.innerText = msg;
             t.classList.remove('translate-y-20', 'opacity-0');
             t.classList.add('translate-y-0', 'opacity-100');
