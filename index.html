@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ピックルボール部 ポータル＆出欠管理</title>
+    <title>ライジングムーンPortal ＆ 出欠・大会管理</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -37,26 +37,30 @@
 <body class="bg-slate-50 text-slate-800 min-h-screen pb-16">
 
     <!-- 接続ステータスバー -->
-    <div id="sync-banner" class="bg-emerald-600 text-white text-xs py-1.5 px-4 text-center font-bold flex items-center justify-center gap-2 transition-all">
-        <span class="inline-block w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
-        <span id="sync-text">リアルタイム同期中 (Firebase Cloud Database)</span>
+    <div id="sync-banner" class="bg-slate-900 text-amber-400 text-xs py-1.5 px-4 text-center font-bold flex items-center justify-center gap-2 transition-all border-b border-amber-500/20">
+        <span class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+        <span id="sync-text">ライジングムーンPortal リアルタイム同期中 (Firebase)</span>
     </div>
 
     <!-- ヘッダー -->
-    <header class="bg-gradient-to-r from-lime-500 to-emerald-600 text-white shadow-md">
-        <div class="max-w-4xl mx-auto px-4 py-6 md:py-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+    <header class="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white shadow-lg relative overflow-hidden">
+        <!-- 背景の月をイメージした光ホバー -->
+        <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-amber-400/10 blur-3xl"></div>
+        <div class="max-w-4xl mx-auto px-4 py-6 md:py-8 flex flex-col sm:flex-row justify-between items-center gap-4 relative z-10">
             <div class="text-center sm:text-left">
-                <div class="inline-flex items-center gap-2 bg-lime-400/30 text-lime-100 text-xs font-bold px-3 py-1 rounded-full mb-2">
-                    <i data-lucide="users" class="w-4 h-4"></i> ピックルボール部ポータル
+                <div class="inline-flex items-center gap-2 bg-amber-400/20 text-amber-300 text-xs font-bold px-3 py-1 rounded-full mb-2 border border-amber-400/30">
+                    <i data-lucide="moon" class="w-4 h-4"></i> RISING MOON PORTAL
                 </div>
-                <h1 class="text-2xl md:text-3xl font-black tracking-tight">PICKLEBALL PORTAL</h1>
-                <p class="text-lime-100 text-sm mt-1">誰が参加するか、一目でわかる出欠管理サイト</p>
+                <h1 class="text-2xl md:text-3xl font-black tracking-tight flex items-center justify-center sm:justify-start gap-2">
+                    ライジングムーンPortal
+                </h1>
+                <p class="text-slate-300 text-sm mt-1">練習スケジュールの出欠登録＆大会エントリーサイト</p>
             </div>
             <!-- クイック統計 -->
-            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20 min-w-[220px]">
-                <p class="text-xs text-lime-200">次回練習日</p>
-                <div id="next-practice-date" class="text-base font-black mt-1">取得中...</div>
-                <div id="next-practice-countdown" class="text-xs text-emerald-100 mt-1 bg-emerald-700/50 py-0.5 px-2 rounded-full inline-block">--:--:--</div>
+            <div class="bg-white/5 backdrop-blur-md rounded-2xl p-4 text-center border border-white/10 min-w-[220px]">
+                <p class="text-xs text-amber-300 font-bold">次回練習日</p>
+                <div id="next-practice-date" class="text-base font-black mt-1 text-white">取得中...</div>
+                <div id="next-practice-countdown" class="text-xs text-amber-200 mt-1 bg-amber-400/20 border border-amber-400/30 py-0.5 px-2 rounded-full inline-block">--:--:--</div>
             </div>
         </div>
     </header>
@@ -66,18 +70,21 @@
         <!-- アプリの案内と切り替えタブ -->
         <div class="flex flex-col sm:flex-row justify-between items-center gap-3 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
             <div class="flex border-b border-slate-100 w-full sm:w-auto overflow-x-auto">
-                <button id="tab-calendar" onclick="switchView('calendar')" class="flex-1 sm:flex-initial px-5 py-2.5 text-center font-bold text-sm border-b-2 border-emerald-600 text-emerald-600 transition flex items-center justify-center gap-2 whitespace-nowrap">
+                <button id="tab-calendar" onclick="switchView('calendar')" class="flex-1 sm:flex-initial px-4 py-2.5 text-center font-bold text-sm border-b-2 border-amber-500 text-amber-600 transition flex items-center justify-center gap-2 whitespace-nowrap">
                     <i data-lucide="calendar" class="w-4 h-4"></i> 練習カレンダー
                 </button>
-                <button id="tab-attendance" onclick="switchView('attendance')" class="flex-1 sm:flex-initial px-5 py-2.5 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-2 whitespace-nowrap">
+                <button id="tab-attendance" onclick="switchView('attendance')" class="flex-1 sm:flex-initial px-4 py-2.5 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-2 whitespace-nowrap">
                     <i data-lucide="check-square" class="w-4 h-4"></i> 出欠回答＆集計
                 </button>
-                <button id="tab-admin" onclick="switchView('admin')" class="flex-1 sm:flex-initial px-5 py-2.5 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-2 whitespace-nowrap">
+                <button id="tab-tournaments" onclick="switchView('tournaments')" class="flex-1 sm:flex-initial px-4 py-2.5 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i data-lucide="trophy" class="w-4 h-4"></i> 🏆 大会情報
+                </button>
+                <button id="tab-admin" onclick="switchView('admin')" class="flex-1 sm:flex-initial px-4 py-2.5 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-2 whitespace-nowrap">
                     <i data-lucide="settings" class="w-4 h-4"></i> 管理者モード
                 </button>
             </div>
             <!-- 現在のアカウント情報 -->
-            <div id="user-info-badge" class="text-xs text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+            <div id="user-info-badge" class="text-xs text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100 shrink-0">
                 ゲスト接続
             </div>
         </div>
@@ -85,11 +92,11 @@
         <!-- 1. カレンダービュー -->
         <section id="view-calendar" class="space-y-6">
             
-            <!-- ⚡ 直近練習の「みんなの参加状況」サマリーカード -->
+            <!-- 直近練習の「みんなの参加状況」サマリーカード -->
             <div class="bg-white rounded-3xl border border-slate-100 p-5 shadow-sm space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div class="flex items-center gap-2">
-                        <div class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg">
+                        <div class="p-1.5 bg-amber-50 text-amber-600 rounded-lg">
                             <i data-lucide="sparkles" class="w-5 h-5"></i>
                         </div>
                         <h3 class="font-extrabold text-slate-800 text-sm sm:text-base">直近の練習日＆参加表明メンバー</h3>
@@ -157,7 +164,7 @@
                 <!-- 出欠登録フォーム -->
                 <div class="md:col-span-1 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 h-fit space-y-4">
                     <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
-                        <div class="p-1.5 bg-emerald-500 text-white rounded-lg">
+                        <div class="p-1.5 bg-amber-500 text-white rounded-lg">
                             <i data-lucide="edit-3" class="w-5 h-5"></i>
                         </div>
                         <h3 class="font-bold text-slate-800">出欠を回答する</h3>
@@ -165,12 +172,12 @@
 
                     <div>
                         <label class="block text-xs font-bold text-slate-400 mb-1.5">1. お名前</label>
-                        <input type="text" id="att-name" placeholder="部員名を入力" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <input type="text" id="att-name" placeholder="部員名を入力" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-400 mb-1.5">2. 練習日程を選択</label>
-                        <select id="att-schedule-id" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <select id="att-schedule-id" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
                             <!-- JSで動的に追加 -->
                         </select>
                     </div>
@@ -186,11 +193,11 @@
 
                     <div>
                         <label class="block text-xs font-bold text-slate-400 mb-1.5">4. 一言・連絡事項 (任意)</label>
-                        <input type="text" id="att-comment" placeholder="遅刻します、ラケット借ります等" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <input type="text" id="att-comment" placeholder="遅刻します、ラケット借ります等" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
                     </div>
 
-                    <button onclick="submitAttendance()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-md">
-                        <i data-lucide="send" class="w-4 h-4"></i>
+                    <button onclick="submitAttendance()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-md">
+                        <i data-lucide="send" class="w-4 h-4 text-amber-400"></i>
                         <span>出欠を登録する</span>
                     </button>
                 </div>
@@ -214,7 +221,32 @@
             </div>
         </section>
 
-        <!-- 3. 管理者モードビュー -->
+        <!-- 3. 大会情報ビュー (新機能) -->
+        <section id="view-tournaments" class="hidden space-y-6">
+            <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-500 p-4 rounded-r-xl shadow-sm">
+                <div class="flex gap-3">
+                    <div class="text-amber-600 shrink-0">
+                        <i data-lucide="trophy" class="w-5 h-5"></i>
+                    </div>
+                    <div class="text-sm text-slate-800">
+                        <p class="font-bold">🏆 大会情報＆エントリー表明機能！</p>
+                        <p class="text-xs text-slate-600 mt-1">
+                            出場予定の大会をみんなにアピールして、ペア探しや引率調整をしましょう！大会カード内の「エントリー表明する」ボタンから表明が可能です。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 大会一覧 -->
+            <div id="tournament-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- JSで大会カードが動的に生成されます -->
+                <div class="col-span-full text-center py-12 text-slate-400 font-bold bg-white rounded-3xl border border-slate-150">
+                    現在登録されている大会情報はありません。
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. 管理者モードビュー -->
         <section id="view-admin" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-6">
             <!-- パスコード認証画面 -->
             <div id="admin-auth-panel" class="py-12 flex flex-col items-center justify-center space-y-4">
@@ -223,10 +255,9 @@
                 </div>
                 <div class="text-center">
                     <h3 class="text-lg font-bold text-slate-800">管理者認証が必要です</h3>
-                    <p class="text-xs text-slate-400 mt-1">練習日の追加・削除を行うにはパスコードを入力してください</p>
+                    <p class="text-xs text-slate-400 mt-1">練習日の追加・削除や大会情報を登録するにはパスコードを入力してください</p>
                 </div>
                 <div class="flex gap-2 max-w-xs w-full">
-                    <!-- 🔐 プレースホルダーから初期値の案内を消去 -->
                     <input type="password" id="admin-passcode" placeholder="パスコードを入力" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-center tracking-widest focus:ring-2 focus:ring-rose-500 focus:outline-none">
                     <button onclick="authenticateAdmin()" class="bg-rose-500 hover:bg-rose-600 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition">解除</button>
                 </div>
@@ -234,92 +265,203 @@
             </div>
 
             <!-- 認証後管理者操作パネル -->
-            <div id="admin-control-panel" class="hidden space-y-6">
+            <div id="admin-control-panel" class="hidden space-y-8">
+                
+                <!-- 管理者ヘッダー -->
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
                     <div>
                         <div class="inline-flex items-center gap-1.5 bg-rose-50 text-rose-700 text-xs font-bold px-2.5 py-1 rounded-full mb-1">
                             <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> 管理者権限 有効
                         </div>
-                        <h3 class="text-lg font-bold text-slate-800">練習スケジュールの管理</h3>
+                        <h3 class="text-lg font-bold text-slate-800">ライジングムーン管理パネル</h3>
                     </div>
                     <button onclick="lockAdmin()" class="text-xs font-bold text-slate-500 hover:text-slate-800 px-3 py-1.5 border border-slate-200 rounded-lg">管理者モードを終了</button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- スケジュール追加フォーム -->
-                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-4">
-                        <h4 class="font-bold text-slate-700 text-sm flex items-center gap-1.5">
-                            <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-600"></i> 新しい練習日程を追加
-                        </h4>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">日程</label>
-                            <input type="date" id="new-sched-date" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1">開始時間</label>
-                                <input type="time" id="new-sched-start" value="18:30" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <!-- A: 練習スケジュールの管理 -->
+                <div class="space-y-4">
+                    <h3 class="font-extrabold text-slate-800 text-base border-b pb-2 flex items-center gap-2">
+                        <i data-lucide="calendar" class="w-5 h-5 text-emerald-600"></i> ① 練習スケジュールの管理
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- 追加フォーム（2カラム幅） -->
+                        <div class="md:col-span-2 bg-slate-50 p-5 rounded-2xl border border-slate-150 space-y-4">
+                            <div class="flex justify-between items-center border-b border-slate-200 pb-2.5">
+                                <h4 class="font-bold text-slate-700 text-sm flex items-center gap-1.5">
+                                    <i data-lucide="plus" class="w-4 h-4 text-emerald-600"></i> 新規練習の追加
+                                </h4>
+                                <!-- モード切り替えスイッチ -->
+                                <div class="flex bg-slate-200 p-0.5 rounded-lg text-xs font-bold">
+                                    <button onclick="toggleAdminAddMode('single')" id="mode-btn-single" class="px-2.5 py-1 rounded-md bg-white text-slate-800 shadow-xs transition-all">単発追加</button>
+                                    <button onclick="toggleAdminAddMode('recurring')" id="mode-btn-recurring" class="px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-800 transition-all">📅 定期予約</button>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1">終了時間</label>
-                                <input type="time" id="new-sched-end" value="21:00" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">開始時間</label>
+                                    <input type="time" id="sched-start-time" value="18:30" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">終了時間</label>
+                                    <input type="time" id="sched-end-time" value="21:00" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">練習区分</label>
+                                    <select id="sched-label" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                        <option value="月曜定期枠">月曜定期枠 (18:30~21:00)</option>
+                                        <option value="土曜特別枠">土曜特別枠 (14:00~17:00)</option>
+                                        <option value="その他特別枠">その他特別枠</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">補足事項 (任意)</label>
+                                    <input type="text" id="sched-note" placeholder="例：3面使用、ラケット無料貸出など" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                            </div>
+
+                            <!-- 単発追加 -->
+                            <div id="form-mode-single" class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">日付指定</label>
+                                    <input type="date" id="sched-single-date" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                                <button onclick="addSingleSchedule()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-sm">
+                                    予定を1件登録する
+                                </button>
+                            </div>
+
+                            <!-- 定期予約 -->
+                            <div id="form-mode-recurring" class="hidden space-y-4 border-t border-slate-200/60 pt-3">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1">開始日</label>
+                                        <input type="date" id="sched-recur-start" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1">終了日</label>
+                                        <input type="date" id="sched-recur-end" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 mb-1.5">繰り返す曜日</label>
+                                    <div class="grid grid-cols-7 gap-1" id="recur-days-box">
+                                        <button type="button" onclick="toggleRecurDay(0)" id="day-btn-0" class="py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-red-500 transition">日</button>
+                                        <button type="button" onclick="toggleRecurDay(1)" id="day-btn-1" class="py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-slate-700 transition">月</button>
+                                        <button type="button" onclick="toggleRecurDay(2)" id="day-btn-2" class="py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-slate-700 transition">火</button>
+                                        <button type="button" onclick="toggleRecurDay(3)" id="day-btn-3" class="py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-slate-700 transition">水</button>
+                                        <button type="button" onclick="toggleRecurDay(4)" id="day-btn-4" class="py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-slate-700 transition">木</button>
+                                        <button type="button" onclick="toggleRecurDay(5)" id="day-btn-5" class="py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-slate-700 transition">金</button>
+                                        <button type="button" onclick="toggleRecurDay(6)" id="day-btn-6" class="py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-sky-500 transition">土</button>
+                                    </div>
+                                </div>
+
+                                <button onclick="addRecurringSchedules()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-2">
+                                    <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+                                    <span>定期予約をカレンダーに一括反映</span>
+                                </button>
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">練習区分</label>
-                            <select id="new-sched-label" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                                <option value="月曜定期枠">月曜定期枠 (18:30~21:00)</option>
-                                <option value="土曜特別枠">土曜特別枠 (14:00~17:00)</option>
-                                <option value="その他臨時枠">その他臨時枠</option>
-                            </select>
+                        <!-- 補足サイドカード -->
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-150 space-y-3 h-fit text-xs text-slate-500">
+                            <h4 class="font-bold text-slate-700 flex items-center gap-1">
+                                <i data-lucide="info" class="w-4 h-4 text-emerald-600"></i> クイック一括生成
+                            </h4>
+                            <p>初めてサイトを立ち上げた際、2026年後半期の月曜夜＆確定土曜の日程を1タップで流し込めます。</p>
+                            <button onclick="seedInitialData()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 rounded-xl transition flex items-center justify-center gap-1.5 mt-2">
+                                <i data-lucide="play" class="w-3.5 h-3.5"></i> 2026後半スケジュールを展開
+                            </button>
                         </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">補足事項 (任意)</label>
-                            <input type="text" id="new-sched-note" placeholder="例：3面使用、ラケット無料貸出など" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                        </div>
-
-                        <button onclick="addSchedule()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-sm transition">
-                            日程を追加して保存
-                        </button>
                     </div>
 
-                    <!-- スケジュール一括生成（便利機能） -->
-                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-4">
-                        <h4 class="font-bold text-slate-700 text-sm flex items-center gap-1.5">
-                            <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i> カレンダー初期化＆バッチ追加
-                        </h4>
-                        <p class="text-xs text-slate-500 leading-relaxed">
-                            初めて利用する際やテストをしたい場合に、2026年後半期の月曜日（定期）と土曜日（7/4、8/22、9/12）の日程データをワンクリックで一括生成します。
-                        </p>
-                        <button onclick="seedInitialData()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
-                            <i data-lucide="play" class="w-4 h-4"></i>
-                            <span>2026年後半期の通常スケジュールを一括追加</span>
-                        </button>
+                    <!-- スケジュール削除エリア -->
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-slate-700 text-sm">登録済みの全スケジュールリスト</h4>
+                        <div id="admin-schedule-list" class="space-y-2 max-h-[300px] overflow-y-auto border border-slate-150 rounded-xl p-3 bg-slate-50">
+                            <!-- JS生成 -->
+                        </div>
                     </div>
                 </div>
 
-                <!-- スケジュール一覧・削除 -->
-                <div class="space-y-3">
-                    <h4 class="font-bold text-slate-700 text-sm">現在登録済みの全スケジュール (${allSchedules.length}件)</h4>
-                    <div id="admin-schedule-list" class="space-y-2 max-h-[400px] overflow-y-auto border border-slate-100 rounded-xl p-3 bg-slate-50">
-                        <!-- JSで動的生成 -->
+                <!-- B: 大会情報の管理 (新設) -->
+                <div class="space-y-4 border-t border-slate-200/60 pt-6">
+                    <h3 class="font-extrabold text-slate-800 text-base border-b pb-2 flex items-center gap-2">
+                        <i data-lucide="trophy" class="w-5 h-5 text-amber-500"></i> ② 大会情報・エントリーの管理
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- 大会情報作成フォーム -->
+                        <div class="md:col-span-2 bg-slate-50 p-5 rounded-2xl border border-slate-150 space-y-4">
+                            <h4 class="font-bold text-slate-700 text-sm flex items-center gap-1.5">
+                                <i data-lucide="award" class="w-4 h-4 text-amber-500"></i> 新しい大会案内を登録する
+                            </h4>
+
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">大会名</label>
+                                    <input type="text" id="tourn-title" placeholder="例：秋季ピックルボール市民大会" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1">開催日</label>
+                                        <input type="date" id="tourn-date" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1">申込締切日</label>
+                                        <input type="date" id="tourn-deadline" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1">開催場所</label>
+                                        <input type="text" id="tourn-location" placeholder="例：グリーンアリーナメイン体育館" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1">参加費用</label>
+                                        <input type="text" id="tourn-fee" placeholder="例：ダブルス1ペア4,000円" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">募集部門・種目</label>
+                                    <input type="text" id="tourn-categories" placeholder="例：一般男子ダブルス、一般女子ダブルス、ミックス、シニア" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">詳細メモ / 案内文（任意）</label>
+                                    <textarea id="tourn-note" placeholder="集合時間、集合場所、申込先など詳細を入力してください" rows="3" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white resize-none"></textarea>
+                                </div>
+                            </div>
+
+                            <button onclick="addTournament()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-1.5 shadow-sm">
+                                <i data-lucide="plus-circle" class="w-4 h-4 text-amber-300"></i> 大会情報を公開する
+                            </button>
+                        </div>
+
+                        <!-- 登録中の大会の簡易削除・一覧リスト -->
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-150 space-y-3">
+                            <h4 class="font-bold text-slate-700 text-xs uppercase tracking-wider">現在公開中の大会リスト</h4>
+                            <div id="admin-tournament-list" class="space-y-2 max-h-[400px] overflow-y-auto">
+                                <!-- JS生成 -->
+                            </div>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </section>
 
     </main>
 
-    <!-- 4. 詳細ポップアップ / 参加部員確認モーダル -->
+    <!-- 5. 出欠・スケジュール詳細ポップアップ -->
     <div id="detail-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform scale-95 transition-all">
             <div class="flex justify-between items-start mb-4">
                 <div class="flex items-center gap-2">
-                    <span id="modal-label" class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">月曜定期練習</span>
+                    <span id="modal-label" class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">月曜定期枠</span>
                 </div>
                 <button onclick="closeModal()" class="p-1.5 hover:bg-slate-100 rounded-lg transition text-slate-400">
                     <i data-lucide="x" class="w-5 h-5"></i>
@@ -379,6 +521,49 @@
         </div>
     </div>
 
+    <!-- 6. 🏆 大会エントリー用の表明ポップアップ (新機能) -->
+    <div id="entry-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform scale-95 transition-all">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="font-bold text-slate-800 text-base flex items-center gap-1.5">
+                    <i data-lucide="medal" class="w-5 h-5 text-amber-500"></i> 大会へのエントリー表明
+                </h3>
+                <button onclick="closeEntryModal()" class="p-1 hover:bg-slate-100 rounded-lg transition text-slate-400">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">お名前</label>
+                    <input type="text" id="entry-name" placeholder="部員名を入力" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">希望部門 / 種目 / ペア名</label>
+                    <input type="text" id="entry-category" placeholder="例：ミックスダブルス (ペア募集中)" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">一言メッセージ (任意)</label>
+                    <input type="text" id="entry-comment" placeholder="例：上位入賞目指します！" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+
+                <!-- 内部保存用の隠し大会ID -->
+                <input type="hidden" id="entry-target-tourn-id">
+
+                <div class="flex gap-2 pt-2">
+                    <button onclick="closeEntryModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition text-sm">
+                        キャンセル
+                    </button>
+                    <button onclick="submitEntry()" class="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition text-sm text-center flex items-center justify-center gap-1">
+                        表明を登録する
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- UI共通トースト表示 -->
     <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2">
         <i data-lucide="info" class="w-4 h-4 text-emerald-400"></i>
@@ -418,10 +603,17 @@
         let user = null;
         let allSchedules = [];
         let allAttendance = [];
+        let allTournaments = []; // 新設: 大会情報
+        let allEntries = [];     // 新設: 大会エントリー表明
+        
         let currentYear = 2026;
         let currentMonth = 6; // 0-indexed (6 = 7月)
         let selectedStatus = '出席'; 
         let currentOpenScheduleId = null; 
+
+        // 管理者モードのフォーム切り替え状態
+        let adminAddMode = 'single'; // 'single' or 'recurring'
+        let selectedRecurDays = [false, false, false, false, false, false, false]; // 日〜土のトグル状態
 
         // UI表示用の関数をグローバルに接続
         window.switchView = switchView;
@@ -431,12 +623,23 @@
         window.submitAttendance = submitAttendance;
         window.authenticateAdmin = authenticateAdmin;
         window.lockAdmin = lockAdmin;
-        window.addSchedule = addSchedule;
+        window.addSingleSchedule = addSingleSchedule;
+        window.addRecurringSchedules = addRecurringSchedules;
+        window.toggleAdminAddMode = toggleAdminAddMode;
+        window.toggleRecurDay = toggleRecurDay;
         window.deleteSchedule = deleteSchedule;
         window.seedInitialData = seedInitialData;
         window.showDetailModal = showDetailModal;
         window.closeModal = closeModal;
         window.copyAttendanceSummaryText = copyAttendanceSummaryText;
+
+        // 新設: 大会関連のアクション
+        window.addTournament = addTournament;
+        window.deleteTournament = deleteTournament;
+        window.openEntryModal = openEntryModal;
+        window.closeEntryModal = closeEntryModal;
+        window.submitEntry = submitEntry;
+        window.deleteEntry = deleteEntry;
 
         // ----------------- RULE 3: AUTHENTICATION FIRST -----------------
         const initAuth = async () => {
@@ -469,17 +672,17 @@
             // RULE 1: /artifacts/{appId}/public/data/{collectionName}
             const schedulesRef = collection(db, 'artifacts', appId, 'public', 'data', 'schedules');
             const attendanceRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance');
+            const tournamentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'tournaments');
+            const entriesRef = collection(db, 'artifacts', appId, 'public', 'data', 'entries');
 
-            // リアルタイムリスナー: スケジュール一覧の同期
+            // 1. スケジュール一覧の同期
             onSnapshot(schedulesRef, (snapshot) => {
                 allSchedules = [];
                 snapshot.forEach((doc) => {
                     allSchedules.push({ id: doc.id, ...doc.data() });
                 });
-                // メモリ上でのソート (RULE 2)
-                allSchedules.sort((a, b) => new Date(a.date) - new Date(b.date));
+                allSchedules.sort((a, b) => new Date(a.date) - new Date(b.date)); // RULE 2
                 
-                // UIアップデート
                 renderCalendar();
                 updateAttendanceFormSchedules();
                 renderAttendanceSummary();
@@ -488,17 +691,15 @@
                 renderQuickSummaryCard();
             }, (err) => {
                 console.error("Schedule load error", err);
-                showToast("スケジュールの読み込みに失敗しました");
             });
 
-            // リアルタイムリスナー: 出欠データの同期
+            // 2. 出欠データの同期
             onSnapshot(attendanceRef, (snapshot) => {
                 allAttendance = [];
                 snapshot.forEach((doc) => {
                     allAttendance.push({ id: doc.id, ...doc.data() });
                 });
                 
-                // UIアップデート
                 renderCalendar();
                 renderAttendanceSummary();
                 renderQuickSummaryCard();
@@ -509,15 +710,41 @@
             }, (err) => {
                 console.error("Attendance load error", err);
             });
+
+            // 3. 大会情報の同期 (新設)
+            onSnapshot(tournamentsRef, (snapshot) => {
+                allTournaments = [];
+                snapshot.forEach((doc) => {
+                    allTournaments.push({ id: doc.id, ...doc.data() });
+                });
+                // 開催日順に並べ替え
+                allTournaments.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                renderTournamentCards();
+                renderAdminTournamentList();
+            }, (err) => {
+                console.error("Tournaments load error", err);
+            });
+
+            // 4. 大会エントリー表明データの同期 (新設)
+            onSnapshot(entriesRef, (snapshot) => {
+                allEntries = [];
+                snapshot.forEach((doc) => {
+                    allEntries.push({ id: doc.id, ...doc.data() });
+                });
+                
+                renderTournamentCards();
+            }, (err) => {
+                console.error("Entries load error", err);
+            });
         };
 
-        // ⚡ 直近の練習の参加状況をカードに集計してパッと見せる
+        // 直近の練習の参加状況をサマリーカードにレンダリング
         function renderQuickSummaryCard() {
             const container = document.getElementById('quick-attendance-summary');
             container.innerHTML = '';
 
             const now = new Date();
-            // 本日以降の直近3日程を取得
             const upcoming = allSchedules.filter(s => new Date(s.date + ' 23:59:59') >= now).slice(0, 3);
 
             if (upcoming.length === 0) {
@@ -538,7 +765,7 @@
                 const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
 
                 const card = document.createElement('div');
-                card.className = "bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col justify-between hover:border-emerald-200 hover:bg-emerald-50/10 cursor-pointer transition-all duration-300";
+                card.className = "bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col justify-between hover:border-amber-200 hover:bg-amber-50/10 cursor-pointer transition-all duration-300";
                 card.onclick = () => showDetailModal(s.id);
 
                 const listNames = attList.length > 0 
@@ -560,12 +787,11 @@
                             <span class="text-amber-600">🟡 未定: ${maybeList.length}人</span>
                         </div>
 
-                        <!-- 出席予定メンバーの名前チラ見せ -->
                         <div class="text-[10px] text-slate-400 mt-2 line-clamp-2 leading-relaxed bg-white/70 p-2 rounded-lg border border-slate-200/50">
                             <strong>出席者:</strong> ${listNames}
                         </div>
                     </div>
-                    <div class="text-[10px] text-right text-emerald-600 font-bold mt-3 flex items-center justify-end gap-1">
+                    <div class="text-[10px] text-right text-amber-600 font-bold mt-3 flex items-center justify-end gap-1">
                         <span>詳細・参加登録</span> <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
                     </div>
                 `;
@@ -612,15 +838,12 @@
 
                 dayCell.appendChild(dateNum);
 
-                // 日程情報があるか確認
                 const schedule = allSchedules.find(s => s.date === dateString);
                 if (schedule) {
-                    // 出欠集計を取得
                     const dayAtts = allAttendance.filter(a => a.scheduleId === schedule.id);
                     const attList = dayAtts.filter(a => a.status === '出席');
                     const maybeList = dayAtts.filter(a => a.status === '未定');
 
-                    // 枠のデザイン変更
                     if (schedule.label === '月曜定期枠') {
                         dayCell.classList.add('bg-emerald-50/80', '!border-emerald-200', 'hover:bg-emerald-100/90');
                         dateNum.classList.add('bg-emerald-500', 'text-white', 'rounded-md', 'px-1.5', 'py-0.5', 'w-auto', 'text-center');
@@ -632,12 +855,10 @@
                         dateNum.classList.add('bg-slate-700', 'text-white', 'rounded-md', 'px-1.5', 'py-0.5', 'w-auto', 'text-center');
                     }
 
-                    // 👥 出席者の名前ミニチップ（カレンダー上に直接リスト表示する）
                     const namesContainer = document.createElement('div');
                     namesContainer.className = 'flex flex-col gap-0.5 text-[8px] sm:text-[10px] mt-1 overflow-y-auto max-h-[40px] select-none text-left w-full';
                     
                     if (attList.length > 0) {
-                        // 最大2名まで名前を小さく表示。それ以上は「他○人」と表記
                         const maxDisplay = 2;
                         attList.slice(0, maxDisplay).forEach(att => {
                             const badge = document.createElement('span');
@@ -699,19 +920,291 @@
 
         // ----------------- TAB SWAP -----------------
         function switchView(view) {
-            const tabs = ['calendar', 'attendance', 'admin'];
+            const tabs = ['calendar', 'attendance', 'tournaments', 'admin'];
             tabs.forEach(t => {
                 const tabBtn = document.getElementById(`tab-${t}`);
                 const section = document.getElementById(`view-${t}`);
                 if (t === view) {
-                    tabBtn.className = "flex-1 sm:flex-initial px-5 py-2.5 text-center font-bold text-sm border-b-2 border-emerald-600 text-emerald-600 transition flex items-center justify-center gap-2 whitespace-nowrap";
+                    tabBtn.className = "flex-1 sm:flex-initial px-4 py-2.5 text-center font-bold text-sm border-b-2 border-amber-500 text-amber-600 transition flex items-center justify-center gap-2 whitespace-nowrap";
                     section.classList.remove('hidden');
                 } else {
-                    tabBtn.className = "flex-1 sm:flex-initial px-5 py-2.5 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-2 whitespace-nowrap";
+                    tabBtn.className = "flex-1 sm:flex-initial px-4 py-2.5 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-2 whitespace-nowrap";
                     section.classList.add('hidden');
                 }
             });
         }
+
+        // ----------------- 大会情報カードの表示レンダリング (新設) -----------------
+        function renderTournamentCards() {
+            const container = document.getElementById('tournament-cards-container');
+            container.innerHTML = '';
+
+            if (allTournaments.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-slate-400 font-bold bg-white rounded-3xl border border-slate-150">
+                        現在予定されている大会情報はありません。
+                    </div>
+                `;
+                return;
+            }
+
+            allTournaments.forEach(t => {
+                // この大会にエントリー登録した情報
+                const tEntries = allEntries.filter(e => e.tournamentId === t.id);
+
+                const d = new Date(t.date);
+                const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
+                const deadlineD = new Date(t.deadline);
+                const deadlineWeek = ['日','月','火','水','木','金','土'][deadlineD.getDay()];
+
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-3xl border border-slate-150 shadow-sm p-5 space-y-4 flex flex-col justify-between hover:border-amber-300 transition-all duration-300 relative overflow-hidden";
+                
+                // 締切切れのバッジ表示用
+                const now = new Date();
+                const isOverDeadline = new Date(t.deadline + ' 23:59:59') < now;
+
+                const deadlineBadge = isOverDeadline 
+                    ? `<span class="bg-red-100 text-red-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-red-200">締切終了</span>`
+                    : `<span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-amber-200">エントリー受付中</span>`;
+
+                card.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-start gap-2 border-b border-slate-100 pb-2.5">
+                            <div>
+                                <span class="text-[10px] bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full font-bold border border-indigo-200/50">RISING MOON 🏆</span>
+                                <h3 class="text-base font-black text-slate-900 mt-1 leading-tight">${t.title}</h3>
+                            </div>
+                            <div class="shrink-0 text-right">${deadlineBadge}</div>
+                        </div>
+
+                        <!-- スペック -->
+                        <div class="grid grid-cols-2 gap-y-2 gap-x-3 text-xs border-b border-slate-100 pb-3">
+                            <div class="text-slate-600 flex items-center gap-1.5">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+                                <span><strong>開催日:</strong> ${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})</span>
+                            </div>
+                            <div class="text-slate-600 flex items-center gap-1.5">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
+                                <span class="truncate"><strong>場所:</strong> ${t.location}</span>
+                            </div>
+                            <div class="text-slate-600 flex items-center gap-1.5">
+                                <i data-lucide="wallet" class="w-3.5 h-3.5 text-slate-400"></i>
+                                <span><strong>参加費:</strong> ${t.fee}</span>
+                            </div>
+                            <div class="text-slate-600 flex items-center gap-1.5">
+                                <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
+                                <span class="text-rose-600 font-bold"><strong>締切:</strong> ${deadlineD.getMonth() + 1}/${deadlineD.getDate()}(${deadlineWeek})</span>
+                            </div>
+                            <div class="col-span-2 text-slate-600 flex items-start gap-1.5">
+                                <i data-lucide="award" class="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5"></i>
+                                <span><strong>種目:</strong> ${t.categories}</span>
+                            </div>
+                        </div>
+
+                        <!-- 備考/案内文 -->
+                        ${t.note ? `
+                        <div class="bg-slate-50 p-2.5 rounded-xl text-[11px] text-slate-500 leading-relaxed">
+                            <strong>案内メモ:</strong><br>${t.note.replace(/\n/g, '<br>')}
+                        </div>
+                        ` : ''}
+
+                        <!-- 現在のエントリー希望者一覧 -->
+                        <div class="space-y-1.5">
+                            <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex justify-between">
+                                <span>エントリー表明 (${tEntries.length}人)</span>
+                            </h4>
+                            <div class="space-y-1.5 max-h-[150px] overflow-y-auto pr-1">
+                                ${tEntries.length > 0 ? tEntries.map(e => `
+                                    <div class="bg-slate-50 border border-slate-100 p-2 rounded-xl flex justify-between items-start text-xs">
+                                        <div>
+                                            <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                                <span>${e.name}</span>
+                                                <span class="text-[10px] bg-white border border-slate-200 px-1.5 py-0.5 rounded text-indigo-700">${e.category}</span>
+                                            </div>
+                                            ${e.comment ? `<p class="text-[10px] text-slate-400 mt-1 pl-3 leading-relaxed">💬 ${e.comment}</p>` : ''}
+                                        </div>
+                                        <!-- 出欠削除。本人の回答のみ消去可能に。プレビュー用に簡易削除ボタン配置 -->
+                                        <button onclick="deleteEntry('${e.id}')" class="text-[9px] font-bold text-slate-300 hover:text-red-500 px-1 py-0.5 transition">
+                                            取消
+                                        </button>
+                                    </div>
+                                `).join('') : '<p class="text-xs text-slate-300 text-center py-2">表明した部員はまだいません。第一号になりましょう！</p>'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 表明ボタン -->
+                    <div class="pt-4 border-t border-slate-100">
+                        <button onclick="openEntryModal('${t.id}')" ${isOverDeadline ? 'disabled' : ''} class="w-full text-xs font-bold py-2 px-4 rounded-xl transition flex items-center justify-center gap-1.5 ${
+                            isOverDeadline 
+                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
+                                : 'bg-slate-900 text-white hover:bg-slate-800 shadow-sm'
+                        }">
+                            <i data-lucide="medal" class="w-3.5 h-3.5"></i>
+                            <span>${isOverDeadline ? '締切済み' : 'エントリー希望を登録する'}</span>
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        // ----------------- 大会管理：追加＆削除ロジック (新設) -----------------
+        async function addTournament() {
+            const title = document.getElementById('tourn-title').value.trim();
+            const date = document.getElementById('tourn-date').value;
+            const deadline = document.getElementById('tourn-deadline').value;
+            const location = document.getElementById('tourn-location').value.trim();
+            const fee = document.getElementById('tourn-fee').value.trim();
+            const categories = document.getElementById('tourn-categories').value.trim();
+            const note = document.getElementById('tourn-note').value.trim();
+
+            if (!title || !date || !deadline || !location || !fee || !categories) {
+                showToast("必須項目（大会名・日付・場所・費用・種目・締切）をすべて入力してください。");
+                return;
+            }
+
+            const tournId = `tourn_${date.replace(/-/g, '')}_${Date.now().toString().slice(-4)}`;
+
+            try {
+                // RULE 1: /artifacts/{appId}/public/data/{collectionName}
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'tournaments', tournId);
+                await setDoc(docRef, {
+                    title,
+                    date,
+                    deadline,
+                    location,
+                    fee,
+                    categories,
+                    note,
+                    timestamp: new Date().toISOString()
+                });
+
+                showToast("大会案内を新しく登録・公開しました！");
+                
+                // フォームをクリア
+                document.getElementById('tourn-title').value = '';
+                document.getElementById('tourn-date').value = '';
+                document.getElementById('tourn-deadline').value = '';
+                document.getElementById('tourn-location').value = '';
+                document.getElementById('tourn-fee').value = '';
+                document.getElementById('tourn-categories').value = '';
+                document.getElementById('tourn-note').value = '';
+            } catch (err) {
+                console.error("大会登録エラー", err);
+                showToast("公開に失敗しました。");
+            }
+        }
+
+        async function deleteTournament(tournId) {
+            if (!confirm("この大会情報を完全に削除しますか？部員からのエントリー表明データも消去されます。")) return;
+
+            try {
+                // 大会の削除
+                const tournRef = doc(db, 'artifacts', appId, 'public', 'data', 'tournaments', tournId);
+                await deleteDoc(tournRef);
+
+                // 紐づくエントリー情報のクリーンアップ
+                const targetEntries = allEntries.filter(e => e.tournamentId === tournId);
+                const deletePromises = targetEntries.map(e => {
+                    return deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'entries', e.id));
+                });
+                await Promise.all(deletePromises);
+
+                showToast("大会情報を削除しました。");
+            } catch (err) {
+                console.error("大会削除エラー", err);
+                showToast("削除に失敗しました。");
+            }
+        }
+
+        // 管理者タブ内での大会一覧
+        function renderAdminTournamentList() {
+            const container = document.getElementById('admin-tournament-list');
+            container.innerHTML = '';
+
+            if (allTournaments.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">公開中の大会はありません。</p>`;
+                return;
+            }
+
+            allTournaments.forEach(t => {
+                const d = new Date(t.date);
+                const item = document.createElement('div');
+                item.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-xs shadow-xs";
+                item.innerHTML = `
+                    <div class="truncate mr-2">
+                        <span class="font-bold text-slate-800">${d.getMonth() + 1}/${d.getDate()}</span>
+                        <span class="text-slate-500 font-medium ml-1">${t.title}</span>
+                    </div>
+                    <button onclick="deleteTournament('${t.id}')" class="text-red-500 hover:text-red-700 font-bold px-2 py-1 hover:bg-red-50 rounded-lg transition shrink-0">
+                        削除
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // ----------------- 大会エントリー表明のアクション (新設) -----------------
+        function openEntryModal(tournId) {
+            document.getElementById('entry-target-tourn-id').value = tournId;
+            document.getElementById('entry-modal').classList.remove('hidden');
+        }
+
+        function closeEntryModal() {
+            document.getElementById('entry-modal').classList.add('hidden');
+            document.getElementById('entry-name').value = '';
+            document.getElementById('entry-category').value = '';
+            document.getElementById('entry-comment').value = '';
+        }
+
+        async function submitEntry() {
+            const tournId = document.getElementById('entry-target-tourn-id').value;
+            const name = document.getElementById('entry-name').value.trim();
+            const category = document.getElementById('entry-category').value.trim();
+            const comment = document.getElementById('entry-comment').value.trim();
+
+            if (!name || !category) {
+                showToast("お名前と希望種目/ペア情報は必須です。");
+                return;
+            }
+
+            const entryId = `entry_${name}_${tournId}`.replace(/\s+/g, '');
+
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'entries', entryId);
+                await setDoc(docRef, {
+                    tournamentId: tournId,
+                    name,
+                    category,
+                    comment,
+                    timestamp: new Date().toISOString()
+                });
+
+                showToast("大会へのエントリー希望を表明しました！");
+                closeEntryModal();
+            } catch (err) {
+                console.error("エントリー登録失敗", err);
+                showToast("送信に失敗しました。");
+            }
+        }
+
+        async function deleteEntry(entryId) {
+            if (!confirm("エントリー表明を取り消しますか？")) return;
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'entries', entryId);
+                await deleteDoc(docRef);
+                showToast("表明をキャンセルしました。");
+            } catch (err) {
+                console.error("表明取消失敗", err);
+                showToast("取消に失敗しました。");
+            }
+        }
+
 
         // ----------------- ATTENDANCE LOGIC -----------------
         function setFormStatus(status) {
@@ -754,7 +1247,6 @@
             });
         }
 
-        // 出欠提出
         async function submitAttendance() {
             if (!user) {
                 showToast("ログイン初期化中です。少々お待ちください。");
@@ -794,7 +1286,6 @@
             }
         }
 
-        // 各日程の出欠集計リストレンダリング
         function renderAttendanceSummary() {
             const container = document.getElementById('attendance-summary-list');
             container.innerHTML = '';
@@ -836,14 +1327,12 @@
                         </div>
                     </div>
 
-                    <!-- 進捗ゲージで視覚化 -->
                     <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden flex">
                         <div class="bg-emerald-500 h-full" style="width: ${sAtts.length > 0 ? okPercent : 0}%"></div>
                         <div class="bg-amber-400 h-full" style="width: ${sAtts.length > 0 ? maybePercent : 0}%"></div>
                         <div class="bg-rose-400 h-full" style="width: ${sAtts.length > 0 ? noPercent : 0}%"></div>
                     </div>
 
-                    <!-- メンバーのタグ表示 -->
                     <div class="space-y-1.5 pt-1">
                         <div class="text-[11px] font-bold text-slate-400 flex justify-between">
                             <span>出席メンバー:</span>
@@ -865,7 +1354,6 @@
             });
         }
 
-        // 次の練習日カウンター更新
         function updateNextPracticeWidget() {
             const now = new Date();
             const future = allSchedules.filter(s => new Date(s.date + ' ' + s.time.split('~')[0].trim()) > now);
@@ -903,13 +1391,13 @@
         // ----------------- ADMIN SYSTEM -----------------
         function authenticateAdmin() {
             const pass = document.getElementById('admin-passcode').value;
-            // 🔐 管理者認証パスコード
             if (pass === '0516') {
                 document.getElementById('admin-auth-panel').classList.add('hidden');
                 document.getElementById('admin-control-panel').classList.remove('hidden');
                 document.getElementById('auth-error').classList.add('hidden');
                 showToast("管理者ログインに成功しました。");
                 renderAdminScheduleList();
+                renderAdminTournamentList();
             } else {
                 document.getElementById('auth-error').classList.remove('hidden');
             }
@@ -921,12 +1409,47 @@
             document.getElementById('admin-passcode').value = '';
         }
 
-        async function addSchedule() {
-            const date = document.getElementById('new-sched-date').value;
-            const start = document.getElementById('new-sched-start').value;
-            const end = document.getElementById('new-sched-end').value;
-            const label = document.getElementById('new-sched-label').value;
-            const note = document.getElementById('new-sched-note').value.trim();
+        function toggleAdminAddMode(mode) {
+            adminAddMode = mode;
+            const btnSingle = document.getElementById('mode-btn-single');
+            const btnRecur = document.getElementById('mode-btn-recurring');
+            const formSingle = document.getElementById('form-mode-single');
+            const formRecur = document.getElementById('form-mode-recurring');
+
+            if (mode === 'single') {
+                btnSingle.className = "px-2.5 py-1 rounded-md bg-white text-slate-800 shadow-xs transition-all";
+                btnRecur.className = "px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-800 transition-all";
+                formSingle.classList.remove('hidden');
+                formRecur.classList.add('hidden');
+            } else {
+                btnRecur.className = "px-2.5 py-1 rounded-md bg-white text-slate-800 shadow-xs transition-all";
+                btnSingle.className = "px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-800 transition-all";
+                formRecur.classList.remove('hidden');
+                formSingle.classList.add('hidden');
+            }
+        }
+
+        function toggleRecurDay(dayIndex) {
+            selectedRecurDays[dayIndex] = !selectedRecurDays[dayIndex];
+            const btn = document.getElementById(`day-btn-${dayIndex}`);
+            
+            if (selectedRecurDays[dayIndex]) {
+                if (dayIndex === 0) btn.className = "py-2 text-xs font-bold rounded-lg bg-red-500 text-white transition";
+                else if (dayIndex === 6) btn.className = "py-2 text-xs font-bold rounded-lg bg-sky-500 text-white transition";
+                else btn.className = "py-2 text-xs font-bold rounded-lg bg-emerald-500 text-white transition";
+            } else {
+                if (dayIndex === 0) btn.className = "py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-red-500 transition";
+                else if (dayIndex === 6) btn.className = "py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-sky-500 transition";
+                else btn.className = "py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 transition";
+            }
+        }
+
+        async function addSingleSchedule() {
+            const date = document.getElementById('sched-single-date').value;
+            const start = document.getElementById('sched-start-time').value;
+            const end = document.getElementById('sched-end-time').value;
+            const label = document.getElementById('sched-label').value;
+            const note = document.getElementById('sched-note').value.trim();
 
             if (!date) {
                 showToast("日付を選択してください");
@@ -945,16 +1468,109 @@
                     note: note
                 });
 
-                showToast("スケジュールを追加しました！");
-                document.getElementById('new-sched-date').value = '';
-                document.getElementById('new-sched-note').value = '';
+                showToast("スケジュールを単発で追加しました！");
+                document.getElementById('sched-single-date').value = '';
+                document.getElementById('sched-note').value = '';
             } catch (err) {
-                console.error("スケジュールの追加失敗", err);
+                console.error("追加失敗", err);
                 showToast("追加に失敗しました。");
             }
         }
 
+        async function addRecurringSchedules() {
+            const startRecurStr = document.getElementById('sched-recur-start').value;
+            const endRecurStr = document.getElementById('sched-recur-end').value;
+            const start = document.getElementById('sched-start-time').value;
+            const end = document.getElementById('sched-end-time').value;
+            const label = document.getElementById('sched-label').value;
+            const note = document.getElementById('sched-note').value.trim();
+
+            if (!startRecurStr || !endRecurStr) {
+                showToast("開始日と終了日を両方指定してください");
+                return;
+            }
+
+            const hasDaySelected = selectedRecurDays.some(d => d === true);
+            if (!hasDaySelected) {
+                showToast("繰り返したい曜日を1つ以上選択してください");
+                return;
+            }
+
+            const startDateObj = new Date(startRecurStr);
+            const endDateObj = new Date(endRecurStr);
+
+            if (startDateObj > endDateObj) {
+                showToast("開始日は終了日より前の日付にしてください");
+                return;
+            }
+
+            const targetDates = [];
+            let currentCursor = new Date(startDateObj);
+
+            const safetyLimit = 366;
+            let iterations = 0;
+
+            while (currentCursor <= endDateObj && iterations < safetyLimit) {
+                const dayOfWeek = currentCursor.getDay(); 
+                if (selectedRecurDays[dayOfWeek]) {
+                    const y = currentCursor.getFullYear();
+                    const m = String(currentCursor.getMonth() + 1).padStart(2, '0');
+                    const d = String(currentCursor.getDate()).padStart(2, '0');
+                    targetDates.push(`${y}-${m}-${d}`);
+                }
+                currentCursor.setDate(currentCursor.getDate() + 1);
+                iterations++;
+            }
+
+            if (targetDates.length === 0) {
+                showToast("指定した期間・曜日を満たす日程がありませんでした");
+                return;
+            }
+
+            if (targetDates.length > 100) {
+                if (!confirm(`一度に ${targetDates.length}件 の日程が登録されます。よろしいですか？`)) {
+                    return;
+                }
+            }
+
+            showToast(`${targetDates.length}件 の定期予約を登録中...`);
+
+            try {
+                const timeStr = `${start} ~ ${end}`;
+                
+                const savePromises = targetDates.map(async (dateStr) => {
+                    const id = `sched_${dateStr.replace(/-/g, '')}`;
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'schedules', id);
+                    return setDoc(docRef, {
+                        date: dateStr,
+                        time: timeStr,
+                        label: label,
+                        note: note
+                    });
+                });
+
+                await Promise.all(savePromises);
+
+                showToast(`${targetDates.length}件 の定期スケジュールを登録しました！`);
+                
+                document.getElementById('sched-recur-start').value = '';
+                document.getElementById('sched-recur-end').value = '';
+                document.getElementById('sched-note').value = '';
+                selectedRecurDays = [false, false, false, false, false, false, false];
+                for (let i = 0; i < 7; i++) {
+                    const btn = document.getElementById(`day-btn-${i}`);
+                    if (i === 0) btn.className = "py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-red-500 transition";
+                    else if (i === 6) btn.className = "py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-sky-500 transition";
+                    else btn.className = "py-2 text-xs font-bold rounded-lg border border-slate-200 bg-white text-slate-700 transition";
+                }
+            } catch (err) {
+                console.error("定期登録に失敗", err);
+                showToast("一部またはすべての定期登録に失敗しました。");
+            }
+        }
+
         async function deleteSchedule(schedId) {
+            if (!confirm("この予定を本当に削除しますか？紐づくこれまでの出欠回答も集計から表示されなくなります。")) return;
             try {
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'schedules', schedId);
                 await deleteDoc(docRef);
@@ -979,14 +1595,14 @@
                 const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
 
                 const item = document.createElement('div');
-                item.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200/60 shadow-xs text-xs";
+                item.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-xs shadow-xs";
                 item.innerHTML = `
                     <div>
                         <span class="inline-block text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 mr-2 font-bold">${s.label}</span>
                         <strong class="text-slate-800">${d.getMonth() + 1}/${d.getDate()}(${dayWeek})</strong> 
                         <span class="text-slate-500">${s.time}</span>
                     </div>
-                    <button onclick="deleteSchedule('${s.id}')" class="text-red-500 hover:text-red-700 font-bold px-2 py-1 hover:bg-red-50 rounded-lg transition">
+                    <button onclick="deleteSchedule('${s.id}')" class="text-red-500 hover:text-red-700 font-bold px-2 py-1 hover:bg-red-50 rounded-lg transition shrink-0">
                         削除
                     </button>
                 `;
@@ -1033,7 +1649,7 @@
                     });
                 }
 
-                showToast("初期データの一括展開に成功しました！");
+                showToast("初期スケジュールをクラウドへ展開しました！");
             } catch (err) {
                 console.error("シードに失敗", err);
                 showToast("一括追加に失敗しました。");
@@ -1055,7 +1671,6 @@
             const attListContainer = document.getElementById('modal-attendance-list');
             const gcalBtn = document.getElementById('modal-gcal');
 
-            // 3つのプログレスバー
             const barOk = document.getElementById('modal-bar-ok');
             const barMaybe = document.getElementById('modal-bar-maybe');
             const barNo = document.getElementById('modal-bar-no');
@@ -1083,7 +1698,6 @@
             const total = sAtts.length || 1;
             statsStr.innerText = `出席: ${atts.length}人 / 未定: ${maybes.length}人 / 欠席: ${absents.length}人`;
 
-            // 出欠率ゲージアニメーション
             if (sAtts.length > 0) {
                 barOk.style.width = `${(atts.length / total) * 100}%`;
                 barMaybe.style.width = `${(maybes.length / total) * 100}%`;
@@ -1094,10 +1708,9 @@
                 barNo.style.width = '0%';
             }
 
-            // 出席者一覧生成
             attListContainer.innerHTML = '';
             if (sAtts.length === 0) {
-                attListContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">回答がまだありません。右側の出欠登録・確認タブから出席登録をお願いします！</p>`;
+                attListContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">回答がまだありません。「出欠回答」タブから最初の回答を行ってみましょう！</p>`;
             } else {
                 sAtts.forEach(a => {
                     const line = document.createElement('div');
@@ -1127,7 +1740,6 @@
             currentOpenScheduleId = null;
         }
 
-        // LINE共有用の集計テキストコピー機能
         function copyAttendanceSummaryText() {
             if (!currentOpenScheduleId) return;
             const schedule = allSchedules.find(s => s.id === currentOpenScheduleId);
@@ -1150,7 +1762,6 @@
             text += `🔴 欠席 (${absents.length}人):\n${absents.length > 0 ? absents.map(a => `・${a.name}`).join('\n') : '・なし'}\n\n`;
             text += `👉 最新状況＆出席回答はこちら：\n${window.location.href}`;
 
-            // クリップボードにコピー
             const tempEl = document.createElement('textarea');
             tempEl.value = text;
             document.body.appendChild(tempEl);
@@ -1169,7 +1780,7 @@
             const startUTC = `${cleanDate}T${startTimeStr}00`;
             const endUTC = `${cleanDate}T${endTimeStr}00`;
             
-            const title = encodeURIComponent(`ピックルボール部 練習 (${label})`);
+            const title = encodeURIComponent(`ライジングムーン 練習 (${label})`);
             const location = encodeURIComponent("体育館 (3面)");
             const details = encodeURIComponent("利用備品: バドミントンポール、ネット");
 
