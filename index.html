@@ -253,7 +253,7 @@
             </div>
         </section>
 
-        <!-- 🔗 新設：リンク集ビュー -->
+        <!-- 🔗 リンク集ビュー -->
         <section id="view-links" class="hidden space-y-6">
             <div class="bg-gradient-to-r from-blue-50 to-slate-100 border-l-4 border-slate-700 p-4 rounded-r-xl shadow-sm">
                 <div class="flex gap-3">
@@ -342,6 +342,10 @@
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">練習場所</label>
+                                    <input type="text" id="sched-location" value="ケミカル体育館" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                                <div>
                                     <label class="block text-xs font-bold text-slate-500 mb-1">練習区分</label>
                                     <select id="sched-label" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                         <option value="月曜定期枠">月曜定期枠 (19:00~21:00)</option>
@@ -349,10 +353,11 @@
                                         <option value="その他特別枠">その他特別枠</option>
                                     </select>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1">補足事項 (任意)</label>
-                                    <input type="text" id="sched-note" placeholder="例：3面使用、ラケット無料貸出など" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">補足事項 (任意)</label>
+                                <input type="text" id="sched-note" placeholder="例：3面使用、ラケット無料貸出など" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
                             </div>
 
                             <!-- 単発追加 -->
@@ -483,7 +488,7 @@
                     </div>
                 </div>
 
-                <!-- 🔗 新設：C: お役立ちリンクの管理 -->
+                <!-- 🔗 C: お役立ちリンクの管理 -->
                 <div class="space-y-4 border-t border-slate-200/60 pt-6">
                     <h3 class="font-extrabold text-slate-800 text-base border-b pb-2 flex items-center gap-2">
                         <i data-lucide="link" class="w-5 h-5 text-indigo-500"></i> ③ お役立ちリンク集の管理
@@ -560,8 +565,7 @@
             </p>
 
             <div class="mt-4 p-3 bg-slate-50 rounded-xl text-xs space-y-1 text-slate-600">
-                <p>📍 <strong>場所:</strong> 体育館 (3面)</p>
-                <p>📦 <strong>備品:</strong> バドミントン用ポール、ネット（現地）</p>
+                <p>📍 <strong>場所:</strong> <span id="modal-location"></span></p>
                 <p id="modal-note">📝 <strong>メモ:</strong> </p>
             </div>
 
@@ -754,6 +758,11 @@
                         <label class="block text-xs font-bold text-slate-400 mb-1">終了時間</label>
                         <input type="time" id="edit-sched-end" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                     </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">練習場所</label>
+                    <input type="text" id="edit-sched-location" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 </div>
 
                 <div>
@@ -1027,7 +1036,7 @@
             renderAttendanceSummary();
             renderAdminScheduleList();
             updateNextPracticeWidget();
-            renderQuickSummaryCard();
+            refreshQuickSummaryCard();
         }
 
         // ----------------- UI VIEW SWAP LOGIC -----------------
@@ -1048,7 +1057,7 @@
         }
 
         // 直近の練習の参加状況をサマリーカードにレンダリング
-        function renderQuickSummaryCard() {
+        function refreshQuickSummaryCard() {
             const container = document.getElementById('quick-attendance-summary');
             if (!container) return;
             container.innerHTML = '';
@@ -1081,13 +1090,15 @@
                     ? attList.map(a => a.name).join('、') 
                     : 'なし';
 
+                const loc = s.location || 'ケミカル体育館';
+
                 card.innerHTML = `
                     <div class="space-y-2">
                         <div class="flex justify-between items-start">
                             <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded ${
                                 s.label === '月曜定期枠' ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'
                             }">${s.label}</span>
-                            <span class="text-[11px] font-bold text-slate-500">${s.time.split('~')[0]}</span>
+                            <span class="text-[11px] font-bold text-slate-500">${s.time.split('~')[0]} @${loc}</span>
                         </div>
                         <h4 class="text-sm font-black text-slate-800">${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})</h4>
                         
@@ -1949,11 +1960,13 @@
                 const div = document.createElement('div');
                 div.className = "p-4 bg-slate-50 border border-slate-155 rounded-2xl space-y-3 shadow-xs";
 
+                const loc = s.location || 'ケミカル体育館';
+
                 div.innerHTML = `
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-200/60 pb-2">
                         <div>
                             <span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">${s.label}</span>
-                            <h4 class="text-sm font-black text-slate-800">${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek}) ${s.time}</h4>
+                            <h4 class="text-sm font-black text-slate-800">${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek}) ${s.time} @${loc}</h4>
                         </div>
                         <div class="flex gap-2 text-xs font-bold text-slate-500">
                             <span class="bg-emerald-50 px-2 py-1 rounded text-emerald-700">出席: ${attList.length}人</span>
@@ -2089,6 +2102,7 @@
             const start = document.getElementById('sched-start-time').value;
             const end = document.getElementById('sched-end-time').value;
             const label = document.getElementById('sched-label').value;
+            const location = document.getElementById('sched-location').value.trim() || 'ケミカル体育館';
             const note = document.getElementById('sched-note').value.trim();
 
             if (!date) {
@@ -2105,6 +2119,7 @@
                     date: date,
                     time: timeStr,
                     label: label,
+                    location: location,
                     note: note
                 });
 
@@ -2123,6 +2138,7 @@
             const start = document.getElementById('sched-start-time').value;
             const end = document.getElementById('sched-end-time').value;
             const label = document.getElementById('sched-label').value;
+            const location = document.getElementById('sched-location').value.trim() || 'ケミカル体育館';
             const note = document.getElementById('sched-note').value.trim();
 
             if (!startRecurStr || !endRecurStr) {
@@ -2175,7 +2191,7 @@
 
             const timeStr = `${start} ~ ${end}`;
 
-            showToast(`${targetDates.length}件 の定期スケジュールを登録中...`);
+            showToast(`${targetDates.length}件 の定期予約を登録中...`);
 
             try {
                 const savePromises = targetDates.map(async (dateStr) => {
@@ -2185,6 +2201,7 @@
                         date: dateStr,
                         time: timeStr,
                         label: label,
+                        location: location,
                         note: note
                     });
                 });
@@ -2220,11 +2237,14 @@
 
                 const item = document.createElement('div');
                 item.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-xs shadow-xs gap-2";
+                
+                const loc = s.location || 'ケミカル体育館';
+
                 item.innerHTML = `
                     <div class="truncate flex-1">
                         <span class="inline-block text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 mr-2 font-bold">${s.label}</span>
                         <strong class="text-slate-800">${d.getMonth() + 1}/${d.getDate()} (${dayWeek})</strong> 
-                        <span class="text-slate-500">${s.time}</span>
+                        <span class="text-slate-500">${s.time} @${loc}</span>
                     </div>
                     <div class="flex gap-1.5 shrink-0">
                         <button onclick="openEditScheduleModal('${s.id}')" class="text-emerald-600 hover:text-emerald-800 font-bold px-2 py-1 hover:bg-emerald-50 rounded-lg transition">
@@ -2264,6 +2284,7 @@
                         date: sat,
                         time: '14:00 ~ 17:00',
                         label: '土曜特別枠',
+                        location: 'ケミカル体育館',
                         note: '画像確認済みの土曜確定枠です'
                     });
                 }
@@ -2274,6 +2295,7 @@
                         date: mon,
                         time: '19:00 ~ 21:00',
                         label: '月曜定期枠',
+                        location: 'ケミカル体育館',
                         note: '毎週月曜日の定期練習枠です'
                     });
                 }
@@ -2308,6 +2330,8 @@
             const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
             dateStr.innerText = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})`;
             timeStr.innerHTML = `<i data-lucide="clock" class="w-4 h-4 text-slate-400 shrink-0"></i> ${schedule.time}`;
+            
+            document.getElementById('modal-location').innerText = schedule.location || 'ケミカル体育館';
             noteStr.innerHTML = `📝 <strong>メモ:</strong> ${schedule.note || '特になし'}`;
 
             label.innerText = schedule.label;
@@ -2317,7 +2341,7 @@
                 label.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-sky-100 text-sky-800";
             }
 
-            gcalBtn.href = generateGoogleCalendarUrl(schedule.date, schedule.time, schedule.label);
+            gcalBtn.href = generateGoogleCalendarUrl(schedule.date, schedule.time, schedule.label, schedule.location);
 
             const sAtts = allAttendance.filter(a => a.scheduleId === schedId);
             const atts = sAtts.filter(a => a.status === '出席');
@@ -2387,8 +2411,11 @@
             const maybes = sAtts.filter(a => a.status === '未定');
             const absents = sAtts.filter(a => a.status === '欠席');
 
+            const loc = schedule.location || 'ケミカル体育館';
+
             let text = `【練習参加状況シェア】\n`;
             text += `📅 日程: ${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek}) ${schedule.time}\n`;
+            text += `📍 場所: ${loc}\n`;
             text += `🏷️ 区分: ${schedule.label}\n`;
             text += `--------------------\n`;
             text += `🟢 出席 (${atts.length}人):\n${atts.length > 0 ? atts.map(a => `・${a.name}${a.comment ? ` (${a.comment})` : ''}`).join('\n') : '・なし'}\n\n`;
@@ -2406,7 +2433,7 @@
             showToast("LINE共有用の出席集計をコピーしました！");
         }
 
-        function generateGoogleCalendarUrl(dateStr, timeStr, label) {
+        function generateGoogleCalendarUrl(dateStr, timeStr, label, locationText) {
             const cleanDate = dateStr.replace(/-/g, '');
             const startTimeStr = timeStr.split('~')[0].trim().replace(':', '');
             const endTimeStr = timeStr.split('~')[1].trim().replace(':', '');
@@ -2415,7 +2442,7 @@
             const endUTC = `${cleanDate}T${endTimeStr}00`;
             
             const title = encodeURIComponent(`ライジングムーン 練習 (${label})`);
-            const location = encodeURIComponent("体育館 (3面)");
+            const location = encodeURIComponent(locationText || "ケミカル体育館");
             const details = encodeURIComponent("利用備品: バドミントンポール、ネット");
 
             return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startUTC}/${endUTC}&details=${details}&location=${location}&ctz=Asia/Tokyo`;
@@ -2452,6 +2479,7 @@
             }
             document.getElementById('edit-sched-start').value = startVal;
             document.getElementById('edit-sched-end').value = endVal;
+            document.getElementById('edit-sched-location').value = schedule.location || 'ケミカル体育館';
             document.getElementById('edit-sched-label').value = schedule.label;
             document.getElementById('edit-sched-note').value = schedule.note || '';
 
@@ -2467,6 +2495,7 @@
             const schedId = document.getElementById('edit-target-sched-id').value;
             const start = document.getElementById('edit-sched-start').value;
             const end = document.getElementById('edit-sched-end').value;
+            const location = document.getElementById('edit-sched-location').value.trim() || 'ケミカル体育館';
             const label = document.getElementById('edit-sched-label').value;
             const note = document.getElementById('edit-sched-note').value.trim();
             const date = document.getElementById('edit-sched-date-display').value;
@@ -2479,6 +2508,7 @@
                     date: date,
                     time: timeStr,
                     label: label,
+                    location: location,
                     note: note
                 });
 
