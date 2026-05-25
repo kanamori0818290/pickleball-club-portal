@@ -144,7 +144,7 @@
                 <div class="mt-6 flex flex-wrap gap-4 text-[11px] sm:text-xs border-t border-slate-100 pt-5 justify-center">
                     <div class="flex items-center gap-1.5">
                         <span class="w-3.5 h-3.5 bg-emerald-500 rounded-lg inline-block shadow-sm"></span>
-                        <span class="text-slate-600 font-semibold">月曜定期枠 (18:30~21:00)</span>
+                        <span class="text-slate-600 font-semibold">月曜定期枠 (19:00~21:00)</span>
                     </div>
                     <div class="flex items-center gap-1.5">
                         <span class="w-3.5 h-3.5 bg-sky-500 rounded-lg inline-block shadow-sm"></span>
@@ -304,7 +304,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 mb-1">開始時間</label>
-                                    <input type="time" id="sched-start-time" value="18:30" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <input type="time" id="sched-start-time" value="19:00" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 mb-1">終了時間</label>
@@ -316,7 +316,7 @@
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 mb-1">練習区分</label>
                                     <select id="sched-label" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                                        <option value="月曜定期枠">月曜定期枠 (18:30~21:00)</option>
+                                        <option value="月曜定期枠">月曜定期枠 (19:00~21:00)</option>
                                         <option value="土曜特別枠">土曜特別枠 (14:00~17:00)</option>
                                         <option value="その他特別枠">その他特別枠</option>
                                     </select>
@@ -474,7 +474,7 @@
             
             <h3 id="modal-date" class="text-xl font-black text-slate-800">2026年7月6日 (月)</h3>
             <p id="modal-time" class="text-sm text-slate-500 flex items-center gap-1.5 mt-1">
-                <i data-lucide="clock" class="w-4 h-4 text-slate-400 shrink-0"></i> 18:30 ~ 21:00
+                <i data-lucide="clock" class="w-4 h-4 text-slate-400 shrink-0"></i> 19:00 ~ 21:00
             </p>
 
             <div class="mt-4 p-3 bg-slate-50 rounded-xl text-xs space-y-1 text-slate-600">
@@ -622,6 +622,64 @@
         </div>
     </div>
 
+    <!-- 8. 練習スケジュール編集ポップアップ (管理者用・新設) -->
+    <div id="edit-schedule-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform scale-95 transition-all">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="font-bold text-slate-800 text-base flex items-center gap-1.5">
+                    <i data-lucide="edit" class="w-5 h-5 text-emerald-500"></i> 練習予定の編集
+                </h3>
+                <button onclick="closeEditScheduleModal()" class="p-1 hover:bg-slate-100 rounded-lg transition text-slate-400">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">日程 (変更不可)</label>
+                    <input type="text" id="edit-sched-date-display" readonly class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-slate-50 text-slate-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1">開始時間</label>
+                        <input type="time" id="edit-sched-start" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1">終了時間</label>
+                        <input type="time" id="edit-sched-end" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">練習区分</label>
+                    <select id="edit-sched-label" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <option value="月曜定期枠">月曜定期枠 (19:00~21:00)</option>
+                        <option value="土曜特別枠">土曜特別枠 (14:00~17:00)</option>
+                        <option value="その他特別枠">その他特別枠</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">補足事項 (任意)</label>
+                    <input type="text" id="edit-sched-note" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <!-- 編集対象のスケジュールIDを格納 -->
+                <input type="hidden" id="edit-target-sched-id">
+
+                <div class="flex gap-2 pt-2">
+                    <button onclick="closeEditScheduleModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition text-sm">
+                        キャンセル
+                    </button>
+                    <button onclick="submitEditSchedule()" class="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition text-sm text-center">
+                        変更を保存する
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- UI共通トースト表示 -->
     <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2">
         <i data-lucide="info" class="w-4 h-4 text-emerald-400"></i>
@@ -661,8 +719,10 @@
         let allTournaments = []; 
         let allEntries = [];     
         
-        let currentYear = 2026;
-        let currentMonth = 6; // 0-indexed (6 = 7月)
+        // 🔐 【アップデート】カレンダーの初期月を「今日の月」に自動取得
+        const todayDate = new Date();
+        let currentYear = todayDate.getFullYear();
+        let currentMonth = todayDate.getMonth(); // 0-indexed（例：5 = 6月）
         let selectedStatus = '出席'; 
         let currentOpenScheduleId = null; 
 
@@ -697,6 +757,11 @@
         window.deleteEntry = deleteEntry;
         window.showTournamentDetailModal = showTournamentDetailModal;
         window.closeTournamentDetailModal = closeTournamentDetailModal;
+
+        // 【新設】スケジュール編集のアクション
+        window.openEditScheduleModal = openEditScheduleModal;
+        window.closeEditScheduleModal = closeEditScheduleModal;
+        window.submitEditSchedule = submitEditSchedule;
 
         // 【バグ修正】Firebaseのダミー接続判定を外し、常に本物の設定で動くようにしました
         function isFirebaseDummy() {
@@ -1816,16 +1881,21 @@
                 const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
 
                 const item = document.createElement('div');
-                item.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-xs shadow-xs";
+                item.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-xs shadow-xs gap-2";
                 item.innerHTML = `
-                    <div>
+                    <div class="truncate flex-1">
                         <span class="inline-block text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 mr-2 font-bold">${s.label}</span>
                         <strong class="text-slate-800">${d.getMonth() + 1}/${d.getDate()}(${dayWeek})</strong> 
                         <span class="text-slate-500">${s.time}</span>
                     </div>
-                    <button onclick="deleteSchedule('${s.id}')" class="text-red-500 hover:text-red-700 font-bold px-2 py-1 hover:bg-red-50 rounded-lg transition shrink-0">
-                        削除
-                    </button>
+                    <div class="flex gap-1.5 shrink-0">
+                        <button onclick="openEditScheduleModal('${s.id}')" class="text-emerald-600 hover:text-emerald-800 font-bold px-2 py-1 hover:bg-emerald-50 rounded-lg transition">
+                            編集
+                        </button>
+                        <button onclick="deleteSchedule('${s.id}')" class="text-red-500 hover:text-red-700 font-bold px-2 py-1 hover:bg-red-50 rounded-lg transition">
+                            削除
+                        </button>
+                    </div>
                 `;
                 container.appendChild(item);
             });
@@ -1864,7 +1934,7 @@
                     const id = `sched_${mon.replace(/-/g, '')}`;
                     await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', id), {
                         date: mon,
-                        time: '18:30 ~ 21:00',
+                        time: '19:00 ~ 21:00',
                         label: '月曜定期枠',
                         note: '毎週月曜日の定期練習枠です'
                     });
@@ -2021,6 +2091,62 @@
                 t.classList.remove('translate-y-0', 'opacity-100');
                 t.classList.add('translate-y-20', 'opacity-0');
             }, 3000);
+        }
+
+        // ----------------- 練習スケジュール編集ポップアップ制御 (新設) -----------------
+        function openEditScheduleModal(schedId) {
+            const schedule = allSchedules.find(s => s.id === schedId);
+            if (!schedule) return;
+
+            document.getElementById('edit-target-sched-id').value = schedId;
+            document.getElementById('edit-sched-date-display').value = schedule.date;
+            
+            // 時間文字列「19:00 ~ 21:00」を分割
+            let startVal = "19:00";
+            let endVal = "21:00";
+            if (schedule.time && schedule.time.includes('~')) {
+                const parts = schedule.time.split('~');
+                startVal = parts[0].trim();
+                endVal = parts[1].trim();
+            }
+            document.getElementById('edit-sched-start').value = startVal;
+            document.getElementById('edit-sched-end').value = endVal;
+            document.getElementById('edit-sched-label').value = schedule.label;
+            document.getElementById('edit-sched-note').value = schedule.note || '';
+
+            document.getElementById('edit-schedule-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeEditScheduleModal() {
+            document.getElementById('edit-schedule-modal').classList.add('hidden');
+        }
+
+        async function submitEditSchedule() {
+            const schedId = document.getElementById('edit-target-sched-id').value;
+            const start = document.getElementById('edit-sched-start').value;
+            const end = document.getElementById('edit-sched-end').value;
+            const label = document.getElementById('edit-sched-label').value;
+            const note = document.getElementById('edit-sched-note').value.trim();
+            const date = document.getElementById('edit-sched-date-display').value;
+
+            const timeStr = `${start} ~ ${end}`;
+
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'schedules', schedId);
+                await setDoc(docRef, {
+                    date: date,
+                    time: timeStr,
+                    label: label,
+                    note: note
+                });
+
+                showToast("スケジュール情報を更新しました！");
+                closeEditScheduleModal();
+            } catch (err) {
+                console.error("スケジュール更新エラー", err);
+                showToast("更新に失敗しました。");
+            }
         }
 
         initAuth();
