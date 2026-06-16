@@ -499,10 +499,6 @@
                             <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col h-full">
                                 <h4 class="font-bold text-slate-500 text-xs uppercase tracking-wider mb-3">登録済みの全スケジュール</h4>
                                 <div id="admin-schedule-list" class="space-y-2 flex-1 custom-scroll max-h-[250px] overflow-y-auto"></div>
-                                
-                                <button onclick="seedInitialData()" class="mt-4 w-full bg-white border border-slate-300 hover:border-slate-400 text-slate-700 text-xs font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm">
-                                    <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500"></i> 6月〜のテストデータ(予定+会計)を展開
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -562,6 +558,23 @@
                             <h4 class="font-bold text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200 pb-2">現在公開中の大会リスト</h4>
                             <div id="admin-tournament-list" class="space-y-2 custom-scroll max-h-[400px] overflow-y-auto pr-1"></div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- ⚙️ システム管理・テスト機能 -->
+                <div class="space-y-5 border-t border-slate-200 pt-8">
+                    <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
+                        <span class="p-1.5 bg-slate-100 text-slate-600 rounded-lg"><i data-lucide="database" class="w-5 h-5"></i></span>
+                        システム管理・テスト機能
+                    </h3>
+                    <div class="bg-amber-50 p-5 md:p-6 rounded-2xl border border-amber-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div>
+                            <h4 class="font-bold text-amber-800 text-sm mb-1">初期データの展開</h4>
+                            <p class="text-xs text-amber-700 leading-relaxed">6/13(土)、6/16(火)以降の練習予定と、テスト用の会計データ（6/15までの集計など）を一括でクラウドに登録します。</p>
+                        </div>
+                        <button onclick="seedInitialData()" class="w-full sm:w-auto shrink-0 bg-white border border-amber-300 hover:bg-amber-400 text-amber-800 text-xs font-bold px-5 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm">
+                            <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i> テストデータ(予定+会計)を展開
+                        </button>
                     </div>
                 </div>
 
@@ -1422,11 +1435,11 @@
             ];
 
             const finances = [
-                { id: 'f1', type: 'income', date: '2026-06-13', amount: 900, cat: 'ビジター参加費', desc: '土曜練習 ビジター3名' },
-                { id: 'f2', type: 'income', date: '2026-06-16', amount: 10000, cat: 'メンバー会費', desc: '6月分 メンバー会費10名分' },
-                { id: 'f3', type: 'income', date: '2026-06-16', amount: 600, cat: 'ビジター参加費', desc: '火曜練習 ビジター2名' },
-                { id: 'f4', type: 'expense', date: '2026-06-18', amount: 10800, cat: '用具・設備代', desc: 'ポータブルネット購入代' },
-                { id: 'f5', type: 'income', date: '2026-06-22', amount: 300, cat: 'ビジター参加費', desc: '月曜練習 1名' },
+                { id: 'f1', type: 'income', date: '2026-06-15', amount: 15400, cat: 'その他', desc: 'これまでの集金合計(〜6/15 14時)' },
+                { id: 'f2', type: 'expense', date: '2026-06-15', amount: 5299, cat: '用具・設備代', desc: 'ボール購入 X26×12' },
+                { id: 'f3', type: 'expense', date: '2026-06-15', amount: 6000, cat: '用具・設備代', desc: 'ボール購入 X40×12' },
+                { id: 'f4', type: 'expense', date: '2026-06-15', amount: 2520, cat: '用具・設備代', desc: 'ボール購入 X26×3' },
+                { id: 'f5', type: 'income', date: '2026-06-15', amount: 1800, cat: 'ビジター参加費', desc: '6/15 夜練習参加費 9名分' },
             ];
 
             try {
