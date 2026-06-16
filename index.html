@@ -12,7 +12,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap');
         body {
             font-family: 'Noto Sans JP', sans-serif;
-            background-color: #f8fafc; /* bg-slate-50 */
+            background-color: #f8fafc;
         }
         .calendar-grid {
             display: grid;
@@ -44,17 +44,23 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
+        /* Toggle Switch Styles */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10b981;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #10b981;
+        }
     </style>
 </head>
 <body class="text-slate-800 min-h-screen pb-20 selection:bg-indigo-100 selection:text-indigo-900">
 
-    <!-- 接続ステータスバー -->
     <div id="sync-banner" class="bg-slate-900 text-amber-400 text-xs py-1.5 px-4 text-center font-bold flex items-center justify-center gap-2 transition-all border-b border-amber-500/20">
         <span class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(251,191,36,0.8)]"></span>
         <span id="sync-text" class="tracking-wide">ライジングムーンPortal リアルタイム同期中 (Firebase)</span>
     </div>
 
-    <!-- ヒーローヘッダー -->
     <header class="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white shadow-xl relative overflow-hidden">
         <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-amber-400/10 blur-3xl pointer-events-none"></div>
         <div class="absolute -left-20 -bottom-20 w-64 h-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none"></div>
@@ -82,7 +88,6 @@
 
     <main class="max-w-4xl mx-auto px-4 py-8 space-y-8">
 
-        <!-- ナビゲーションタブ -->
         <nav class="glass-card p-2 rounded-2xl border border-slate-200 shadow-sm sticky top-4 z-40">
             <div class="flex overflow-x-auto hide-scroll-bar gap-1">
                 <button id="tab-calendar" onclick="switchView('calendar')" class="flex-1 min-w-[120px] px-4 py-3 text-center font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap bg-amber-50 text-amber-700 shadow-sm">
@@ -109,7 +114,6 @@
             </div>
         </div>
 
-        <!-- お知らせエリア -->
         <div id="news-section" class="hidden bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100/50 rounded-2xl p-5 shadow-sm relative overflow-hidden">
             <div class="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
             <div class="flex gap-4">
@@ -403,6 +407,34 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- ✅ 月謝管理チェックリスト (NEW) -->
+                <div class="space-y-5 border-t border-slate-200 pt-8">
+                    <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
+                        <span class="p-1.5 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></span>
+                        月謝・会費の徴収チェック
+                    </h3>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <p class="text-sm text-slate-500 font-medium">出欠システムに登録された名前を元にリスト化しています。</p>
+                            <div class="flex items-center gap-2">
+                                <select id="fee-month-selector" onchange="renderFeeChecklist()" class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-slate-50 focus:outline-none font-bold text-slate-700">
+                                    <option value="2026-06">2026年 6月</option>
+                                    <option value="2026-07">2026年 7月</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
+                            <div class="grid grid-cols-2 bg-slate-100 border-b border-slate-200 px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                <div>メンバー名</div>
+                                <div class="text-right">支払い状況</div>
+                            </div>
+                            <div id="admin-fee-checklist" class="divide-y divide-slate-100 max-h-[300px] overflow-y-auto custom-scroll">
+                                <!-- JS生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- 📅 スケジュール管理 -->
                 <div class="space-y-5 border-t border-slate-200 pt-8">
@@ -565,9 +597,14 @@
                     <h3 id="modal-date" class="text-xl font-black text-slate-800 mt-2">日付</h3>
                     <p id="modal-time" class="text-sm text-slate-500 font-medium flex items-center gap-1.5 mt-0.5"></p>
                 </div>
-                <button onclick="closeModal()" class="p-2 bg-white hover:bg-slate-100 rounded-full transition-colors text-slate-400 shadow-sm border border-slate-200">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+                <div class="flex gap-2">
+                    <button id="btn-line-share" onclick="shareToLine()" class="p-2 bg-[#06C755] hover:bg-[#05b34c] rounded-full transition-colors text-white shadow-sm border border-transparent flex items-center justify-center" title="LINEで出欠状況を共有">
+                        <i data-lucide="message-circle" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="closeModal()" class="p-2 bg-white hover:bg-slate-100 rounded-full transition-colors text-slate-400 shadow-sm border border-slate-200">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
             </div>
             <div class="p-6 max-h-[70vh] overflow-y-auto custom-scroll space-y-6">
                 <div class="p-3.5 bg-sky-50/50 border border-sky-100 rounded-xl text-xs text-slate-600 flex items-center gap-2">
@@ -662,19 +699,6 @@
         <span id="toast-message">メッセージ</span>
     </div>
 
-    <style>
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
-        }
-        @keyframes shimmer {
-            100% { transform: translateX(100%); }
-        }
-    </style>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -700,6 +724,7 @@
         let allNews = [];
         let allFinance = []; 
         let allTournaments = []; 
+        let allFeeChecks = {}; // Added to store fee checklist status
         
         let financeGoal = { title: "ポータブルネット購入", amount: 10000 }; 
 
@@ -737,6 +762,10 @@
         window.openGoalEditModal = openGoalEditModal;
         window.closeGoalEditModal = closeGoalEditModal;
         window.saveGoalSettings = saveGoalSettings;
+        
+        window.shareToLine = shareToLine; // Added line share function
+        window.toggleFeeStatus = toggleFeeStatus; // Added fee toggle
+        window.renderFeeChecklist = renderFeeChecklist; // Make it global for onchange
 
         function getTodayString() {
             const d = new Date();
@@ -772,6 +801,7 @@
             const newsRef = collection(db, 'artifacts', appId, 'public', 'data', 'news'); 
             const financeRef = collection(db, 'artifacts', appId, 'public', 'data', 'finance'); 
             const tournamentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'tournaments');
+            const feesRef = collection(db, 'artifacts', appId, 'public', 'data', 'fees'); // New collection for fee checks
 
             try {
                 const goalDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'finance_goal'));
@@ -791,6 +821,7 @@
                 allAttendance = [];
                 snapshot.forEach(doc => allAttendance.push({ id: doc.id, ...doc.data() }));
                 refreshAllUI();
+                renderFeeChecklist(); // Update checklist when attendance (names) changes
                 if (currentOpenScheduleId) showDetailModal(currentOpenScheduleId);
             });
 
@@ -816,6 +847,14 @@
                 renderTournamentCards();
                 renderAdminTournamentList();
                 renderCalendar(); 
+            });
+
+            onSnapshot(feesRef, (snapshot) => {
+                allFeeChecks = {};
+                snapshot.forEach(doc => {
+                    allFeeChecks[doc.id] = doc.data();
+                });
+                renderFeeChecklist();
             });
 
             const finDateEl = document.getElementById('fin-date');
@@ -1024,6 +1063,58 @@
         }
 
         // ==========================================
+        // 💰 月謝チェックリスト (NEW)
+        // ==========================================
+        function renderFeeChecklist() {
+            const listEl = document.getElementById('admin-fee-checklist');
+            const monthVal = document.getElementById('fee-month-selector').value; // e.g., "2026-06"
+            if (!listEl || !monthVal) return;
+
+            // Extract unique names from all attendance data
+            const uniqueNames = [...new Set(allAttendance.map(a => a.name))].sort();
+            
+            listEl.innerHTML = '';
+            
+            if (uniqueNames.length === 0) {
+                listEl.innerHTML = '<div class="p-4 text-center text-sm text-slate-400">まだ出欠に登録されたメンバーがいません</div>';
+                return;
+            }
+
+            uniqueNames.forEach(name => {
+                const docId = `fee_${monthVal}_${name}`.replace(/\s+/g, '');
+                const isPaid = allFeeChecks[docId]?.isPaid || false;
+                
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center px-4 py-3 hover:bg-slate-50 transition-colors";
+                
+                div.innerHTML = `
+                    <div class="font-bold text-sm text-slate-700">${name}</div>
+                    <div class="flex items-center">
+                        <label for="${docId}" class="flex items-center cursor-pointer relative">
+                            <input type="checkbox" id="${docId}" class="sr-only toggle-checkbox" ${isPaid ? 'checked' : ''} onchange="toggleFeeStatus('${monthVal}', '${name}', this.checked)">
+                            <div class="toggle-label block w-10 h-6 bg-slate-200 rounded-full transition-colors border-2 border-slate-200"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${isPaid ? 'transform translate-x-4' : ''}"></div>
+                        </label>
+                        <span class="ml-2 w-8 text-xs font-bold text-right ${isPaid ? 'text-emerald-600' : 'text-slate-400'}">${isPaid ? '済' : '未'}</span>
+                    </div>
+                `;
+                listEl.appendChild(div);
+            });
+        }
+
+        async function toggleFeeStatus(monthVal, name, isPaid) {
+            const docId = `fee_${monthVal}_${name}`.replace(/\s+/g, '');
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fees', docId), {
+                    month: monthVal, name: name, isPaid: isPaid, timestamp: new Date().toISOString()
+                });
+                // Note: The UI will auto-update via onSnapshot
+            } catch (err) {
+                showToast("保存に失敗しました");
+            }
+        }
+
+        // ==========================================
         // 📅 UI & カレンダーロジック
         // ==========================================
         function renderCalendar() {
@@ -1048,7 +1139,6 @@
                 const dayCell = document.createElement('button');
                 dayCell.className = `h-20 sm:h-28 rounded-2xl flex flex-col justify-between p-1.5 transition-all duration-200 text-xs relative border border-slate-200 bg-white hover:border-amber-300 hover:shadow-md group`;
 
-                // 左上の日付数字
                 const dateNum = document.createElement('div');
                 dateNum.className = 'text-left font-black text-slate-400 pl-1 pt-0.5 transition-colors';
                 dateNum.innerText = day;
@@ -1320,6 +1410,33 @@
 
         function closeModal() {
             document.getElementById('detail-modal').classList.add('hidden');
+        }
+
+        // ==========================================
+        // 💬 LINE連携 (NEW)
+        // ==========================================
+        function shareToLine() {
+            if (!currentOpenScheduleId) return;
+            const schedule = allSchedules.find(s => s.id === currentOpenScheduleId);
+            if (!schedule) return;
+
+            const d = new Date(schedule.date);
+            const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
+            const dateStr = `${d.getMonth() + 1}/${d.getDate()}(${dayWeek})`;
+
+            const sAtts = allAttendance.filter(a => a.scheduleId === currentOpenScheduleId);
+            const attsCount = sAtts.filter(a => a.status === '出席').length;
+            const maybesCount = sAtts.filter(a => a.status === '未定').length;
+
+            const portalUrl = window.location.href; // Get current URL
+
+            const message = `お疲れ様です！\n${dateStr} ${schedule.time || ''} の練習ですが、\n現在【出席: ${attsCount}名 / 未定: ${maybesCount}名】です🏓\n\nまだ出欠を入力していない方は、こちらのサイトから登録をお願いします👇\n${portalUrl}`;
+            
+            // Encode the message for the URL
+            const encodedMessage = encodeURIComponent(message);
+            
+            // Open LINE app via custom URL scheme
+            window.open(`line://msg/text/${encodedMessage}`, '_blank');
         }
 
         // ==========================================
