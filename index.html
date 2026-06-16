@@ -408,7 +408,7 @@
                     </div>
                 </div>
                 
-                <!-- ✅ 月謝管理チェックリスト (NEW) -->
+                <!-- ✅ 月謝管理チェックリスト -->
                 <div class="space-y-5 border-t border-slate-200 pt-8">
                     <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
                         <span class="p-1.5 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></span>
@@ -724,7 +724,7 @@
         let allNews = [];
         let allFinance = []; 
         let allTournaments = []; 
-        let allFeeChecks = {}; // Added to store fee checklist status
+        let allFeeChecks = {}; 
         
         let financeGoal = { title: "ポータブルネット購入", amount: 10000 }; 
 
@@ -763,9 +763,9 @@
         window.closeGoalEditModal = closeGoalEditModal;
         window.saveGoalSettings = saveGoalSettings;
         
-        window.shareToLine = shareToLine; // Added line share function
-        window.toggleFeeStatus = toggleFeeStatus; // Added fee toggle
-        window.renderFeeChecklist = renderFeeChecklist; // Make it global for onchange
+        window.shareToLine = shareToLine; 
+        window.toggleFeeStatus = toggleFeeStatus; 
+        window.renderFeeChecklist = renderFeeChecklist; 
 
         function getTodayString() {
             const d = new Date();
@@ -801,7 +801,7 @@
             const newsRef = collection(db, 'artifacts', appId, 'public', 'data', 'news'); 
             const financeRef = collection(db, 'artifacts', appId, 'public', 'data', 'finance'); 
             const tournamentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'tournaments');
-            const feesRef = collection(db, 'artifacts', appId, 'public', 'data', 'fees'); // New collection for fee checks
+            const feesRef = collection(db, 'artifacts', appId, 'public', 'data', 'fees'); 
 
             try {
                 const goalDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'finance_goal'));
@@ -821,7 +821,7 @@
                 allAttendance = [];
                 snapshot.forEach(doc => allAttendance.push({ id: doc.id, ...doc.data() }));
                 refreshAllUI();
-                renderFeeChecklist(); // Update checklist when attendance (names) changes
+                renderFeeChecklist(); 
                 if (currentOpenScheduleId) showDetailModal(currentOpenScheduleId);
             });
 
@@ -1067,10 +1067,9 @@
         // ==========================================
         function renderFeeChecklist() {
             const listEl = document.getElementById('admin-fee-checklist');
-            const monthVal = document.getElementById('fee-month-selector').value; // e.g., "2026-06"
+            const monthVal = document.getElementById('fee-month-selector').value; 
             if (!listEl || !monthVal) return;
 
-            // Extract unique names from all attendance data
             const uniqueNames = [...new Set(allAttendance.map(a => a.name))].sort();
             
             listEl.innerHTML = '';
@@ -1108,7 +1107,6 @@
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fees', docId), {
                     month: monthVal, name: name, isPaid: isPaid, timestamp: new Date().toISOString()
                 });
-                // Note: The UI will auto-update via onSnapshot
             } catch (err) {
                 showToast("保存に失敗しました");
             }
@@ -1413,7 +1411,7 @@
         }
 
         // ==========================================
-        // 💬 LINE連携 (NEW)
+        // 💬 LINE連携 
         // ==========================================
         function shareToLine() {
             if (!currentOpenScheduleId) return;
@@ -1428,14 +1426,12 @@
             const attsCount = sAtts.filter(a => a.status === '出席').length;
             const maybesCount = sAtts.filter(a => a.status === '未定').length;
 
-            const portalUrl = window.location.href; // Get current URL
+            const portalUrl = window.location.href; 
 
-            const message = `お疲れ様です！\n${dateStr} ${schedule.time || ''} の練習ですが、\n現在【出席: ${attsCount}名 / 未定: ${maybesCount}名】です🏓\n\nまだ出欠を入力していない方は、こちらのサイトから登録をお願いします👇\n${portalUrl}`;
+            // 絵文字を修正 (🏓 -> ✨)
+            const message = `お疲れ様です！\n${dateStr} ${schedule.time || ''} の練習ですが、\n現在【出席: ${attsCount}名 / 未定: ${maybesCount}名】です✨\n\nまだ出欠を入力していない方は、こちらのサイトから登録をお願いします👇\n${portalUrl}`;
             
-            // Encode the message for the URL
             const encodedMessage = encodeURIComponent(message);
-            
-            // Open LINE app via custom URL scheme
             window.open(`line://msg/text/${encodedMessage}`, '_blank');
         }
 
