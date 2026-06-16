@@ -518,12 +518,13 @@
                         </button>
                     </div>
                 </div>
+
             </div>
         </section>
 
     </main>
 
-    <!-- 🎯 目標設定の変更モーダル (NEW) -->
+    <!-- 🎯 目標設定の変更モーダル -->
     <div id="goal-edit-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
         <div class="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden transform scale-100 transition-all border border-white/20">
             <div class="bg-slate-50 px-6 py-4 flex justify-between items-center border-b border-slate-100">
@@ -555,7 +556,7 @@
         </div>
     </div>
 
-    <!-- モーダル・トースト等 -->
+    <!-- 🗓️ スケジュール詳細・出欠モーダル -->
     <div id="detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
         <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden transform scale-100 transition-all border border-white/20">
             <div class="bg-slate-50 px-6 py-4 flex justify-between items-start border-b border-slate-100">
@@ -609,6 +610,7 @@
         </div>
     </div>
 
+    <!-- 🏆 大会詳細モーダル -->
     <div id="tournament-detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
         <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden transform scale-100 transition-all border border-white/20">
             <div class="bg-amber-50 px-6 py-4 flex justify-between items-start border-b border-amber-100">
@@ -645,11 +647,7 @@
                         <div><strong class="text-slate-700">種目:</strong> <span id="td-modal-categories"></span></div>
                     </div>
                 </div>
-                <div class="text-xs text-slate-500 space-y-1 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <strong class="text-slate-700">📝 詳細メモ:</strong>
-                    <div id="td-modal-note" class="leading-relaxed mt-1"></div>
-                </div>
-                <div class="pt-4">
+                <div class="pt-2">
                     <button onclick="closeTournamentDetailModal()" class="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors shadow-sm">
                         閉じる
                     </button>
@@ -658,10 +656,24 @@
         </div>
     </div>
 
+    <!-- UI共通トースト表示 -->
     <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-sm font-bold px-6 py-3.5 rounded-full shadow-xl transform translate-y-24 opacity-0 transition-all duration-300 flex items-center gap-2 border border-slate-700">
         <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
         <span id="toast-message">メッセージ</span>
     </div>
+
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+    </style>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -689,7 +701,7 @@
         let allFinance = []; 
         let allTournaments = []; 
         
-        let financeGoal = { title: "ポータブルネット購入", amount: 10000 }; // デフォルト目標
+        let financeGoal = { title: "ポータブルネット購入", amount: 10000 }; 
 
         let currentYear = 2026;
         let currentMonth = 5; 
@@ -761,13 +773,12 @@
             const financeRef = collection(db, 'artifacts', appId, 'public', 'data', 'finance'); 
             const tournamentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'tournaments');
 
-            // 🎯 目標設定の読み込み
             try {
                 const goalDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'finance_goal'));
                 if (goalDoc.exists()) {
                     financeGoal = goalDoc.data();
                 }
-            } catch (err) { console.log("No goal setting found, using default"); }
+            } catch (err) {}
 
             onSnapshot(schedulesRef, (snapshot) => {
                 allSchedules = [];
@@ -883,7 +894,6 @@
             showToast("削除しました");
         }
 
-        // 🎯 目標編集モーダルの処理
         function openGoalEditModal() {
             document.getElementById('goal-edit-title').value = financeGoal.title;
             document.getElementById('goal-edit-amount').value = financeGoal.amount;
@@ -897,21 +907,15 @@
         async function saveGoalSettings() {
             const title = document.getElementById('goal-edit-title').value.trim();
             const amount = parseInt(document.getElementById('goal-edit-amount').value, 10);
-            
-            if(!title || isNaN(amount) || amount <= 0) {
-                return showToast("タイトルと金額(1円以上)を正しく入力してください");
-            }
+            if(!title || isNaN(amount) || amount <= 0) return showToast("正しく入力してください");
 
             financeGoal = { title, amount };
-            
             try {
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'finance_goal'), financeGoal);
                 showToast("目標設定を更新しました！");
                 renderFinanceDashboard();
                 closeGoalEditModal();
-            } catch(err) {
-                showToast("更新に失敗しました");
-            }
+            } catch(err) { showToast("更新に失敗しました"); }
         }
 
         function renderFinanceDashboard() {
@@ -1020,7 +1024,7 @@
         }
 
         // ==========================================
-        // UI & カレンダーロジック
+        // 📅 UI & カレンダーロジック
         // ==========================================
         function renderCalendar() {
             const monthYearLabel = document.getElementById('calendar-month-year');
@@ -1034,18 +1038,20 @@
 
             for (let i = 0; i < firstDayIndex; i++) {
                 const empty = document.createElement('div');
-                empty.className = 'h-16 sm:h-28 border border-transparent';
+                empty.className = 'h-20 sm:h-28 border border-transparent';
                 daysContainer.appendChild(empty);
             }
 
             for (let day = 1; day <= totalDays; day++) {
                 const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
                 const dayCell = document.createElement('button');
-                dayCell.className = `h-16 sm:h-28 rounded-2xl flex flex-col justify-between items-stretch p-1.5 transition-all duration-200 text-xs font-bold relative border border-slate-100 bg-white hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 overflow-hidden group`;
+                dayCell.className = `h-20 sm:h-28 rounded-2xl flex flex-col justify-between p-1.5 transition-all duration-200 text-xs relative border border-slate-200 bg-white hover:border-amber-300 hover:shadow-md group`;
 
-                const dateNum = document.createElement('span');
+                // 左上の日付数字
+                const dateNum = document.createElement('div');
+                dateNum.className = 'text-left font-black text-slate-400 pl-1 pt-0.5 transition-colors';
                 dateNum.innerText = day;
-                dateNum.className = 'text-left inline-block w-8 h-8 leading-8 text-center rounded-full text-slate-700 transition-colors';
 
                 const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
                 if (dayOfWeek === 0) dateNum.classList.add('!text-rose-500');
@@ -1056,31 +1062,36 @@
 
                 if (tournament) {
                     dayCell.classList.add('bg-amber-50/80', '!border-amber-300', 'hover:shadow-md');
-                    dateNum.classList.add('!bg-amber-500', '!text-white', 'shadow-sm');
+                    dateNum.classList.add('!text-amber-700');
+                    
                     const badgeDiv = document.createElement('div');
-                    badgeDiv.className = 'mt-auto w-full px-0.5 pb-0.5 transition-transform group-hover:scale-105';
-                    badgeDiv.innerHTML = `<div class="bg-amber-400 text-slate-900 text-[10px] sm:text-xs font-black rounded-lg py-1 text-center shadow-sm">🏆 大会</div>`;
+                    badgeDiv.className = 'w-full mt-auto transition-transform group-hover:scale-105';
+                    badgeDiv.innerHTML = `<div class="bg-amber-400 text-slate-900 text-[10px] sm:text-xs font-black rounded py-1 px-1 text-center shadow-sm">🏆 大会</div>`;
+                    
                     dayCell.appendChild(dateNum);
                     dayCell.appendChild(badgeDiv);
                     dayCell.onclick = () => showTournamentDetailModal(tournament.id);
                 } else if (schedule) {
                     if (schedule.label.includes('定期')) {
                         dayCell.classList.add('bg-emerald-50/50', '!border-emerald-200');
-                        dateNum.classList.add('!bg-emerald-500', '!text-white', 'shadow-sm');
                     } else if (schedule.label.includes('土曜')) {
                         dayCell.classList.add('bg-sky-50/50', '!border-sky-200');
-                        dateNum.classList.add('!bg-sky-500', '!text-white', 'shadow-sm');
                     }
 
                     const sAtts = allAttendance.filter(a => a.scheduleId === schedule.id);
                     const atts = sAtts.filter(a => a.status === '出席').length;
+                    const maybes = sAtts.filter(a => a.status === '未定').length;
                     
                     const summaryDiv = document.createElement('div');
-                    summaryDiv.className = 'mt-auto w-full px-0.5 pb-0.5 transition-transform group-hover:scale-105';
-                    if(atts > 0) {
-                        summaryDiv.innerHTML = `<div class="bg-emerald-500 text-white text-[10px] sm:text-xs font-bold rounded-lg py-1 text-center shadow-sm">🟢 ${atts}人</div>`;
+                    summaryDiv.className = 'w-full flex flex-col gap-0.5 mt-auto transition-transform group-hover:scale-105';
+                    
+                    if(atts > 0 || maybes > 0) {
+                        let html = '';
+                        if(atts > 0) html += `<div class="bg-emerald-100 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold rounded py-0.5 px-1 flex justify-between items-center shadow-sm"><span>出</span><span>${atts}人</span></div>`;
+                        if(maybes > 0) html += `<div class="bg-amber-100 text-amber-700 border border-amber-200 text-[10px] font-extrabold rounded py-0.5 px-1 flex justify-between items-center shadow-sm"><span>未</span><span>${maybes}人</span></div>`;
+                        summaryDiv.innerHTML = html;
                     } else {
-                        summaryDiv.innerHTML = `<div class="bg-slate-100 text-slate-400 text-[9px] sm:text-[10px] font-bold rounded-lg py-1 text-center">未回答</div>`;
+                        summaryDiv.innerHTML = `<div class="bg-white text-slate-400 border border-slate-200 text-[10px] font-bold rounded py-1 px-1 text-center">未回答</div>`;
                     }
                     
                     dayCell.appendChild(dateNum);
@@ -1108,7 +1119,7 @@
 
         function updateNextPracticeWidget() {
             const now = new Date();
-            const future = allSchedules.filter(s => new Date(s.date + ' ' + s.time.split('~')[0].trim()) > now);
+            const future = allSchedules.filter(s => new Date(s.date + ' ' + (s.time ? s.time.split('~')[0].trim() : '00:00')) > now);
             const dateWidget = document.getElementById('next-practice-date');
             
             if (future.length === 0) {
@@ -1118,7 +1129,7 @@
             const next = future[0];
             const nextD = new Date(next.date);
             const dayWeek = ['日','月','火','水','木','金','土'][nextD.getDay()];
-            if(dateWidget) dateWidget.innerText = `${nextD.getMonth() + 1}/${nextD.getDate()}(${dayWeek}) ${next.time.split('~')[0]}`;
+            if(dateWidget) dateWidget.innerText = `${nextD.getMonth() + 1}/${nextD.getDate()}(${dayWeek}) ${next.time ? next.time.split('~')[0] : ''}`;
         }
 
         // ==========================================
@@ -1164,7 +1175,7 @@
                 const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
                 const opt = document.createElement('option');
                 opt.value = s.id;
-                opt.innerText = `${d.getMonth() + 1}/${d.getDate()}(${dayWeek}) ${s.time.split('~')[0]} 【${s.label}】`;
+                opt.innerText = `${d.getMonth() + 1}/${d.getDate()}(${dayWeek}) ${s.time ? s.time.split('~')[0] : ''} 【${s.label}】`;
                 select.appendChild(opt);
             });
         }
@@ -1226,7 +1237,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3 mb-4">
                         <div>
                             <span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded ${s.label.includes('定期') ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'} mb-1">${s.label}</span>
-                            <h4 class="text-base font-black text-slate-800">${d.getMonth() + 1}/${d.getDate()}(${dayWeek}) <span class="text-sm text-slate-500 font-bold ml-1">${s.time}</span></h4>
+                            <h4 class="text-base font-black text-slate-800">${d.getMonth() + 1}/${d.getDate()}(${dayWeek}) <span class="text-sm text-slate-500 font-bold ml-1">${s.time || ''}</span></h4>
                         </div>
                         <div class="flex gap-1 text-[11px] font-bold">
                             <span class="bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-md text-emerald-700">出: ${atts.length}</span>
@@ -1263,7 +1274,7 @@
             document.getElementById('modal-label').className = `text-[10px] font-extrabold px-2.5 py-1 rounded-full tracking-wider ${schedule.label.includes('定期') ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'}`;
             
             document.getElementById('modal-date').innerText = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})`;
-            document.getElementById('modal-time').innerHTML = `<i data-lucide="clock" class="w-4 h-4 text-slate-400"></i> ${schedule.time}`;
+            document.getElementById('modal-time').innerHTML = `<i data-lucide="clock" class="w-4 h-4 text-slate-400"></i> ${schedule.time || ''}`;
             document.getElementById('modal-location').innerText = schedule.location || 'ケミカル体育館';
 
             const sAtts = allAttendance.filter(a => a.scheduleId === id);
