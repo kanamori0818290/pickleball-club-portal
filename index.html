@@ -361,7 +361,7 @@
                 </div>
                 <div class="text-center space-y-2">
                     <h3 class="text-xl font-black text-slate-800 tracking-tight">管理者認証</h3>
-                    <p class="text-xs text-slate-500 font-medium">スケジュールや会計を入力するには<br>パスコード(0516)を入力してください</p>
+                    <p class="text-xs text-slate-500 font-medium">スケジュールや会計を管理するには<br>専用のパスコードを入力してください</p>
                 </div>
                 <div class="w-full space-y-3">
                     <input type="password" id="admin-passcode" placeholder="パスコード" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-center tracking-[0.5em] text-lg font-bold focus:ring-2 focus:ring-slate-900 focus:outline-none bg-slate-50 focus:bg-white transition-colors">
@@ -508,6 +508,63 @@
                     </div>
                 </div>
 
+                <!-- 🏆 大会情報の管理 -->
+                <div class="space-y-5 border-t border-slate-200 pt-8">
+                    <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
+                        <span class="p-1.5 bg-amber-100 text-amber-600 rounded-lg"><i data-lucide="trophy" class="w-5 h-5"></i></span>
+                        大会情報の管理
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <h4 class="font-bold text-slate-700 text-sm flex items-center gap-1.5 border-b border-slate-100 pb-3">
+                                <i data-lucide="award" class="w-4 h-4 text-amber-500"></i> 新しい大会案内を登録する
+                            </h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">大会名</label>
+                                    <input type="text" id="tourn-title" placeholder="例：秋季市民大会" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50 focus:bg-white transition-colors">
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1">開催日</label>
+                                        <input type="date" id="tourn-date" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50 focus:bg-white transition-colors">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1">申込締切日</label>
+                                        <input type="date" id="tourn-deadline" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50 focus:bg-white transition-colors">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1">開催場所</label>
+                                        <input type="text" id="tourn-location" placeholder="例：グリーンアリーナ" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50 focus:bg-white transition-colors">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1">参加費用</label>
+                                        <input type="text" id="tourn-fee" placeholder="例：1ペア4,000円" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50 focus:bg-white transition-colors">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">募集部門・種目</label>
+                                    <input type="text" id="tourn-categories" placeholder="例：一般男子、ミックス" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50 focus:bg-white transition-colors">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">詳細メモ (任意)</label>
+                                    <textarea id="tourn-note" placeholder="集合時間など" rows="2" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50 focus:bg-white transition-colors resize-none"></textarea>
+                                </div>
+                            </div>
+                            <button onclick="addTournament()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 shadow-lg mt-2">
+                                <i data-lucide="plus-circle" class="w-4 h-4 text-amber-400"></i> 大会情報を公開する
+                            </button>
+                        </div>
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
+                            <h4 class="font-bold text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200 pb-2">現在公開中の大会リスト</h4>
+                            <div id="admin-tournament-list" class="space-y-2 custom-scroll max-h-[400px] overflow-y-auto pr-1"></div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>
 
@@ -576,6 +633,56 @@
         </div>
     </div>
 
+    <!-- 🏆 6. 大会詳細ポップアップ -->
+    <div id="tournament-detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden transform scale-100 transition-all border border-white/20">
+            <div class="bg-amber-50 px-6 py-4 flex justify-between items-start border-b border-amber-100">
+                <div>
+                    <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-amber-200 text-amber-800 tracking-wider flex items-center gap-1 w-fit">
+                        <i data-lucide="trophy" class="w-3 h-3"></i> 大会情報
+                    </span>
+                    <h3 id="td-modal-title" class="text-xl font-black text-slate-800 mt-2 leading-tight">タイトル</h3>
+                </div>
+                <button onclick="closeTournamentDetailModal()" class="p-2 bg-white hover:bg-slate-100 rounded-full transition-colors text-slate-400 shadow-sm border border-slate-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="p-4 bg-amber-50/50 border border-amber-100 rounded-xl text-sm text-slate-600 flex flex-col gap-3">
+                    <div class="flex items-start gap-2">
+                        <i data-lucide="calendar" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
+                        <div><strong class="text-slate-700">開催日:</strong> <span id="td-modal-date"></span></div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <i data-lucide="map-pin" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
+                        <div><strong class="text-slate-700">場所:</strong> <span id="td-modal-location"></span></div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <i data-lucide="wallet" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
+                        <div><strong class="text-slate-700">参加費:</strong> <span id="td-modal-fee"></span></div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <i data-lucide="clock" class="w-4 h-4 text-rose-500 shrink-0 mt-0.5"></i>
+                        <div><strong class="text-rose-600">申込締切:</strong> <span id="td-modal-deadline" class="text-rose-600 font-bold"></span></div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <i data-lucide="award" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
+                        <div><strong class="text-slate-700">種目:</strong> <span id="td-modal-categories"></span></div>
+                    </div>
+                </div>
+                <div class="text-xs text-slate-500 space-y-1 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <strong class="text-slate-700">📝 詳細メモ:</strong>
+                    <div id="td-modal-note" class="leading-relaxed mt-1"></div>
+                </div>
+                <div class="pt-4">
+                    <button onclick="closeTournamentDetailModal()" class="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors shadow-sm">
+                        閉じる
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- UI共通トースト表示 -->
     <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-sm font-bold px-6 py-3.5 rounded-full shadow-xl transform translate-y-24 opacity-0 transition-all duration-300 flex items-center gap-2 border border-slate-700">
         <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
@@ -621,6 +728,7 @@
         let allAttendance = [];
         let allNews = [];
         let allFinance = []; 
+        let allTournaments = []; // 大会情報用配列
 
         let currentYear = 2026;
         let currentMonth = 5; // 6月
@@ -647,6 +755,12 @@
         window.setFinanceType = setFinanceType;
         window.addFinanceRecord = addFinanceRecord;
         window.deleteFinanceRecord = deleteFinanceRecord;
+
+        // 大会情報用関数をWindowに登録
+        window.addTournament = addTournament;
+        window.deleteTournament = deleteTournament;
+        window.showTournamentDetailModal = showTournamentDetailModal;
+        window.closeTournamentDetailModal = closeTournamentDetailModal;
 
         function getTodayString() {
             const d = new Date();
@@ -681,6 +795,7 @@
             const attendanceRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance');
             const newsRef = collection(db, 'artifacts', appId, 'public', 'data', 'news'); 
             const financeRef = collection(db, 'artifacts', appId, 'public', 'data', 'finance'); 
+            const tournamentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'tournaments'); // 大会DB
 
             onSnapshot(schedulesRef, (snapshot) => {
                 allSchedules = [];
@@ -709,6 +824,16 @@
                 allFinance.sort((a, b) => new Date(b.date) - new Date(a.date));
                 renderFinanceDashboard();
                 renderAdminFinanceList();
+            });
+
+            // 大会データの同期
+            onSnapshot(tournamentsRef, (snapshot) => {
+                allTournaments = [];
+                snapshot.forEach(doc => allTournaments.push({ id: doc.id, ...doc.data() }));
+                allTournaments.sort((a, b) => new Date(a.date) - new Date(b.date));
+                renderTournamentCards();
+                renderAdminTournamentList();
+                renderCalendar(); // カレンダーの大会バッジも更新
             });
 
             const finDateEl = document.getElementById('fin-date');
@@ -926,8 +1051,18 @@
                 if (dayOfWeek === 6) dateNum.classList.add('!text-sky-500');
 
                 const schedule = allSchedules.find(s => s.date === dateString);
+                const tournament = allTournaments.find(t => t.date === dateString); // 大会を検索
 
-                if (schedule) {
+                if (tournament) {
+                    dayCell.classList.add('bg-amber-50/80', '!border-amber-300', 'hover:shadow-md');
+                    dateNum.classList.add('!bg-amber-500', '!text-white', 'shadow-sm');
+                    const badgeDiv = document.createElement('div');
+                    badgeDiv.className = 'mt-auto w-full px-0.5 pb-0.5 transition-transform group-hover:scale-105';
+                    badgeDiv.innerHTML = `<div class="bg-amber-400 text-slate-900 text-[10px] sm:text-xs font-black rounded-lg py-1 text-center shadow-sm">🏆 大会</div>`;
+                    dayCell.appendChild(dateNum);
+                    dayCell.appendChild(badgeDiv);
+                    dayCell.onclick = () => showTournamentDetailModal(tournament.id);
+                } else if (schedule) {
                     if (schedule.label.includes('定期')) {
                         dayCell.classList.add('bg-emerald-50/50', '!border-emerald-200');
                         dateNum.classList.add('!bg-emerald-500', '!text-white', 'shadow-sm');
@@ -1309,6 +1444,161 @@
             } catch (err) {
                 showToast("展開に失敗しました。");
             }
+        }
+
+        // ==========================================
+        // 大会関連のロジック
+        // ==========================================
+        function renderTournamentCards() {
+            const container = document.getElementById('tournament-cards-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (allTournaments.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-bold bg-white rounded-3xl border border-slate-200 border-dashed">現在予定されている大会情報はありません。</div>`;
+                return;
+            }
+
+            allTournaments.forEach(t => {
+                const d = new Date(t.date);
+                const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
+                const deadlineD = new Date(t.deadline);
+                const deadlineWeek = ['日','月','火','水','木','金','土'][deadlineD.getDay()];
+                const now = new Date();
+                const isOverDeadline = new Date(t.deadline + ' 23:59:59') < now;
+
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4 flex flex-col justify-between hover:border-amber-300 hover:shadow-md transition-all duration-300 relative overflow-hidden group";
+                
+                const deadlineBadge = isOverDeadline 
+                    ? `<span class="bg-red-50 text-red-600 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-red-100">締切終了</span>`
+                    : `<span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-amber-200">エントリー受付中</span>`;
+
+                card.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start gap-2 border-b border-slate-100 pb-3">
+                            <div>
+                                <span class="text-[10px] bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full font-bold border border-indigo-100">RISING MOON 🏆</span>
+                                <h3 class="text-lg font-black text-slate-800 mt-2 leading-tight">${t.title}</h3>
+                            </div>
+                            <div class="shrink-0 text-right">${deadlineBadge}</div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
+                            <div class="text-slate-600 flex items-center gap-2">
+                                <i data-lucide="calendar" class="w-4 h-4 text-slate-400 bg-slate-50 p-0.5 rounded"></i>
+                                <span><strong>開催日:</strong> <br>${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})</span>
+                            </div>
+                            <div class="text-slate-600 flex items-center gap-2">
+                                <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 bg-slate-50 p-0.5 rounded"></i>
+                                <span class="truncate"><strong>場所:</strong> <br>${t.location}</span>
+                            </div>
+                            <div class="text-slate-600 flex items-center gap-2">
+                                <i data-lucide="wallet" class="w-4 h-4 text-slate-400 bg-slate-50 p-0.5 rounded"></i>
+                                <span><strong>参加費:</strong> <br>${t.fee}</span>
+                            </div>
+                            <div class="text-slate-600 flex items-center gap-2">
+                                <i data-lucide="clock" class="w-4 h-4 text-rose-500 bg-rose-50 p-0.5 rounded"></i>
+                                <span><strong class="text-rose-600">締切:</strong> <br><span class="text-rose-600 font-bold">${deadlineD.getMonth() + 1}/${deadlineD.getDate()}(${deadlineWeek})</span></span>
+                            </div>
+                            <div class="col-span-2 text-slate-600 flex items-start gap-2 pt-1 border-t border-slate-50">
+                                <i data-lucide="award" class="w-4 h-4 text-amber-500 bg-amber-50 p-0.5 rounded shrink-0"></i>
+                                <span><strong>種目:</strong> ${t.categories}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        async function addTournament() {
+            const title = document.getElementById('tourn-title').value.trim();
+            const date = document.getElementById('tourn-date').value;
+            const deadline = document.getElementById('tourn-deadline').value;
+            const location = document.getElementById('tourn-location').value.trim();
+            const fee = document.getElementById('tourn-fee').value.trim();
+            const categories = document.getElementById('tourn-categories').value.trim();
+            const note = document.getElementById('tourn-note').value.trim();
+
+            if (!title || !date || !deadline || !location || !fee || !categories) {
+                return showToast("必須項目（大会名・日付・場所・費用・種目・締切）をすべて入力してください");
+            }
+
+            const tournId = `tourn_${date.replace(/-/g, '')}_${Date.now().toString().slice(-4)}`;
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'tournaments', tournId), {
+                    title, date, deadline, location, fee, categories, note, timestamp: new Date().toISOString()
+                });
+                showToast("大会案内を公開しました！");
+                document.getElementById('tourn-title').value = '';
+                document.getElementById('tourn-date').value = '';
+                document.getElementById('tourn-deadline').value = '';
+                document.getElementById('tourn-location').value = '';
+                document.getElementById('tourn-fee').value = '';
+                document.getElementById('tourn-categories').value = '';
+                document.getElementById('tourn-note').value = '';
+            } catch (err) {
+                showToast("公開に失敗しました。");
+            }
+        }
+
+        async function deleteTournament(tournId) {
+            if (!confirm("大会情報を削除しますか？")) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'tournaments', tournId));
+                showToast("削除しました。");
+            } catch (err) {
+                showToast("削除に失敗しました。");
+            }
+        }
+
+        function renderAdminTournamentList() {
+            const container = document.getElementById('admin-tournament-list');
+            if (!container) return;
+            container.innerHTML = '';
+            if (allTournaments.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 py-2">公開中の大会はありません。</p>`;
+                return;
+            }
+            allTournaments.forEach(t => {
+                const d = new Date(t.date);
+                const item = document.createElement('div');
+                item.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-xs shadow-sm hover:border-slate-300 transition-colors group";
+                item.innerHTML = `
+                    <div class="truncate mr-2 flex-1">
+                        <span class="font-bold text-slate-400 mr-2">${d.getMonth() + 1}/${d.getDate()}</span>
+                        <span class="font-bold text-slate-700">${t.title}</span>
+                    </div>
+                    <button onclick="deleteTournament('${t.id}')" class="text-red-500 hover:text-red-700 font-bold opacity-0 group-hover:opacity-100 transition-opacity px-2">削除</button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function showTournamentDetailModal(tournId) {
+            const t = allTournaments.find(x => x.id === tournId);
+            if (!t) return;
+            
+            document.getElementById('td-modal-title').innerText = t.title;
+            const d = new Date(t.date);
+            const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
+            document.getElementById('td-modal-date').innerText = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})`;
+            document.getElementById('td-modal-location').innerText = t.location;
+            document.getElementById('td-modal-fee').innerText = t.fee;
+            
+            const dl = new Date(t.deadline);
+            const dlWeek = ['日','月','火','水','木','金','土'][dl.getDay()];
+            document.getElementById('td-modal-deadline').innerText = `${dl.getFullYear()}年${dl.getMonth() + 1}月${dl.getDate()}日 (${dlWeek})`;
+            document.getElementById('td-modal-categories').innerText = t.categories;
+            document.getElementById('td-modal-note').innerHTML = t.note ? t.note.replace(/\n/g, '<br>') : '特になし';
+
+            document.getElementById('tournament-detail-modal').classList.remove('hidden');
+        }
+
+        function closeTournamentDetailModal() {
+            document.getElementById('tournament-detail-modal').classList.add('hidden');
         }
 
         initAuth();
