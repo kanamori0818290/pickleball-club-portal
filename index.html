@@ -18,15 +18,13 @@
             display: grid;
             grid-template-columns: repeat(7, minmax(0, 1fr));
         }
-        /* Hide scrollbar for tabs */
         .hide-scroll-bar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
         .hide-scroll-bar::-webkit-scrollbar {
             display: none;
         }
-        /* Custom scrollbar for lists */
         .custom-scroll::-webkit-scrollbar {
             width: 6px;
         }
@@ -41,8 +39,6 @@
         .custom-scroll::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
-        
-        /* Glassmorphism effects */
         .glass-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -60,7 +56,6 @@
 
     <!-- ヒーローヘッダー -->
     <header class="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white shadow-xl relative overflow-hidden">
-        <!-- 背景装飾 -->
         <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-amber-400/10 blur-3xl pointer-events-none"></div>
         <div class="absolute -left-20 -bottom-20 w-64 h-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none"></div>
         
@@ -75,7 +70,6 @@
                 <p class="text-slate-300 text-sm mt-2 font-medium tracking-wide">練習スケジュール・出欠 ＆ 会計ダッシュボード</p>
             </div>
             
-            <!-- クイック統計カード -->
             <div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 text-center border border-white/10 shadow-lg min-w-[240px] transform hover:scale-[1.02] transition-transform duration-300">
                 <p class="text-xs text-amber-300 font-bold uppercase tracking-wider mb-1 opacity-90">次回練習日</p>
                 <div id="next-practice-date" class="text-lg font-black mt-1 text-white drop-shadow-md">取得中...</div>
@@ -88,7 +82,7 @@
 
     <main class="max-w-4xl mx-auto px-4 py-8 space-y-8">
 
-        <!-- 🌟 ナビゲーションタブ -->
+        <!-- ナビゲーションタブ -->
         <nav class="glass-card p-2 rounded-2xl border border-slate-200 shadow-sm sticky top-4 z-40">
             <div class="flex overflow-x-auto hide-scroll-bar gap-1">
                 <button id="tab-calendar" onclick="switchView('calendar')" class="flex-1 min-w-[120px] px-4 py-3 text-center font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap bg-amber-50 text-amber-700 shadow-sm">
@@ -109,14 +103,13 @@
             </div>
         </nav>
 
-        <!-- アカウントバッジ (ナビゲーション下に配置) -->
         <div class="flex justify-end px-2">
             <div id="user-info-badge" class="text-[10px] font-bold text-slate-400 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm flex items-center gap-1.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> ゲスト接続
             </div>
         </div>
 
-        <!-- 📢 お知らせ・ニュース速報エリア -->
+        <!-- お知らせエリア -->
         <div id="news-section" class="hidden bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100/50 rounded-2xl p-5 shadow-sm relative overflow-hidden">
             <div class="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
             <div class="flex gap-4">
@@ -125,16 +118,13 @@
                 </div>
                 <div class="w-full">
                     <h3 class="text-sm font-extrabold text-indigo-900 mb-3 tracking-wide">チームからのお知らせ</h3>
-                    <div id="news-list-container" class="space-y-3 custom-scroll max-h-32 overflow-y-auto pr-2">
-                        <!-- JS生成 -->
-                    </div>
+                    <div id="news-list-container" class="space-y-3 custom-scroll max-h-32 overflow-y-auto pr-2"></div>
                 </div>
             </div>
         </div>
 
         <!-- 📅 1. カレンダービュー -->
         <section id="view-calendar" class="space-y-8 animate-fade-in">
-            <!-- 直近練習のサマリーカード -->
             <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
                     <div class="flex items-center gap-2.5">
@@ -153,7 +143,6 @@
                 </div>
             </div>
 
-            <!-- カレンダー本体 -->
             <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
                 <div class="flex justify-between items-center mb-8">
                     <button onclick="prevMonth()" class="p-2.5 hover:bg-slate-100 rounded-xl transition text-slate-600 border border-slate-200 shadow-sm hover:shadow group">
@@ -165,17 +154,12 @@
                     </button>
                 </div>
 
-                <!-- 曜日表記 -->
                 <div class="calendar-grid text-center text-xs font-bold text-slate-400 border-b-2 border-slate-100 pb-3 mb-4 tracking-widest uppercase">
                     <div class="text-rose-500">Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div class="text-sky-500">Sat</div>
                 </div>
 
-                <!-- 日付枠 -->
-                <div id="calendar-days" class="calendar-grid gap-2 sm:gap-3">
-                    <!-- JS生成 -->
-                </div>
+                <div id="calendar-days" class="calendar-grid gap-2 sm:gap-3"></div>
 
-                <!-- カレンダー凡例 -->
                 <div class="mt-8 flex flex-wrap gap-5 text-xs border-t border-slate-100 pt-6 justify-center bg-slate-50/50 rounded-2xl pb-4">
                     <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
                         <span class="w-3 h-3 bg-emerald-400 rounded-full inline-block shadow-inner"></span>
@@ -196,33 +180,24 @@
         <!-- ✅ 2. 出欠登録・確認ビュー -->
         <section id="view-attendance" class="hidden space-y-8 animate-fade-in">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                
-                <!-- 出欠登録フォーム (左カラム) -->
                 <div class="lg:col-span-5">
                     <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200 sticky top-24">
                         <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
-                            <div class="p-2 bg-amber-50 text-amber-500 rounded-xl">
-                                <i data-lucide="edit-3" class="w-6 h-6"></i>
-                            </div>
+                            <div class="p-2 bg-amber-50 text-amber-500 rounded-xl"><i data-lucide="edit-3" class="w-6 h-6"></i></div>
                             <h3 class="font-extrabold text-lg text-slate-800 tracking-tight">出欠を回答する</h3>
                         </div>
-                        
                         <div class="space-y-5">
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">1. お名前</label>
                                 <input type="text" id="att-name" placeholder="部員名を入力" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none transition-shadow bg-slate-50 focus:bg-white font-medium">
                             </div>
-                            
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">2. 練習日程を選択</label>
                                 <div class="relative">
-                                    <select id="att-schedule-id" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none appearance-none font-medium cursor-pointer transition-shadow">
-                                        <!-- JS生成 -->
-                                    </select>
+                                    <select id="att-schedule-id" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none appearance-none font-medium cursor-pointer transition-shadow"></select>
                                     <i data-lucide="chevron-down" class="w-4 h-4 absolute right-4 top-3.5 text-slate-400 pointer-events-none"></i>
                                 </div>
                             </div>
-                            
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">3. 参加状況</label>
                                 <div class="grid grid-cols-3 gap-2 sm:gap-3">
@@ -237,12 +212,10 @@
                                     </button>
                                 </div>
                             </div>
-                            
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">4. 連絡事項 (任意)</label>
                                 <input type="text" id="att-comment" placeholder="遅刻します、等" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none transition-shadow bg-slate-50 focus:bg-white">
                             </div>
-                            
                             <button onclick="submitAttendance()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 shadow-lg mt-4 group">
                                 <i data-lucide="send" class="w-4 h-4 text-amber-400 group-hover:translate-x-1 transition-transform"></i>
                                 <span>この内容で登録する</span>
@@ -251,41 +224,28 @@
                     </div>
                 </div>
 
-                <!-- 出欠確認リスト (右カラム) -->
                 <div class="lg:col-span-7">
                     <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200">
                         <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
-                            <div class="p-2 bg-sky-50 text-sky-500 rounded-xl">
-                                <i data-lucide="clipboard-list" class="w-6 h-6"></i>
-                            </div>
+                            <div class="p-2 bg-sky-50 text-sky-500 rounded-xl"><i data-lucide="clipboard-list" class="w-6 h-6"></i></div>
                             <h3 class="font-extrabold text-lg text-slate-800 tracking-tight">日程別の出欠集計</h3>
                         </div>
-                        
-                        <div id="attendance-summary-list" class="space-y-5 custom-scroll max-h-[700px] overflow-y-auto pr-2">
-                            <!-- JS生成 -->
-                        </div>
+                        <div id="attendance-summary-list" class="space-y-5 custom-scroll max-h-[700px] overflow-y-auto pr-2"></div>
                     </div>
                 </div>
-                
             </div>
         </section>
 
         <!-- 💰 3. 会計・ダッシュボードビュー -->
         <section id="view-finance" class="hidden space-y-8 animate-fade-in">
             
-            <!-- 資産サマリー (ヒーローデザイン) -->
             <div class="bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-800 rounded-3xl p-6 md:p-10 text-white shadow-xl relative overflow-hidden">
-                <!-- 装飾 -->
                 <div class="absolute right-0 top-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-                <div class="absolute -right-6 -bottom-10 opacity-10 rotate-12 pointer-events-none">
-                    <i data-lucide="coins" class="w-56 h-56"></i>
-                </div>
+                <div class="absolute -right-6 -bottom-10 opacity-10 rotate-12 pointer-events-none"><i data-lucide="coins" class="w-56 h-56"></i></div>
                 
                 <div class="relative z-10">
                     <div class="flex items-center gap-2 mb-2 opacity-90">
-                        <div class="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm">
-                            <i data-lucide="piggy-bank" class="w-5 h-5 text-emerald-100"></i>
-                        </div>
+                        <div class="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm"><i data-lucide="piggy-bank" class="w-5 h-5 text-emerald-100"></i></div>
                         <h3 class="text-sm font-bold tracking-widest uppercase">チーム総資産 (貯金額)</h3>
                     </div>
                     
@@ -294,31 +254,34 @@
                         <span id="finance-total-balance" class="text-5xl md:text-7xl font-black tracking-tighter drop-shadow-md">0</span>
                     </div>
                     
-                    <!-- 目標プログレスバー -->
-                    <div class="bg-black/20 rounded-2xl p-5 md:p-6 backdrop-blur-md border border-white/10 shadow-inner">
+                    <div class="bg-black/20 rounded-2xl p-5 md:p-6 backdrop-blur-md border border-white/10 shadow-inner group relative">
                         <div class="flex justify-between items-end mb-3">
                             <span class="text-sm md:text-base font-bold flex items-center gap-2">
-                                <i data-lucide="target" class="w-5 h-5 text-amber-300"></i> 次の目標: ボール100個まとめ買い
+                                <i data-lucide="target" class="w-5 h-5 text-amber-300"></i> 
+                                次の目標: <span id="display-goal-title">ポータブルネット購入</span>
                             </span>
-                            <span class="text-xs md:text-sm font-bold text-emerald-100 bg-white/10 px-2 py-1 rounded-md">目標: 50,000円</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs md:text-sm font-bold text-emerald-100 bg-white/10 px-2 py-1 rounded-md">目標: <span id="display-goal-amount">10,000</span>円</span>
+                                <button onclick="openGoalEditModal()" class="p-1.5 bg-white/10 hover:bg-white/30 rounded-lg transition-colors" title="目標の変更">
+                                    <i data-lucide="pencil" class="w-3 h-3 text-white"></i>
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="w-full h-4 bg-black/40 rounded-full overflow-hidden border border-white/5 relative">
                             <div id="finance-goal-bar" class="bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 h-full transition-all duration-1000 ease-out relative" style="width: 0%">
-                                <!-- きらめきエフェクト -->
                                 <div class="absolute top-0 right-0 bottom-0 left-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
                             </div>
                         </div>
                         
                         <div class="mt-3 flex justify-between items-center text-sm">
                             <span id="finance-goal-pct" class="font-black text-amber-300 tracking-wide">0%</span>
-                            <span id="finance-goal-text" class="font-bold text-white opacity-90">あと 50,000円</span>
+                            <span id="finance-goal-text" class="font-bold text-white opacity-90">あと 10,000円</span>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- 収支履歴タイムライン -->
             <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
                     <h3 class="font-extrabold text-lg text-slate-800 flex items-center gap-2">
@@ -326,7 +289,6 @@
                     </h3>
                     <span class="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-md">最新15件</span>
                 </div>
-                
                 <div id="finance-history-list" class="space-y-0 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
                     <!-- JS生成 -->
                 </div>
@@ -337,9 +299,7 @@
         <section id="view-tournaments" class="hidden space-y-6 animate-fade-in">
             <div class="bg-white p-6 rounded-3xl border border-amber-200 shadow-sm flex items-center gap-4 relative overflow-hidden">
                 <div class="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-amber-50 to-transparent"></div>
-                <div class="p-3 bg-amber-100 text-amber-600 rounded-2xl shrink-0 z-10">
-                    <i data-lucide="trophy" class="w-8 h-8"></i>
-                </div>
+                <div class="p-3 bg-amber-100 text-amber-600 rounded-2xl shrink-0 z-10"><i data-lucide="trophy" class="w-8 h-8"></i></div>
                 <div class="z-10">
                     <h2 class="text-lg font-black text-slate-800">大会情報一覧</h2>
                     <p class="text-sm text-slate-500 mt-1 font-medium">参加に興味がある方は、LINEグループ等で声をかけあってエントリーしましょう！</p>
@@ -351,7 +311,6 @@
         <!-- ⚙️ 5. 管理者モードビュー -->
         <section id="view-admin" class="hidden bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200 space-y-8 animate-fade-in min-h-[50vh]">
             
-            <!-- パスコード認証画面 -->
             <div id="admin-auth-panel" class="py-16 flex flex-col items-center justify-center space-y-6 max-w-sm mx-auto">
                 <div class="relative">
                     <div class="absolute inset-0 bg-slate-100 rounded-full animate-ping opacity-75"></div>
@@ -372,9 +331,7 @@
                 <div id="auth-error" class="hidden text-sm text-rose-500 font-bold bg-rose-50 px-4 py-2 rounded-lg w-full text-center">※パスコードが違います。</div>
             </div>
 
-            <!-- 認証後管理者操作パネル -->
             <div id="admin-control-panel" class="hidden space-y-10">
-                
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                     <div class="flex items-center gap-3">
                         <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse"></div>
@@ -385,17 +342,14 @@
                     </button>
                 </div>
 
-                <!-- 💰 会計管理 (最優先) -->
+                <!-- 💰 会計管理 -->
                 <div class="space-y-5">
                     <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
                         <span class="p-1.5 bg-emerald-100 text-emerald-600 rounded-lg"><i data-lucide="wallet" class="w-5 h-5"></i></span>
                         会計・収支の現場入力
                     </h3>
-                    
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                        <!-- 入力フォーム -->
                         <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5 relative overflow-hidden">
-                            <!-- 背景の薄いアイコン -->
                             <i data-lucide="calculator" class="absolute -right-4 -bottom-4 w-32 h-32 text-slate-50 opacity-50 pointer-events-none"></i>
                             
                             <div class="flex gap-2 bg-slate-100 p-1.5 rounded-xl relative z-10">
@@ -443,13 +397,9 @@
                                 <i data-lucide="save" class="w-4 h-4 text-emerald-400"></i> 帳簿に登録する
                             </button>
                         </div>
-
-                        <!-- 最近の登録データ -->
                         <div class="lg:col-span-5 bg-slate-50 p-5 md:p-6 rounded-2xl border border-slate-200 flex flex-col">
                             <h4 class="font-bold text-slate-500 text-xs uppercase tracking-wider mb-4 border-b border-slate-200 pb-2">最近の登録データ</h4>
-                            <div id="admin-finance-list" class="space-y-3 flex-1 custom-scroll overflow-y-auto pr-1">
-                                <!-- JS生成 -->
-                            </div>
+                            <div id="admin-finance-list" class="space-y-3 flex-1 custom-scroll overflow-y-auto pr-1"></div>
                         </div>
                     </div>
                 </div>
@@ -494,7 +444,6 @@
                                 <i data-lucide="calendar-plus" class="w-4 h-4 text-sky-400"></i> カレンダーに登録
                             </button>
                         </div>
-                        
                         <div class="lg:col-span-5 space-y-4">
                             <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col h-full">
                                 <h4 class="font-bold text-slate-500 text-xs uppercase tracking-wider mb-3">登録済みの全スケジュール</h4>
@@ -510,44 +459,36 @@
                         <span class="p-1.5 bg-amber-100 text-amber-600 rounded-lg"><i data-lucide="trophy" class="w-5 h-5"></i></span>
                         大会情報の管理
                     </h3>
-                    
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="md:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                            <h4 class="font-bold text-slate-700 text-sm flex items-center gap-1.5 border-b border-slate-100 pb-3">
-                                <i data-lucide="award" class="w-4 h-4 text-amber-500"></i> 新しい大会案内を登録する
-                            </h4>
                             <div class="space-y-3">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 mb-1">大会名</label>
-                                    <input type="text" id="tourn-title" placeholder="例：秋季市民大会" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50 focus:bg-white transition-colors">
+                                    <input type="text" id="tourn-title" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white">
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-bold text-slate-500 mb-1">開催日</label>
-                                        <input type="date" id="tourn-date" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50 focus:bg-white transition-colors">
+                                        <input type="date" id="tourn-date" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-slate-500 mb-1">申込締切日</label>
-                                        <input type="date" id="tourn-deadline" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50 focus:bg-white transition-colors">
+                                        <input type="date" id="tourn-deadline" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white">
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-bold text-slate-500 mb-1">開催場所</label>
-                                        <input type="text" id="tourn-location" placeholder="例：グリーンアリーナ" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50 focus:bg-white transition-colors">
+                                        <input type="text" id="tourn-location" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-slate-500 mb-1">参加費用</label>
-                                        <input type="text" id="tourn-fee" placeholder="例：1ペア4,000円" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50 focus:bg-white transition-colors">
+                                        <input type="text" id="tourn-fee" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white">
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 mb-1">募集部門・種目</label>
-                                    <input type="text" id="tourn-categories" placeholder="例：一般男子、ミックス" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50 focus:bg-white transition-colors">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1">詳細メモ (任意)</label>
-                                    <textarea id="tourn-note" placeholder="集合時間など" rows="2" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50 focus:bg-white transition-colors resize-none"></textarea>
+                                    <input type="text" id="tourn-categories" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white">
                                 </div>
                             </div>
                             <button onclick="addTournament()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 shadow-lg mt-2">
@@ -577,17 +518,46 @@
                         </button>
                     </div>
                 </div>
-
             </div>
         </section>
 
     </main>
 
-    <!-- モーダル・トースト等 (ロジックは前バージョンと同じため省略せず記述) -->
-    <!-- 5. 出欠・スケジュール詳細ポップアップ -->
+    <!-- 🎯 目標設定の変更モーダル (NEW) -->
+    <div id="goal-edit-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
+        <div class="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden transform scale-100 transition-all border border-white/20">
+            <div class="bg-slate-50 px-6 py-4 flex justify-between items-center border-b border-slate-100">
+                <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
+                    <i data-lucide="target" class="w-5 h-5 text-amber-500"></i> 目標の変更
+                </h3>
+                <button onclick="closeGoalEditModal()" class="p-2 bg-white hover:bg-slate-100 rounded-full transition-colors text-slate-400 shadow-sm border border-slate-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-2">目標のタイトル</label>
+                    <input type="text" id="goal-edit-title" placeholder="例: ポータブルネット購入" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 focus:bg-white font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-2">目標金額 (円)</label>
+                    <input type="number" id="goal-edit-amount" placeholder="例: 10000" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 focus:bg-white font-medium">
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button onclick="closeGoalEditModal()" class="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors text-sm">
+                        キャンセル
+                    </button>
+                    <button onclick="saveGoalSettings()" class="flex-1 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-colors text-sm shadow-md">
+                        保存する
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- モーダル・トースト等 -->
     <div id="detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
         <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden transform scale-100 transition-all border border-white/20">
-            <!-- モーダルヘッダー -->
             <div class="bg-slate-50 px-6 py-4 flex justify-between items-start border-b border-slate-100">
                 <div>
                     <span id="modal-label" class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 tracking-wider">枠</span>
@@ -598,14 +568,11 @@
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-
             <div class="p-6 max-h-[70vh] overflow-y-auto custom-scroll space-y-6">
                 <div class="p-3.5 bg-sky-50/50 border border-sky-100 rounded-xl text-xs text-slate-600 flex items-center gap-2">
                     <div class="p-1.5 bg-white rounded-lg shadow-sm shrink-0"><i data-lucide="map-pin" class="w-4 h-4 text-sky-500"></i></div>
                     <span id="modal-location" class="font-bold"></span>
                 </div>
-
-                <!-- 出欠ビジュアルメーター -->
                 <div class="space-y-2">
                     <div class="flex justify-between text-[11px] font-bold text-slate-500">
                         <span>現在の参加状況</span>
@@ -617,8 +584,6 @@
                         <div id="modal-bar-no" class="bg-rose-400 h-full transition-all duration-500" style="width: 0%"></div>
                     </div>
                 </div>
-
-                <!-- 簡易出欠登録フォーム -->
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-4">
                     <h4 class="text-xs font-bold text-slate-600 flex items-center gap-1.5">
                         <i data-lucide="edit-3" class="w-4 h-4 text-amber-500"></i> その場で出欠回答
@@ -636,8 +601,6 @@
                         <button type="button" onclick="submitModalAttendance()" class="bg-slate-900 text-white font-bold text-sm px-5 py-3 rounded-xl shadow-md transition-transform hover:scale-105 active:scale-95 shrink-0">登録</button>
                     </div>
                 </div>
-
-                <!-- 回答一覧 -->
                 <div class="space-y-3">
                     <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2">回答一覧</h4>
                     <div id="modal-attendance-list" class="space-y-2 text-sm pb-4"></div>
@@ -646,7 +609,6 @@
         </div>
     </div>
 
-    <!-- 🏆 6. 大会詳細ポップアップ -->
     <div id="tournament-detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
         <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden transform scale-100 transition-all border border-white/20">
             <div class="bg-amber-50 px-6 py-4 flex justify-between items-start border-b border-amber-100">
@@ -696,31 +658,15 @@
         </div>
     </div>
 
-    <!-- UI共通トースト表示 -->
     <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-sm font-bold px-6 py-3.5 rounded-full shadow-xl transform translate-y-24 opacity-0 transition-all duration-300 flex items-center gap-2 border border-slate-700">
         <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
         <span id="toast-message">メッセージ</span>
     </div>
 
-    <style>
-        /* カスタムアニメーション */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
-        }
-        @keyframes shimmer {
-            100% { transform: translateX(100%); }
-        }
-    </style>
-
-    <!-- Firebase SDK & Logic (Same as previous version, fully functional) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const appId = 'pickleball-club-portal';
         const firebaseConfig = {
@@ -741,10 +687,12 @@
         let allAttendance = [];
         let allNews = [];
         let allFinance = []; 
-        let allTournaments = []; // 大会情報用配列
+        let allTournaments = []; 
+        
+        let financeGoal = { title: "ポータブルネット購入", amount: 10000 }; // デフォルト目標
 
         let currentYear = 2026;
-        let currentMonth = 5; // 6月
+        let currentMonth = 5; 
         let selectedStatus = '出席'; 
         let selectedModalStatus = '出席'; 
         let currentOpenScheduleId = null; 
@@ -769,11 +717,14 @@
         window.addFinanceRecord = addFinanceRecord;
         window.deleteFinanceRecord = deleteFinanceRecord;
 
-        // 大会情報用関数をWindowに登録
         window.addTournament = addTournament;
         window.deleteTournament = deleteTournament;
         window.showTournamentDetailModal = showTournamentDetailModal;
         window.closeTournamentDetailModal = closeTournamentDetailModal;
+
+        window.openGoalEditModal = openGoalEditModal;
+        window.closeGoalEditModal = closeGoalEditModal;
+        window.saveGoalSettings = saveGoalSettings;
 
         function getTodayString() {
             const d = new Date();
@@ -802,13 +753,21 @@
             }
         });
 
-        const onUserLoaded = (currentUser) => {
+        const onUserLoaded = async (currentUser) => {
             if (!currentUser) return;
             const schedulesRef = collection(db, 'artifacts', appId, 'public', 'data', 'schedules');
             const attendanceRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance');
             const newsRef = collection(db, 'artifacts', appId, 'public', 'data', 'news'); 
             const financeRef = collection(db, 'artifacts', appId, 'public', 'data', 'finance'); 
-            const tournamentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'tournaments'); // 大会DB
+            const tournamentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'tournaments');
+
+            // 🎯 目標設定の読み込み
+            try {
+                const goalDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'finance_goal'));
+                if (goalDoc.exists()) {
+                    financeGoal = goalDoc.data();
+                }
+            } catch (err) { console.log("No goal setting found, using default"); }
 
             onSnapshot(schedulesRef, (snapshot) => {
                 allSchedules = [];
@@ -839,14 +798,13 @@
                 renderAdminFinanceList();
             });
 
-            // 大会データの同期
             onSnapshot(tournamentsRef, (snapshot) => {
                 allTournaments = [];
                 snapshot.forEach(doc => allTournaments.push({ id: doc.id, ...doc.data() }));
                 allTournaments.sort((a, b) => new Date(a.date) - new Date(b.date));
                 renderTournamentCards();
                 renderAdminTournamentList();
-                renderCalendar(); // カレンダーの大会バッジも更新
+                renderCalendar(); 
             });
 
             const finDateEl = document.getElementById('fin-date');
@@ -925,6 +883,37 @@
             showToast("削除しました");
         }
 
+        // 🎯 目標編集モーダルの処理
+        function openGoalEditModal() {
+            document.getElementById('goal-edit-title').value = financeGoal.title;
+            document.getElementById('goal-edit-amount').value = financeGoal.amount;
+            document.getElementById('goal-edit-modal').classList.remove('hidden');
+        }
+
+        function closeGoalEditModal() {
+            document.getElementById('goal-edit-modal').classList.add('hidden');
+        }
+
+        async function saveGoalSettings() {
+            const title = document.getElementById('goal-edit-title').value.trim();
+            const amount = parseInt(document.getElementById('goal-edit-amount').value, 10);
+            
+            if(!title || isNaN(amount) || amount <= 0) {
+                return showToast("タイトルと金額(1円以上)を正しく入力してください");
+            }
+
+            financeGoal = { title, amount };
+            
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'finance_goal'), financeGoal);
+                showToast("目標設定を更新しました！");
+                renderFinanceDashboard();
+                closeGoalEditModal();
+            } catch(err) {
+                showToast("更新に失敗しました");
+            }
+        }
+
         function renderFinanceDashboard() {
             let total = 0;
             allFinance.forEach(f => {
@@ -933,26 +922,25 @@
             });
 
             const totalEl = document.getElementById('finance-total-balance');
-            if(totalEl) {
-                // アニメーションカウントアップ風（簡易的）
-                totalEl.innerText = total.toLocaleString();
-            }
+            if(totalEl) totalEl.innerText = total.toLocaleString();
 
-            const goal = 50000;
             const bar = document.getElementById('finance-goal-bar');
             const text = document.getElementById('finance-goal-text');
             const pctText = document.getElementById('finance-goal-pct');
+            
+            document.getElementById('display-goal-title').innerText = financeGoal.title;
+            document.getElementById('display-goal-amount').innerText = financeGoal.amount.toLocaleString();
 
             if(bar && text && pctText) {
-                if(total >= goal) {
+                if(total >= financeGoal.amount) {
                     bar.style.width = '100%';
                     text.innerText = "目標達成済み！🎉";
                     pctText.innerText = "100% 達成";
                     bar.className = "bg-gradient-to-r from-emerald-400 to-emerald-500 h-full transition-all duration-1000 ease-out relative shadow-[0_0_10px_rgba(52,211,153,0.5)]";
                 } else {
-                    const pct = Math.max(0, (total / goal) * 100);
+                    const pct = Math.max(0, (total / financeGoal.amount) * 100);
                     bar.style.width = `${pct}%`;
-                    text.innerText = `あと ${(goal - total).toLocaleString()}円`;
+                    text.innerText = `あと ${(financeGoal.amount - total).toLocaleString()}円`;
                     pctText.innerText = `${Math.floor(pct)}% 達成`;
                     bar.className = "bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 h-full transition-all duration-1000 ease-out relative";
                 }
@@ -1064,7 +1052,7 @@
                 if (dayOfWeek === 6) dateNum.classList.add('!text-sky-500');
 
                 const schedule = allSchedules.find(s => s.date === dateString);
-                const tournament = allTournaments.find(t => t.date === dateString); // 大会を検索
+                const tournament = allTournaments.find(t => t.date === dateString);
 
                 if (tournament) {
                     dayCell.classList.add('bg-amber-50/80', '!border-amber-300', 'hover:shadow-md');
@@ -1323,15 +1311,148 @@
             document.getElementById('detail-modal').classList.add('hidden');
         }
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            document.getElementById('toast-message').innerText = msg;
-            t.classList.remove('translate-y-24', 'opacity-0');
-            setTimeout(() => { t.classList.add('translate-y-24', 'opacity-0'); }, 3000);
+        // ==========================================
+        // 大会情報ロジック
+        // ==========================================
+        function renderTournamentCards() {
+            const container = document.getElementById('tournament-cards-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (allTournaments.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-bold bg-white rounded-3xl border border-slate-200 border-dashed">現在予定されている大会情報はありません。</div>`;
+                return;
+            }
+
+            allTournaments.forEach(t => {
+                const d = new Date(t.date);
+                const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
+                const deadlineD = new Date(t.deadline);
+                const deadlineWeek = ['日','月','火','水','木','金','土'][deadlineD.getDay()];
+                const now = new Date();
+                const isOverDeadline = new Date(t.deadline + ' 23:59:59') < now;
+
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4 flex flex-col justify-between hover:border-amber-300 hover:shadow-md transition-all duration-300 relative overflow-hidden group";
+                
+                const deadlineBadge = isOverDeadline 
+                    ? `<span class="bg-red-50 text-red-600 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-red-100">締切終了</span>`
+                    : `<span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-amber-200">エントリー受付中</span>`;
+
+                card.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start gap-2 border-b border-slate-100 pb-3">
+                            <div>
+                                <span class="text-[10px] bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full font-bold border border-indigo-100">RISING MOON 🏆</span>
+                                <h3 class="text-lg font-black text-slate-800 mt-2 leading-tight">${t.title}</h3>
+                            </div>
+                            <div class="shrink-0 text-right">${deadlineBadge}</div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
+                            <div class="text-slate-600 flex items-center gap-2">
+                                <i data-lucide="calendar" class="w-4 h-4 text-slate-400 bg-slate-50 p-0.5 rounded"></i>
+                                <span><strong>開催日:</strong> <br>${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})</span>
+                            </div>
+                            <div class="text-slate-600 flex items-center gap-2">
+                                <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 bg-slate-50 p-0.5 rounded"></i>
+                                <span class="truncate"><strong>場所:</strong> <br>${t.location}</span>
+                            </div>
+                            <div class="text-slate-600 flex items-center gap-2">
+                                <i data-lucide="wallet" class="w-4 h-4 text-slate-400 bg-slate-50 p-0.5 rounded"></i>
+                                <span><strong>参加費:</strong> <br>${t.fee}</span>
+                            </div>
+                            <div class="text-slate-600 flex items-center gap-2">
+                                <i data-lucide="clock" class="w-4 h-4 text-rose-500 bg-rose-50 p-0.5 rounded"></i>
+                                <span><strong class="text-rose-600">締切:</strong> <br><span class="text-rose-600 font-bold">${deadlineD.getMonth() + 1}/${deadlineD.getDate()}(${deadlineWeek})</span></span>
+                            </div>
+                            <div class="col-span-2 text-slate-600 flex items-start gap-2 pt-1 border-t border-slate-50">
+                                <i data-lucide="award" class="w-4 h-4 text-amber-500 bg-amber-50 p-0.5 rounded shrink-0"></i>
+                                <span><strong>種目:</strong> ${t.categories}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        async function addTournament() {
+            const title = document.getElementById('tourn-title').value.trim();
+            const date = document.getElementById('tourn-date').value;
+            const deadline = document.getElementById('tourn-deadline').value;
+            const location = document.getElementById('tourn-location').value.trim();
+            const fee = document.getElementById('tourn-fee').value.trim();
+            const categories = document.getElementById('tourn-categories').value.trim();
+            
+            if (!title || !date || !deadline) return showToast("必須項目を入力してください");
+
+            const tournId = `tourn_${date.replace(/-/g, '')}_${Date.now().toString().slice(-4)}`;
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'tournaments', tournId), {
+                    title, date, deadline, location, fee, categories, timestamp: new Date().toISOString()
+                });
+                showToast("大会案内を公開しました！");
+            } catch (err) {
+                showToast("公開に失敗しました。");
+            }
+        }
+
+        async function deleteTournament(tournId) {
+            if (!confirm("大会情報を削除しますか？")) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'tournaments', tournId));
+                showToast("削除しました。");
+            } catch (err) { showToast("削除に失敗しました。"); }
+        }
+
+        function renderAdminTournamentList() {
+            const container = document.getElementById('admin-tournament-list');
+            if (!container) return;
+            container.innerHTML = '';
+            if (allTournaments.length === 0) return;
+            
+            allTournaments.forEach(t => {
+                const d = new Date(t.date);
+                const item = document.createElement('div');
+                item.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-xs shadow-sm hover:border-slate-300 transition-colors group";
+                item.innerHTML = `
+                    <div class="truncate mr-2 flex-1">
+                        <span class="font-bold text-slate-400 mr-2">${d.getMonth() + 1}/${d.getDate()}</span>
+                        <span class="font-bold text-slate-700">${t.title}</span>
+                    </div>
+                    <button onclick="deleteTournament('${t.id}')" class="text-red-500 hover:text-red-700 font-bold opacity-0 group-hover:opacity-100 transition-opacity px-2">削除</button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function showTournamentDetailModal(tournId) {
+            const t = allTournaments.find(x => x.id === tournId);
+            if (!t) return;
+            
+            document.getElementById('td-modal-title').innerText = t.title;
+            const d = new Date(t.date);
+            const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
+            document.getElementById('td-modal-date').innerText = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})`;
+            document.getElementById('td-modal-location').innerText = t.location;
+            document.getElementById('td-modal-fee').innerText = t.fee;
+            
+            const dl = new Date(t.deadline);
+            const dlWeek = ['日','月','火','水','木','金','土'][dl.getDay()];
+            document.getElementById('td-modal-deadline').innerText = `${dl.getFullYear()}年${dl.getMonth() + 1}月${dl.getDate()}日 (${dlWeek})`;
+            document.getElementById('td-modal-categories').innerText = t.categories;
+
+            document.getElementById('tournament-detail-modal').classList.remove('hidden');
+        }
+
+        function closeTournamentDetailModal() {
+            document.getElementById('tournament-detail-modal').classList.add('hidden');
         }
 
         // ==========================================
-        // 管理者モード・初期データ設定
+        // 管理者システム
         // ==========================================
         function authenticateAdmin() {
             const pass = document.getElementById('admin-passcode').value;
@@ -1420,6 +1541,13 @@
             });
         }
 
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            t.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => { t.classList.add('translate-y-24', 'opacity-0'); }, 3000);
+        }
+
         async function seedInitialData() {
             if (!confirm("6月13日(土)、6月16日(火)以降の練習予定と\nテスト用の「会計データ」を一括で展開しますか？")) return;
             showToast("展開中...");
@@ -1457,161 +1585,6 @@
             } catch (err) {
                 showToast("展開に失敗しました。");
             }
-        }
-
-        // ==========================================
-        // 大会関連のロジック
-        // ==========================================
-        function renderTournamentCards() {
-            const container = document.getElementById('tournament-cards-container');
-            if (!container) return;
-            container.innerHTML = '';
-
-            if (allTournaments.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-bold bg-white rounded-3xl border border-slate-200 border-dashed">現在予定されている大会情報はありません。</div>`;
-                return;
-            }
-
-            allTournaments.forEach(t => {
-                const d = new Date(t.date);
-                const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
-                const deadlineD = new Date(t.deadline);
-                const deadlineWeek = ['日','月','火','水','木','金','土'][deadlineD.getDay()];
-                const now = new Date();
-                const isOverDeadline = new Date(t.deadline + ' 23:59:59') < now;
-
-                const card = document.createElement('div');
-                card.className = "bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4 flex flex-col justify-between hover:border-amber-300 hover:shadow-md transition-all duration-300 relative overflow-hidden group";
-                
-                const deadlineBadge = isOverDeadline 
-                    ? `<span class="bg-red-50 text-red-600 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-red-100">締切終了</span>`
-                    : `<span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-amber-200">エントリー受付中</span>`;
-
-                card.innerHTML = `
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-start gap-2 border-b border-slate-100 pb-3">
-                            <div>
-                                <span class="text-[10px] bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full font-bold border border-indigo-100">RISING MOON 🏆</span>
-                                <h3 class="text-lg font-black text-slate-800 mt-2 leading-tight">${t.title}</h3>
-                            </div>
-                            <div class="shrink-0 text-right">${deadlineBadge}</div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
-                            <div class="text-slate-600 flex items-center gap-2">
-                                <i data-lucide="calendar" class="w-4 h-4 text-slate-400 bg-slate-50 p-0.5 rounded"></i>
-                                <span><strong>開催日:</strong> <br>${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})</span>
-                            </div>
-                            <div class="text-slate-600 flex items-center gap-2">
-                                <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 bg-slate-50 p-0.5 rounded"></i>
-                                <span class="truncate"><strong>場所:</strong> <br>${t.location}</span>
-                            </div>
-                            <div class="text-slate-600 flex items-center gap-2">
-                                <i data-lucide="wallet" class="w-4 h-4 text-slate-400 bg-slate-50 p-0.5 rounded"></i>
-                                <span><strong>参加費:</strong> <br>${t.fee}</span>
-                            </div>
-                            <div class="text-slate-600 flex items-center gap-2">
-                                <i data-lucide="clock" class="w-4 h-4 text-rose-500 bg-rose-50 p-0.5 rounded"></i>
-                                <span><strong class="text-rose-600">締切:</strong> <br><span class="text-rose-600 font-bold">${deadlineD.getMonth() + 1}/${deadlineD.getDate()}(${deadlineWeek})</span></span>
-                            </div>
-                            <div class="col-span-2 text-slate-600 flex items-start gap-2 pt-1 border-t border-slate-50">
-                                <i data-lucide="award" class="w-4 h-4 text-amber-500 bg-amber-50 p-0.5 rounded shrink-0"></i>
-                                <span><strong>種目:</strong> ${t.categories}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-            lucide.createIcons();
-        }
-
-        async function addTournament() {
-            const title = document.getElementById('tourn-title').value.trim();
-            const date = document.getElementById('tourn-date').value;
-            const deadline = document.getElementById('tourn-deadline').value;
-            const location = document.getElementById('tourn-location').value.trim();
-            const fee = document.getElementById('tourn-fee').value.trim();
-            const categories = document.getElementById('tourn-categories').value.trim();
-            const note = document.getElementById('tourn-note').value.trim();
-
-            if (!title || !date || !deadline || !location || !fee || !categories) {
-                return showToast("必須項目（大会名・日付・場所・費用・種目・締切）をすべて入力してください");
-            }
-
-            const tournId = `tourn_${date.replace(/-/g, '')}_${Date.now().toString().slice(-4)}`;
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'tournaments', tournId), {
-                    title, date, deadline, location, fee, categories, note, timestamp: new Date().toISOString()
-                });
-                showToast("大会案内を公開しました！");
-                document.getElementById('tourn-title').value = '';
-                document.getElementById('tourn-date').value = '';
-                document.getElementById('tourn-deadline').value = '';
-                document.getElementById('tourn-location').value = '';
-                document.getElementById('tourn-fee').value = '';
-                document.getElementById('tourn-categories').value = '';
-                document.getElementById('tourn-note').value = '';
-            } catch (err) {
-                showToast("公開に失敗しました。");
-            }
-        }
-
-        async function deleteTournament(tournId) {
-            if (!confirm("大会情報を削除しますか？")) return;
-            try {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'tournaments', tournId));
-                showToast("削除しました。");
-            } catch (err) {
-                showToast("削除に失敗しました。");
-            }
-        }
-
-        function renderAdminTournamentList() {
-            const container = document.getElementById('admin-tournament-list');
-            if (!container) return;
-            container.innerHTML = '';
-            if (allTournaments.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400 py-2">公開中の大会はありません。</p>`;
-                return;
-            }
-            allTournaments.forEach(t => {
-                const d = new Date(t.date);
-                const item = document.createElement('div');
-                item.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-xs shadow-sm hover:border-slate-300 transition-colors group";
-                item.innerHTML = `
-                    <div class="truncate mr-2 flex-1">
-                        <span class="font-bold text-slate-400 mr-2">${d.getMonth() + 1}/${d.getDate()}</span>
-                        <span class="font-bold text-slate-700">${t.title}</span>
-                    </div>
-                    <button onclick="deleteTournament('${t.id}')" class="text-red-500 hover:text-red-700 font-bold opacity-0 group-hover:opacity-100 transition-opacity px-2">削除</button>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        function showTournamentDetailModal(tournId) {
-            const t = allTournaments.find(x => x.id === tournId);
-            if (!t) return;
-            
-            document.getElementById('td-modal-title').innerText = t.title;
-            const d = new Date(t.date);
-            const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
-            document.getElementById('td-modal-date').innerText = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})`;
-            document.getElementById('td-modal-location').innerText = t.location;
-            document.getElementById('td-modal-fee').innerText = t.fee;
-            
-            const dl = new Date(t.deadline);
-            const dlWeek = ['日','月','火','水','木','金','土'][dl.getDay()];
-            document.getElementById('td-modal-deadline').innerText = `${dl.getFullYear()}年${dl.getMonth() + 1}月${dl.getDate()}日 (${dlWeek})`;
-            document.getElementById('td-modal-categories').innerText = t.categories;
-            document.getElementById('td-modal-note').innerHTML = t.note ? t.note.replace(/\n/g, '<br>') : '特になし';
-
-            document.getElementById('tournament-detail-modal').classList.remove('hidden');
-        }
-
-        function closeTournamentDetailModal() {
-            document.getElementById('tournament-detail-modal').classList.add('hidden');
         }
 
         initAuth();
