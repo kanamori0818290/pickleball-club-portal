@@ -116,14 +116,11 @@
             </div>
         </nav>
 
-        <!-- ✨ ログイン/ステータス バッジエリア -->
+        <!-- ✨ ステータス バッジエリア -->
         <div class="flex justify-end items-center gap-3 px-2">
             <div id="user-info-badge" class="text-[10px] font-bold text-slate-400 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm flex items-center gap-1.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> ゲスト接続
             </div>
-            <button id="header-auth-btn" onclick="openAuthModal()" class="text-[10px] font-bold text-slate-600 bg-white border border-slate-200 shadow-sm px-3 py-1.5 rounded-full flex items-center gap-1 hover:bg-slate-50 transition-colors">
-                <i data-lucide="log-in" class="w-3.5 h-3.5"></i> ログイン / 登録
-            </button>
         </div>
 
         <div id="news-section" class="hidden bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100/50 rounded-2xl p-5 shadow-sm relative overflow-hidden">
@@ -170,32 +167,32 @@
                         </div>
                         <div class="space-y-5">
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">1. お名前</label>
-                                <input type="text" id="att-name" placeholder="部員名を入力" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none transition-shadow bg-slate-50 focus:bg-white font-medium">
+                                <label class="block text-sm font-bold text-slate-500 mb-2 uppercase tracking-wide">1. お名前</label>
+                                <input type="text" id="att-name" placeholder="部員名を入力" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-amber-500 focus:outline-none transition-shadow bg-slate-50 focus:bg-white font-medium">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">2. 練習日程を選択</label>
+                                <label class="block text-sm font-bold text-slate-500 mb-2 uppercase tracking-wide">2. 練習日程を選択</label>
                                 <div class="relative">
-                                    <select id="att-schedule-id" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none appearance-none font-medium cursor-pointer transition-shadow"></select>
-                                    <i data-lucide="chevron-down" class="w-4 h-4 absolute right-4 top-3.5 text-slate-400 pointer-events-none"></i>
+                                    <select id="att-schedule-id" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none appearance-none font-medium cursor-pointer transition-shadow"></select>
+                                    <i data-lucide="chevron-down" class="w-4 h-4 absolute right-4 top-4 text-slate-400 pointer-events-none"></i>
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">3. 参加状況</label>
+                                <label class="block text-sm font-bold text-slate-500 mb-2 uppercase tracking-wide">3. 参加状況</label>
                                 <div class="grid grid-cols-3 gap-2 sm:gap-3">
-                                    <button type="button" onclick="setFormStatus('出席')" id="status-btn-出席" class="py-3 rounded-xl border border-slate-200 text-sm font-bold transition-all bg-white text-slate-600 hover:bg-slate-50 flex flex-col items-center gap-1">
-                                        <span class="text-lg">🟢</span><span>出席</span>
+                                    <button type="button" onclick="setFormStatus('出席')" id="status-btn-出席" class="py-3.5 rounded-xl border border-slate-200 text-sm font-bold transition-all bg-white text-slate-600 hover:bg-slate-50 flex flex-col items-center gap-1">
+                                        <span class="text-xl">🟢</span><span>出席</span>
                                     </button>
-                                    <button type="button" onclick="setFormStatus('未定')" id="status-btn-未定" class="py-3 rounded-xl border border-slate-200 text-sm font-bold transition-all bg-white text-slate-600 hover:bg-slate-50 flex flex-col items-center gap-1">
-                                        <span class="text-lg">🟡</span><span>未定</span>
+                                    <button type="button" onclick="setFormStatus('未定')" id="status-btn-未定" class="py-3.5 rounded-xl border border-slate-200 text-sm font-bold transition-all bg-white text-slate-600 hover:bg-slate-50 flex flex-col items-center gap-1">
+                                        <span class="text-xl">🟡</span><span>未定</span>
                                     </button>
-                                    <button type="button" onclick="setFormStatus('欠席')" id="status-btn-欠席" class="py-3 rounded-xl border border-slate-200 text-sm font-bold transition-all bg-white text-slate-600 hover:bg-slate-50 flex flex-col items-center gap-1">
-                                        <span class="text-lg">🔴</span><span>欠席</span>
+                                    <button type="button" onclick="setFormStatus('欠席')" id="status-btn-欠席" class="py-3.5 rounded-xl border border-slate-200 text-sm font-bold transition-all bg-white text-slate-600 hover:bg-slate-50 flex flex-col items-center gap-1">
+                                        <span class="text-xl">🔴</span><span>欠席</span>
                                     </button>
                                 </div>
                             </div>
-                            <button onclick="submitAttendance()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 shadow-lg mt-4 group">
-                                <i data-lucide="send" class="w-4 h-4 text-amber-400 group-hover:translate-x-1 transition-transform"></i>
+                            <button onclick="submitAttendance()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl transition-colors text-base flex items-center justify-center gap-2 shadow-lg mt-4 group">
+                                <i data-lucide="send" class="w-5 h-5 text-amber-400 group-hover:translate-x-1 transition-transform"></i>
                                 <span>この内容で登録する</span>
                             </button>
                         </div>
@@ -253,8 +250,8 @@
                             </span>
                             <div class="flex items-center gap-2">
                                 <span class="text-xs md:text-sm font-bold text-emerald-100 bg-white/10 px-2 py-1 rounded-md">目標: <span id="display-goal-amount">10,000</span>円</span>
-                                <button onclick="openGoalEditModal()" class="p-1.5 bg-white/10 hover:bg-white/30 rounded-lg transition-colors" title="目標の変更">
-                                    <i data-lucide="pencil" class="w-3 h-3 text-white"></i>
+                                <button onclick="openGoalEditModal()" class="p-2 bg-white/10 hover:bg-white/30 rounded-lg transition-colors" title="目標の変更">
+                                    <i data-lucide="pencil" class="w-4 h-4 text-white"></i>
                                 </button>
                             </div>
                         </div>
@@ -296,9 +293,9 @@
         </section>
 
         <!-- ⚙️ 5. 管理者モードビュー -->
-        <section id="view-admin" class="hidden bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200 space-y-8 animate-fade-in min-h-[50vh]">
+        <section id="view-admin" class="hidden bg-white p-4 sm:p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200 space-y-8 animate-fade-in min-h-[50vh]">
             
-            <div id="admin-auth-panel" class="py-16 flex flex-col items-center justify-center space-y-6 max-w-sm mx-auto">
+            <div id="admin-auth-panel" class="py-12 sm:py-16 flex flex-col items-center justify-center space-y-6 max-w-sm mx-auto">
                 <div class="relative">
                     <div class="absolute inset-0 bg-slate-100 rounded-full animate-ping opacity-75"></div>
                     <div class="relative p-5 bg-slate-900 text-white rounded-full shadow-lg">
@@ -307,11 +304,11 @@
                 </div>
                 <div class="text-center space-y-2">
                     <h3 class="text-xl font-black text-slate-800 tracking-tight">管理者認証</h3>
-                    <p class="text-xs text-slate-500 font-medium">スケジュールや会計を管理するには<br>専用のパスコードを入力してください</p>
+                    <p class="text-sm text-slate-500 font-medium">スケジュールや会計を管理するには<br>専用のパスコードを入力してください</p>
                 </div>
-                <div class="w-full space-y-3">
-                    <input type="password" id="admin-passcode" placeholder="パスコード" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-center tracking-[0.5em] text-lg font-bold focus:ring-2 focus:ring-slate-900 focus:outline-none bg-slate-50 focus:bg-white transition-colors">
-                    <button onclick="authenticateAdmin()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition-colors shadow-md">
+                <div class="w-full space-y-4">
+                    <input type="password" id="admin-passcode" placeholder="パスコード" class="w-full px-4 py-4 rounded-xl border border-slate-200 text-center tracking-[0.5em] text-xl font-bold focus:ring-2 focus:ring-slate-900 focus:outline-none bg-slate-50 focus:bg-white transition-colors">
+                    <button onclick="authenticateAdmin()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl text-lg transition-colors shadow-md">
                         ロック解除
                     </button>
                 </div>
@@ -324,8 +321,8 @@
                         <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse"></div>
                         <h3 class="text-sm font-bold text-slate-800">管理者モードで接続中</h3>
                     </div>
-                    <button onclick="lockAdmin()" class="text-xs font-bold text-slate-600 bg-white hover:bg-slate-100 px-4 py-2 border border-slate-200 rounded-xl transition-colors shadow-sm flex items-center gap-1.5">
-                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i> 終了する
+                    <button onclick="lockAdmin()" class="text-sm font-bold text-slate-600 bg-white hover:bg-slate-100 px-4 py-2 border border-slate-200 rounded-xl transition-colors shadow-sm flex items-center gap-1.5">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> 終了する
                     </button>
                 </div>
 
@@ -336,37 +333,37 @@
                         会計・収支の現場入力
                     </h3>
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                        <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5 relative overflow-hidden">
+                        <div class="lg:col-span-7 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5 relative overflow-hidden">
                             <i data-lucide="calculator" class="absolute -right-4 -bottom-4 w-32 h-32 text-slate-50 opacity-50 pointer-events-none"></i>
                             
                             <div class="flex gap-2 bg-slate-100 p-1.5 rounded-xl relative z-10">
-                                <button id="fin-type-income" onclick="setFinanceType('income')" class="flex-1 py-3 bg-emerald-500 text-white font-bold rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-1.5 transform hover:scale-[1.02]">
-                                    <i data-lucide="plus-circle" class="w-4 h-4"></i> 収入 (入金)
+                                <button id="fin-type-income" onclick="setFinanceType('income')" class="flex-1 py-3 bg-emerald-500 text-white font-bold rounded-lg text-base transition-all shadow-sm flex items-center justify-center gap-1.5 transform hover:scale-[1.02]">
+                                    <i data-lucide="plus-circle" class="w-5 h-5"></i> 収入 (入金)
                                 </button>
-                                <button id="fin-type-expense" onclick="setFinanceType('expense')" class="flex-1 py-3 bg-transparent text-slate-500 hover:text-slate-800 font-bold rounded-lg text-sm transition-all flex items-center justify-center gap-1.5">
-                                    <i data-lucide="minus-circle" class="w-4 h-4"></i> 支出 (支払)
+                                <button id="fin-type-expense" onclick="setFinanceType('expense')" class="flex-1 py-3 bg-transparent text-slate-500 hover:text-slate-800 font-bold rounded-lg text-base transition-all flex items-center justify-center gap-1.5">
+                                    <i data-lucide="minus-circle" class="w-5 h-5"></i> 支出 (支払)
                                 </button>
                             </div>
                             <input type="hidden" id="fin-type-value" value="income">
 
-                            <div class="grid grid-cols-2 gap-4 relative z-10">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1.5">日付</label>
-                                    <input type="date" id="fin-date" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
+                                    <label class="block text-sm font-bold text-slate-500 mb-1.5">日付</label>
+                                    <input type="date" id="fin-date" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1.5">金額 (円)</label>
+                                    <label class="block text-sm font-bold text-slate-500 mb-1.5">金額 (円)</label>
                                     <div class="relative">
-                                        <span class="absolute left-4 top-3 text-slate-400 font-bold">¥</span>
-                                        <input type="number" id="fin-amount" placeholder="1000" class="w-full pl-8 pr-4 py-3 rounded-xl border border-slate-200 text-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-black text-slate-800">
+                                        <span class="absolute left-4 top-4 text-slate-400 font-bold">¥</span>
+                                        <input type="number" id="fin-amount" placeholder="1000" class="w-full pl-8 pr-4 py-3.5 rounded-xl border border-slate-200 text-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-black text-slate-800">
                                     </div>
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1.5">カテゴリ</label>
-                                    <select id="fin-category" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
+                                    <label class="block text-sm font-bold text-slate-500 mb-1.5">カテゴリ</label>
+                                    <select id="fin-category" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium appearance-none">
                                         <option value="メンバー会費">メンバー会費</option>
                                         <option value="ビジター参加費">ビジター参加費</option>
                                         <option value="用具・設備代">用具・設備代</option>
@@ -375,42 +372,34 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1.5">摘要・メモ (誰から/何を買った)</label>
-                                    <input type="text" id="fin-desc" placeholder="例: 山田さん 6月分" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
+                                    <label class="block text-sm font-bold text-slate-500 mb-1.5">摘要・メモ (誰から/何を買った)</label>
+                                    <input type="text" id="fin-desc" placeholder="例: 山田さん 6月分" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
                                 </div>
                             </div>
 
                             <!-- 立替入力エリア -->
                             <div id="advance-input-area" class="hidden relative z-10 bg-orange-50 p-4 rounded-xl border border-orange-200 mt-2">
                                 <div class="flex items-center gap-2 mb-3">
-                                    <input type="checkbox" id="fin-is-advance" class="w-4 h-4 text-orange-600 rounded cursor-pointer">
+                                    <input type="checkbox" id="fin-is-advance" class="w-5 h-5 text-orange-600 rounded cursor-pointer">
                                     <label for="fin-is-advance" class="text-sm font-bold text-orange-800 cursor-pointer flex items-center gap-1.5">
-                                        <i data-lucide="alert-circle" class="w-4 h-4"></i> この支払いは「メンバーの立て替え」である
+                                        <i data-lucide="alert-circle" class="w-5 h-5"></i> この支払いは「メンバーの立て替え」である
                                     </label>
                                 </div>
                                 <div>
-                                    <input type="text" id="fin-advance-person" placeholder="立て替えてくれた人の名前 (例: 山田さん)" class="w-full px-4 py-2.5 rounded-lg border border-orange-200 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
+                                    <input type="text" id="fin-advance-person" placeholder="立て替えてくれた人の名前 (例: 山田さん)" class="w-full px-4 py-3 rounded-lg border border-orange-200 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
                                 </div>
                             </div>
 
-                            <!-- 🖼️ レシートアップロードエリア (NEW) -->
-                            <div class="relative z-10 bg-slate-50 p-4 rounded-xl border border-slate-200 mt-2">
-                                <label class="block text-xs font-bold text-slate-500 mb-2 flex items-center gap-1.5">
-                                    <i data-lucide="camera" class="w-4 h-4 text-indigo-500"></i> レシート・領収書のアップロード (任意)
-                                </label>
-                                <input type="file" id="fin-receipt" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-colors bg-white border border-slate-200 rounded-xl cursor-pointer">
-                            </div>
-
-                            <button id="fin-submit-btn" onclick="addFinanceRecord()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 shadow-lg relative z-10 mt-2">
-                                <i data-lucide="save" class="w-4 h-4 text-emerald-400"></i> 帳簿に登録する
+                            <button id="fin-submit-btn" onclick="addFinanceRecord()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl text-base transition-colors flex items-center justify-center gap-2 shadow-lg relative z-10 mt-2">
+                                <i data-lucide="save" class="w-5 h-5 text-emerald-400"></i> 帳簿に登録する
                             </button>
                         </div>
                         
                         <div class="lg:col-span-5 flex flex-col gap-4">
                             <!-- 未精算の立替リスト -->
                             <div id="advance-alert-container" class="hidden bg-orange-50 border border-orange-200 p-4 rounded-2xl shadow-sm space-y-3">
-                                <h4 class="font-bold text-orange-800 text-xs flex items-center gap-1"><i data-lucide="alert-triangle" class="w-4 h-4"></i> 未精算の立て替えがあります</h4>
-                                <div id="advance-list" class="space-y-2 max-h-[150px] overflow-y-auto custom-scroll pr-1"></div>
+                                <h4 class="font-bold text-orange-800 text-sm flex items-center gap-1"><i data-lucide="alert-triangle" class="w-5 h-5"></i> 未精算の立て替えがあります</h4>
+                                <div id="advance-list" class="space-y-2 max-h-[200px] overflow-y-auto custom-scroll pr-1"></div>
                             </div>
 
                             <div class="bg-slate-50 p-5 md:p-6 rounded-2xl border border-slate-200 flex-1 flex flex-col">
@@ -427,22 +416,22 @@
                         <span class="p-1.5 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></span>
                         月謝・会費の徴収チェック
                     </h3>
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <p class="text-sm text-slate-500 font-medium">出欠システムに登録された名前を元にリスト化しています。</p>
-                            <div class="flex items-center gap-2">
-                                <select id="fee-month-selector" onchange="renderFeeChecklist()" class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-slate-50 focus:outline-none font-bold text-slate-700">
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-2">
+                            <p class="text-sm text-slate-500 font-medium">出欠に登録された名前を元にリスト化しています。</p>
+                            <div class="flex items-center gap-2 w-full sm:w-auto">
+                                <select id="fee-month-selector" onchange="renderFeeChecklist()" class="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-slate-200 text-base bg-slate-50 focus:outline-none font-bold text-slate-700">
                                     <option value="2026-06">2026年 6月</option>
                                     <option value="2026-07">2026年 7月</option>
                                 </select>
                             </div>
                         </div>
                         <div class="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
-                            <div class="grid grid-cols-2 bg-slate-100 border-b border-slate-200 px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            <div class="grid grid-cols-2 bg-slate-100 border-b border-slate-200 px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">
                                 <div>メンバー名</div>
                                 <div class="text-right">支払い状況</div>
                             </div>
-                            <div id="admin-fee-checklist" class="divide-y divide-slate-100 max-h-[300px] overflow-y-auto custom-scroll">
+                            <div id="admin-fee-checklist" class="divide-y divide-slate-100 max-h-[400px] overflow-y-auto custom-scroll">
                                 <!-- JS生成 -->
                             </div>
                         </div>
@@ -456,43 +445,43 @@
                         練習スケジュールの管理
                     </h3>
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                        <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
+                        <div class="lg:col-span-7 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1.5">日付</label>
-                                    <input type="date" id="sched-single-date" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                    <label class="block text-sm font-bold text-slate-500 mb-1.5">日付</label>
+                                    <input type="date" id="sched-single-date" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1.5">練習区分</label>
-                                    <select id="sched-label" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                    <label class="block text-sm font-bold text-slate-500 mb-1.5">練習区分</label>
+                                    <select id="sched-label" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 appearance-none">
                                         <option value="月曜定期枠">月曜定期枠 (19:00~21:00)</option>
                                         <option value="火曜定期枠">火曜定期枠 (19:00~21:00)</option>
                                         <option value="土曜特別枠">土曜特別枠 (14:00~17:00)</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1.5">開始時間</label>
-                                    <input type="time" id="sched-start-time" value="19:00" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                    <label class="block text-sm font-bold text-slate-500 mb-1.5">開始時間</label>
+                                    <input type="time" id="sched-start-time" value="19:00" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1.5">終了時間</label>
-                                    <input type="time" id="sched-end-time" value="21:00" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                    <label class="block text-sm font-bold text-slate-500 mb-1.5">終了時間</label>
+                                    <input type="time" id="sched-end-time" value="21:00" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1.5">場所</label>
-                                <input type="text" id="sched-location" value="ケミカル体育館" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                <label class="block text-sm font-bold text-slate-500 mb-1.5">場所</label>
+                                <input type="text" id="sched-location" value="ケミカル体育館" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
                             </div>
-                            <button onclick="addSingleSchedule()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl text-sm transition-colors shadow-md mt-2 flex items-center justify-center gap-2">
-                                <i data-lucide="calendar-plus" class="w-4 h-4 text-sky-400"></i> カレンダーに登録
+                            <button onclick="addSingleSchedule()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl text-base transition-colors shadow-md mt-2 flex items-center justify-center gap-2">
+                                <i data-lucide="calendar-plus" class="w-5 h-5 text-sky-400"></i> カレンダーに登録
                             </button>
                         </div>
                         <div class="lg:col-span-5 space-y-4">
                             <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col h-full">
                                 <h4 class="font-bold text-slate-500 text-xs uppercase tracking-wider mb-3">登録済みの全スケジュール</h4>
-                                <div id="admin-schedule-list" class="space-y-2 flex-1 custom-scroll max-h-[250px] overflow-y-auto"></div>
+                                <div id="admin-schedule-list" class="space-y-2 flex-1 custom-scroll max-h-[300px] overflow-y-auto"></div>
                             </div>
                         </div>
                     </div>
@@ -505,39 +494,39 @@
                         大会情報の管理
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="md:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                            <div class="space-y-3">
+                        <div class="md:col-span-2 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+                            <div class="space-y-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1">大会名</label>
-                                    <input type="text" id="tourn-title" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white">
+                                    <label class="block text-sm font-bold text-slate-500 mb-1.5">大会名</label>
+                                    <input type="text" id="tourn-title" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white">
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-500 mb-1">開催日</label>
-                                        <input type="date" id="tourn-date" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white">
+                                        <label class="block text-sm font-bold text-slate-500 mb-1.5">開催日</label>
+                                        <input type="date" id="tourn-date" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white">
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-500 mb-1">申込締切日</label>
-                                        <input type="date" id="tourn-deadline" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white">
+                                        <label class="block text-sm font-bold text-slate-500 mb-1.5">申込締切日</label>
+                                        <input type="date" id="tourn-deadline" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white">
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-500 mb-1">開催場所</label>
-                                        <input type="text" id="tourn-location" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white">
+                                        <label class="block text-sm font-bold text-slate-500 mb-1.5">開催場所</label>
+                                        <input type="text" id="tourn-location" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white">
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-500 mb-1">参加費用</label>
-                                        <input type="text" id="tourn-fee" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white">
+                                        <label class="block text-sm font-bold text-slate-500 mb-1.5">参加費用</label>
+                                        <input type="text" id="tourn-fee" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white">
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1">募集部門・種目</label>
-                                    <input type="text" id="tourn-categories" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white">
+                                    <label class="block text-sm font-bold text-slate-500 mb-1.5">募集部門・種目</label>
+                                    <input type="text" id="tourn-categories" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white">
                                 </div>
                             </div>
-                            <button onclick="addTournament()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 shadow-lg mt-2">
-                                <i data-lucide="plus-circle" class="w-4 h-4 text-amber-400"></i> 大会情報を公開する
+                            <button onclick="addTournament()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl text-base transition-colors flex items-center justify-center gap-2 shadow-lg mt-2">
+                                <i data-lucide="plus-circle" class="w-5 h-5 text-amber-400"></i> 大会情報を公開する
                             </button>
                         </div>
                         <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
@@ -554,16 +543,16 @@
                         システム設定・テスト機能
                     </h3>
                     
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                         <div>
-                            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2 mb-1">
-                                <i data-lucide="smartphone" class="w-4 h-4 text-slate-500"></i> PayPay送金リンクの設定
+                            <h4 class="font-bold text-slate-800 text-base flex items-center gap-2 mb-1">
+                                <i data-lucide="smartphone" class="w-5 h-5 text-slate-500"></i> PayPay送金リンクの設定
                             </h4>
-                            <p class="text-xs text-slate-500 leading-relaxed mb-3">ここにPayPayの「マイコードURL」を入力しておくと、メンバーが会計ダッシュボードからワンタップで送金できるようになります。</p>
+                            <p class="text-sm text-slate-500 leading-relaxed mb-3">ここにPayPayの「マイコードURL」を入力しておくと、メンバーが会計ダッシュボードからワンタップで送金できるようになります。</p>
                         </div>
-                        <div class="flex gap-2">
-                            <input type="text" id="admin-paypay-link" placeholder="https://paypay.ne.jp/p/..." class="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-colors">
-                            <button onclick="savePaypayLink()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-md transition-colors whitespace-nowrap">
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <input type="text" id="admin-paypay-link" placeholder="https://paypay.ne.jp/p/..." class="flex-1 px-4 py-3.5 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-colors">
+                            <button onclick="savePaypayLink()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-8 py-3.5 rounded-xl text-base shadow-md transition-colors whitespace-nowrap">
                                 登録
                             </button>
                         </div>
@@ -571,11 +560,11 @@
 
                     <div class="bg-amber-50 p-5 md:p-6 rounded-2xl border border-amber-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div>
-                            <h4 class="font-bold text-amber-800 text-sm mb-1">初期データの展開</h4>
-                            <p class="text-xs text-amber-700 leading-relaxed">テスト用のスケジュールと会計データを一括でクラウドに登録します。</p>
+                            <h4 class="font-bold text-amber-800 text-base mb-1">初期データの展開</h4>
+                            <p class="text-sm text-amber-700 leading-relaxed">テスト用のスケジュールと会計データを一括でクラウドに登録します。</p>
                         </div>
-                        <button onclick="seedInitialData()" class="w-full sm:w-auto shrink-0 bg-white border border-amber-300 hover:bg-amber-400 text-amber-800 text-xs font-bold px-5 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm">
-                            <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i> テストデータ(予定+会計)を展開
+                        <button onclick="seedInitialData()" class="w-full sm:w-auto shrink-0 bg-white border border-amber-300 hover:bg-amber-400 text-amber-800 text-sm font-bold px-6 py-4 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm">
+                            <i data-lucide="zap" class="w-5 h-5 text-amber-500"></i> テストデータ(予定+会計)を展開
                         </button>
                     </div>
                 </div>
@@ -584,57 +573,6 @@
         </section>
 
     </main>
-
-    <!-- 🔐 ログイン / アカウント登録モーダル (NEW) -->
-    <div id="auth-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden animate-fade-in">
-        <div class="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden border border-white/20">
-            <div class="p-6 md:p-8 space-y-6">
-                <div class="text-center">
-                    <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
-                        <i data-lucide="user" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-xl font-black text-slate-800 tracking-tight">メンバー認証</h3>
-                    <p class="text-xs text-slate-500 mt-1.5 font-medium">メールアドレスでログイン・新規登録</p>
-                </div>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1.5">メールアドレス</label>
-                        <input type="email" id="auth-email" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-colors font-medium" placeholder="hello@example.com">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1.5">パスワード (6文字以上)</label>
-                        <input type="password" id="auth-password" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-colors font-medium" placeholder="••••••••">
-                    </div>
-                </div>
-                <div class="pt-2 space-y-3">
-                    <button onclick="handleLogin()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition-colors shadow-md flex items-center justify-center gap-2">
-                        ログイン
-                    </button>
-                    <button onclick="handleSignup()" class="w-full bg-white hover:bg-slate-50 text-indigo-600 border border-indigo-200 font-bold py-3.5 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
-                        新規アカウント作成
-                    </button>
-                </div>
-                <div class="text-center">
-                    <button onclick="closeAuthModal()" class="text-xs font-bold text-slate-400 hover:text-slate-600 underline">
-                        キャンセルして戻る
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 🖼️ レシート画像プレビューモーダル (NEW) -->
-    <div id="receipt-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] flex items-center justify-center p-4 hidden animate-fade-in">
-        <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="px-4 py-3 flex justify-between items-center border-b border-slate-100 bg-slate-50">
-                <h3 class="font-bold text-slate-700 flex items-center gap-2"><i data-lucide="receipt" class="w-4 h-4"></i> レシート・領収書</h3>
-                <button onclick="closeReceiptModal()" class="p-1.5 bg-white hover:bg-slate-200 rounded-full transition-colors text-slate-500 shadow-sm border border-slate-200"><i data-lucide="x" class="w-4 h-4"></i></button>
-            </div>
-            <div class="p-4 overflow-auto flex-1 flex justify-center items-center bg-slate-100/50">
-                <img id="receipt-image" src="" alt="Receipt" class="max-w-full rounded-lg shadow-sm border border-slate-200">
-            </div>
-        </div>
-    </div>
 
     <!-- 📊 レポート生成モーダル -->
     <div id="report-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
@@ -734,7 +672,7 @@
                         <i data-lucide="edit-3" class="w-4 h-4 text-amber-500"></i> その場で出欠回答
                     </h4>
                     <div class="grid grid-cols-1 gap-3">
-                        <input type="text" id="modal-att-name" placeholder="お名前" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-500 bg-white">
+                        <input type="text" id="modal-att-name" placeholder="お名前" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-amber-500 bg-white">
                         <div class="flex gap-2">
                             <button type="button" onclick="setModalFormStatus('出席')" id="modal-status-出席" class="flex-1 py-3 rounded-xl text-sm font-bold bg-white border border-slate-200 text-slate-600 transition-colors">🟢</button>
                             <button type="button" onclick="setModalFormStatus('未定')" id="modal-status-未定" class="flex-1 py-3 rounded-xl text-sm font-bold bg-white border border-slate-200 text-slate-600 transition-colors">🟡</button>
@@ -742,8 +680,8 @@
                         </div>
                     </div>
                     <div class="flex gap-2">
-                        <input type="text" id="modal-att-comment" placeholder="連絡事項 (任意)" class="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-500 bg-white">
-                        <button type="button" onclick="submitModalAttendance()" class="bg-slate-900 text-white font-bold text-sm px-5 py-3 rounded-xl shadow-md transition-transform hover:scale-105 active:scale-95 shrink-0">登録</button>
+                        <input type="text" id="modal-att-comment" placeholder="連絡事項 (任意)" class="flex-1 px-4 py-3.5 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-amber-500 bg-white">
+                        <button type="button" onclick="submitModalAttendance()" class="bg-slate-900 text-white font-bold text-base px-6 py-3.5 rounded-xl shadow-md transition-transform hover:scale-105 active:scale-95 shrink-0">登録</button>
                     </div>
                 </div>
                 <div class="space-y-3">
@@ -808,10 +746,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        // ✨ 新規追加: Firebase Storage (画像アップロード用)
-        import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         const appId = 'pickleball-club-portal';
         const firebaseConfig = {
@@ -826,7 +762,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app); // Storage初期化
 
         let user = null;
         let allSchedules = [];
@@ -883,14 +818,6 @@
         window.savePaypayLink = savePaypayLink;
         window.openPaypayLink = openPaypayLink;
 
-        // 新規追加: Auth UI と 画像プレビュー関数
-        window.openAuthModal = () => document.getElementById('auth-modal').classList.remove('hidden');
-        window.closeAuthModal = () => document.getElementById('auth-modal').classList.add('hidden');
-        window.handleLogin = handleLogin;
-        window.handleSignup = handleSignup;
-        window.handleLogout = handleLogout;
-        window.viewReceipt = viewReceipt;
-        window.closeReceiptModal = closeReceiptModal;
 
         function getTodayString() {
             const d = new Date();
@@ -898,14 +825,13 @@
         }
 
         // ==========================================
-        // 🔐 認証 (Auth) ロジック
+        // 🔐 認証 (Auth) ゲストログイン
         // ==========================================
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
-                    // 初期は匿名で入る（ゲスト状態）
                     await signInAnonymously(auth);
                 }
             } catch (err) {
@@ -915,63 +841,12 @@
         };
 
         onAuthStateChanged(auth, (userData) => {
-            const badge = document.getElementById('user-info-badge');
-            const authBtn = document.getElementById('header-auth-btn');
-            
             if (userData) {
                 user = userData;
-                if (!userData.isAnonymous) {
-                    // メンバーログイン中
-                    if(badge) badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.8)]"></span> メンバー接続: ${user.email.split('@')[0]}`;
-                    if(authBtn) {
-                        authBtn.innerHTML = `<i data-lucide="log-out" class="w-3.5 h-3.5"></i> ログアウト`;
-                        authBtn.onclick = handleLogout;
-                    }
-                } else {
-                    // ゲスト（匿名）接続中
-                    if(badge) badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> ゲスト接続`;
-                    if(authBtn) {
-                        authBtn.innerHTML = `<i data-lucide="log-in" class="w-3.5 h-3.5"></i> ログイン / 登録`;
-                        authBtn.onclick = openAuthModal;
-                    }
-                }
                 onUserLoaded(user);
                 lucide.createIcons();
             }
         });
-
-        async function handleSignup() {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-password').value;
-            if(!email || pass.length < 6) return showToast("メールアドレスと6文字以上のパスワードを入力してください");
-            try {
-                await createUserWithEmailAndPassword(auth, email, pass);
-                showToast("メンバー登録が完了しました！");
-                closeAuthModal();
-            } catch (e) {
-                showToast("登録エラー: コンソールのAuth設定(Email)を確認してください");
-            }
-        }
-
-        async function handleLogin() {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-password').value;
-            if(!email || !pass) return showToast("入力してください");
-            try {
-                await signInWithEmailAndPassword(auth, email, pass);
-                showToast("ログインしました！");
-                closeAuthModal();
-            } catch (e) {
-                showToast("ログイン失敗。アドレスかパスワードが違います。");
-            }
-        }
-
-        async function handleLogout() {
-            if(confirm("ログアウトしますか？")) {
-                await signOut(auth);
-                window.location.reload(); // 匿名に切り替えるためリロード
-            }
-        }
 
         // ==========================================
         // データロード
@@ -1071,7 +946,7 @@
         }
 
         // ==========================================
-        // 💰 会計システム ＆ 🖼️ 画像アップロード
+        // 💰 会計システム
         // ==========================================
         function setFinanceType(type) {
             document.getElementById('fin-type-value').value = type;
@@ -1080,12 +955,12 @@
             const advanceArea = document.getElementById('advance-input-area'); 
 
             if(type === 'income') {
-                btnInc.className = "flex-1 py-3 bg-emerald-500 text-white font-bold rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-1.5 transform scale-[1.02] ring-2 ring-emerald-200";
-                btnExp.className = "flex-1 py-3 bg-transparent text-slate-500 hover:bg-slate-200 font-bold rounded-lg text-sm transition-all flex items-center justify-center gap-1.5";
+                btnInc.className = "flex-1 py-3 bg-emerald-500 text-white font-bold rounded-lg text-base transition-all shadow-sm flex items-center justify-center gap-1.5 transform scale-[1.02] ring-2 ring-emerald-200";
+                btnExp.className = "flex-1 py-3 bg-transparent text-slate-500 hover:bg-slate-200 font-bold rounded-lg text-base transition-all flex items-center justify-center gap-1.5";
                 advanceArea.classList.add('hidden'); 
             } else {
-                btnExp.className = "flex-1 py-3 bg-rose-500 text-white font-bold rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-1.5 transform scale-[1.02] ring-2 ring-rose-200";
-                btnInc.className = "flex-1 py-3 bg-transparent text-slate-500 hover:bg-slate-200 font-bold rounded-lg text-sm transition-all flex items-center justify-center gap-1.5";
+                btnExp.className = "flex-1 py-3 bg-rose-500 text-white font-bold rounded-lg text-base transition-all shadow-sm flex items-center justify-center gap-1.5 transform scale-[1.02] ring-2 ring-rose-200";
+                btnInc.className = "flex-1 py-3 bg-transparent text-slate-500 hover:bg-slate-200 font-bold rounded-lg text-base transition-all flex items-center justify-center gap-1.5";
                 advanceArea.classList.remove('hidden'); 
             }
         }
@@ -1098,8 +973,6 @@
             const desc = document.getElementById('fin-desc').value.trim();
             const isAdvance = type === 'expense' && document.getElementById('fin-is-advance').checked;
             const advancePerson = document.getElementById('fin-advance-person').value.trim();
-            const fileInput = document.getElementById('fin-receipt');
-            const file = fileInput.files[0];
 
             if(!date || isNaN(amount) || amount <= 0 || !desc) {
                 return showToast("すべて正しく入力してください");
@@ -1111,24 +984,14 @@
             const submitBtn = document.getElementById('fin-submit-btn');
             const originalBtnText = submitBtn.innerHTML;
             const finId = `fin_${Date.now()}`;
-            let receiptUrl = null;
 
             try {
-                submitBtn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> 登録中...`;
+                submitBtn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> 登録中...`;
                 submitBtn.disabled = true;
-
-                // 🖼️ レシート画像がある場合はStorageにアップロード
-                if (file) {
-                    submitBtn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> 画像をアップロード中...`;
-                    const fileRef = storageRef(storage, `receipts/${finId}_${file.name}`);
-                    await uploadBytesResumable(fileRef, file);
-                    receiptUrl = await getDownloadURL(fileRef);
-                }
 
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', finId), {
                     type, date, amount, category, description: desc, 
                     isAdvance, advancePerson, isSettled: false,
-                    receiptUrl, // 取得した画像URLを保存
                     timestamp: new Date().toISOString()
                 });
 
@@ -1137,14 +1000,8 @@
                 document.getElementById('fin-desc').value = '';
                 document.getElementById('fin-is-advance').checked = false;
                 document.getElementById('fin-advance-person').value = '';
-                fileInput.value = ''; // ファイル選択をクリア
             } catch(err) {
-                console.error(err);
-                if (err.message.includes("unauthorized")) {
-                    showToast("画像の保存に失敗。FirebaseのStorageルールを確認してください。");
-                } else {
-                    showToast("登録に失敗しました");
-                }
+                showToast("登録に失敗しました");
             } finally {
                 submitBtn.innerHTML = originalBtnText;
                 submitBtn.disabled = false;
@@ -1164,17 +1021,6 @@
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', id), { isSettled: true });
                 showToast("精算済みに変更しました");
             } catch (e) { showToast("エラーが発生しました"); }
-        }
-
-        // レシート画像プレビュー処理
-        function viewReceipt(url) {
-            document.getElementById('receipt-image').src = url;
-            document.getElementById('receipt-modal').classList.remove('hidden');
-        }
-
-        function closeReceiptModal() {
-            document.getElementById('receipt-modal').classList.add('hidden');
-            document.getElementById('receipt-image').src = '';
         }
 
         // PayPayリンク設定
@@ -1313,11 +1159,6 @@
                     if (f.isSettled) advanceBadge = `<span class="bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded text-[9px] font-bold ml-1">精算済</span>`;
                     else advanceBadge = `<span class="bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded text-[9px] font-bold ml-1 border border-orange-200">${f.advancePerson}さん立替</span>`;
                 }
-                
-                let receiptBtn = '';
-                if (f.receiptUrl) {
-                    receiptBtn = `<button onclick="viewReceipt('${f.receiptUrl}')" class="ml-2 p-1 bg-indigo-50 text-indigo-500 hover:bg-indigo-100 rounded shadow-sm transition-colors" title="レシートを見る"><i data-lucide="image" class="w-3 h-3"></i></button>`;
-                }
 
                 div.innerHTML = `
                     <div class="flex items-center gap-4 relative z-10 w-2/3">
@@ -1330,7 +1171,7 @@
                                 <span class="bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider">${f.category}</span>
                             </div>
                             <div class="text-sm font-bold text-slate-800 truncate flex items-center">
-                                ${f.description} ${advanceBadge} ${receiptBtn}
+                                ${f.description} ${advanceBadge}
                             </div>
                         </div>
                     </div>
@@ -1359,34 +1200,32 @@
                 if (f.isAdvance && !f.isSettled) {
                     hasUnsettled = true;
                     const adDiv = document.createElement('div');
-                    adDiv.className = "flex justify-between items-center bg-white p-2 rounded-lg text-xs shadow-sm border border-orange-100";
+                    adDiv.className = "flex justify-between items-center bg-white p-3 rounded-xl text-sm shadow-sm border border-orange-100";
                     adDiv.innerHTML = `
                         <div class="flex-1 mr-2">
                             <span class="font-bold text-orange-800">${f.advancePerson}</span>さん立替分
                             <span class="font-bold text-rose-500 ml-1">¥${f.amount.toLocaleString()}</span>
-                            <div class="text-[9px] text-slate-400 mt-0.5">${d.getMonth()+1}/${d.getDate()} - ${f.description}</div>
+                            <div class="text-[10px] text-slate-400 mt-1">${d.getMonth()+1}/${d.getDate()} - ${f.description}</div>
                         </div>
-                        <button onclick="settleAdvance('${f.id}')" class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-3 py-1.5 rounded-lg transition-colors shrink-0">精算済にする</button>
+                        <button onclick="settleAdvance('${f.id}')" class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-2 rounded-xl transition-colors shrink-0 text-xs">精算済にする</button>
                     `;
                     if(advanceListEl) advanceListEl.appendChild(adDiv);
                 }
 
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-xs shadow-sm hover:border-slate-300 transition-colors group";
-                
-                let receiptIcon = f.receiptUrl ? `<i data-lucide="image" class="w-3 h-3 text-indigo-400 inline ml-1"></i>` : '';
+                div.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-sm shadow-sm hover:border-slate-300 transition-colors group";
 
                 div.innerHTML = `
                     <div class="flex-1 min-w-0 pr-2">
                         <div class="flex items-center gap-2 mb-1">
                             <span class="text-slate-400 font-bold">${d.getMonth()+1}/${d.getDate()}</span>
-                            <span class="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">${f.category}</span>
-                            ${f.isAdvance ? (f.isSettled ? '<span class="text-[9px] text-slate-400">立替(済)</span>' : '<span class="text-[9px] text-orange-500 font-bold">立替(未)</span>') : ''}
+                            <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">${f.category}</span>
+                            ${f.isAdvance ? (f.isSettled ? '<span class="text-[10px] text-slate-400">立替(済)</span>' : '<span class="text-[10px] text-orange-500 font-bold">立替(未)</span>') : ''}
                         </div>
-                        <div class="font-bold text-slate-700 truncate">${f.description} ${receiptIcon}</div>
+                        <div class="font-bold text-slate-700 truncate flex items-center">${f.description}</div>
                     </div>
                     <div class="flex flex-col items-end shrink-0">
-                        <div class="font-black text-sm ${isInc ? 'text-emerald-600' : 'text-rose-500'}">
+                        <div class="font-black text-base ${isInc ? 'text-emerald-600' : 'text-rose-500'}">
                             ${isInc ? '+' : '-'}¥${f.amount.toLocaleString()}
                         </div>
                         <button onclick="deleteFinanceRecord('${f.id}')" class="text-xs text-slate-300 hover:text-rose-500 font-bold mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1425,17 +1264,17 @@
                 const isPaid = allFeeChecks[docId]?.isPaid || false;
                 
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center px-4 py-3 hover:bg-slate-50 transition-colors";
+                div.className = "flex justify-between items-center px-4 py-4 hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0";
                 
                 div.innerHTML = `
-                    <div class="font-bold text-sm text-slate-700">${name}</div>
+                    <div class="font-bold text-base text-slate-700">${name}</div>
                     <div class="flex items-center">
                         <label for="${docId}" class="flex items-center cursor-pointer relative">
                             <input type="checkbox" id="${docId}" class="sr-only toggle-checkbox" ${isPaid ? 'checked' : ''} onchange="toggleFeeStatus('${monthVal}', '${name}', this.checked)">
-                            <div class="toggle-label block w-10 h-6 bg-slate-200 rounded-full transition-colors border-2 border-slate-200"></div>
-                            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${isPaid ? 'transform translate-x-4' : ''}"></div>
+                            <div class="toggle-label block w-12 h-7 bg-slate-200 rounded-full transition-colors border-2 border-slate-200"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${isPaid ? 'transform translate-x-5' : ''}"></div>
                         </label>
-                        <span class="ml-2 w-8 text-xs font-bold text-right ${isPaid ? 'text-emerald-600' : 'text-slate-400'}">${isPaid ? '済' : '未'}</span>
+                        <span class="ml-3 w-8 text-sm font-bold text-right ${isPaid ? 'text-emerald-600' : 'text-slate-400'}">${isPaid ? '済' : '未'}</span>
                     </div>
                 `;
                 listEl.appendChild(div);
@@ -1589,11 +1428,11 @@
                 const btn = document.getElementById(`status-btn-${s}`);
                 if (!btn) return;
                 if (s === status) {
-                    if (s === '出席') btn.className = "py-3 rounded-xl border-2 border-emerald-500 text-sm font-bold bg-emerald-50 text-emerald-800 flex flex-col items-center gap-1 shadow-sm transform scale-[1.02] transition-all";
-                    if (s === '未定') btn.className = "py-3 rounded-xl border-2 border-amber-500 text-sm font-bold bg-amber-50 text-amber-800 flex flex-col items-center gap-1 shadow-sm transform scale-[1.02] transition-all";
-                    if (s === '欠席') btn.className = "py-3 rounded-xl border-2 border-rose-500 text-sm font-bold bg-rose-50 text-rose-800 flex flex-col items-center gap-1 shadow-sm transform scale-[1.02] transition-all";
+                    if (s === '出席') btn.className = "py-3.5 rounded-xl border-2 border-emerald-500 text-sm font-bold bg-emerald-50 text-emerald-800 flex flex-col items-center gap-1 shadow-sm transform scale-[1.02] transition-all";
+                    if (s === '未定') btn.className = "py-3.5 rounded-xl border-2 border-amber-500 text-sm font-bold bg-amber-50 text-amber-800 flex flex-col items-center gap-1 shadow-sm transform scale-[1.02] transition-all";
+                    if (s === '欠席') btn.className = "py-3.5 rounded-xl border-2 border-rose-500 text-sm font-bold bg-rose-50 text-rose-800 flex flex-col items-center gap-1 shadow-sm transform scale-[1.02] transition-all";
                 } else {
-                    btn.className = "py-3 rounded-xl border-2 border-transparent border-slate-200 text-sm font-bold bg-white text-slate-500 flex flex-col items-center gap-1 hover:bg-slate-50 transition-all";
+                    btn.className = "py-3.5 rounded-xl border-2 border-transparent border-slate-200 text-sm font-bold bg-white text-slate-500 flex flex-col items-center gap-1 hover:bg-slate-50 transition-all";
                 }
             });
         }
@@ -1955,7 +1794,7 @@
             list.innerHTML = '';
             allSchedules.forEach(s => {
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-white p-2.5 rounded-xl border border-slate-200 text-xs shadow-sm hover:border-slate-300 group";
+                div.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-sm shadow-sm hover:border-slate-300 group";
                 div.innerHTML = `
                     <div class="flex-1 truncate">
                         <span class="text-slate-400 font-bold mr-2">${s.date.substring(5).replace('-','/')}</span>
