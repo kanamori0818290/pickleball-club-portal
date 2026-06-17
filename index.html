@@ -44,13 +44,22 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
-        /* Toggle Switch Styles */
         .toggle-checkbox:checked {
             right: 0;
             border-color: #10b981;
         }
         .toggle-checkbox:checked + .toggle-label {
             background-color: #10b981;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
         }
     </style>
 </head>
@@ -87,7 +96,6 @@
     </header>
 
     <main class="max-w-4xl mx-auto px-4 py-8 space-y-8">
-
         <nav class="glass-card p-2 rounded-2xl border border-slate-200 shadow-sm sticky top-4 z-40">
             <div class="flex overflow-x-auto hide-scroll-bar gap-1">
                 <button id="tab-calendar" onclick="switchView('calendar')" class="flex-1 min-w-[120px] px-4 py-3 text-center font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap bg-amber-50 text-amber-700 shadow-sm">
@@ -108,10 +116,14 @@
             </div>
         </nav>
 
-        <div class="flex justify-end px-2">
-            <div id="user-info-badge" class="text-[10px] font-bold text-slate-400 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm flex items-center gap-1.5">
+        <!-- ✨ ログイン/ステータス バッジエリア -->
+        <div class="flex justify-end items-center gap-3 px-2">
+            <div id="user-info-badge" class="text-[10px] font-bold text-slate-400 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm flex items-center gap-1.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> ゲスト接続
             </div>
+            <button id="header-auth-btn" onclick="openAuthModal()" class="text-[10px] font-bold text-slate-600 bg-white border border-slate-200 shadow-sm px-3 py-1.5 rounded-full flex items-center gap-1 hover:bg-slate-50 transition-colors">
+                <i data-lucide="log-in" class="w-3.5 h-3.5"></i> ログイン / 登録
+            </button>
         </div>
 
         <div id="news-section" class="hidden bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100/50 rounded-2xl p-5 shadow-sm relative overflow-hidden">
@@ -129,24 +141,6 @@
 
         <!-- 📅 1. カレンダービュー -->
         <section id="view-calendar" class="space-y-8 animate-fade-in">
-            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                        <div class="p-2 bg-amber-100 text-amber-600 rounded-xl shadow-inner">
-                            <i data-lucide="sparkles" class="w-5 h-5"></i>
-                        </div>
-                        <h3 class="font-extrabold text-slate-800 text-base">直近の練習日 ＆ 出欠状況</h3>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <div id="quick-attendance-summary" class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div class="col-span-full text-center py-8 text-sm text-slate-400 font-bold bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                            読込中...
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
                 <div class="flex justify-between items-center mb-8">
                     <button onclick="prevMonth()" class="p-2.5 hover:bg-slate-100 rounded-xl transition text-slate-600 border border-slate-200 shadow-sm hover:shadow group">
@@ -161,23 +155,7 @@
                 <div class="calendar-grid text-center text-xs font-bold text-slate-400 border-b-2 border-slate-100 pb-3 mb-4 tracking-widest uppercase">
                     <div class="text-rose-500">Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div class="text-sky-500">Sat</div>
                 </div>
-
                 <div id="calendar-days" class="calendar-grid gap-2 sm:gap-3"></div>
-
-                <div class="mt-8 flex flex-wrap gap-5 text-xs border-t border-slate-100 pt-6 justify-center bg-slate-50/50 rounded-2xl pb-4">
-                    <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
-                        <span class="w-3 h-3 bg-emerald-400 rounded-full inline-block shadow-inner"></span>
-                        <span class="text-slate-600 font-bold">定期枠 (月・火)</span>
-                    </div>
-                    <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
-                        <span class="w-3 h-3 bg-sky-400 rounded-full inline-block shadow-inner"></span>
-                        <span class="text-slate-600 font-bold">土曜特別枠</span>
-                    </div>
-                    <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
-                        <span class="w-3 h-3 bg-amber-400 rounded-full inline-block shadow-inner"></span>
-                        <span class="text-slate-600 font-bold">🏆 大会開催日</span>
-                    </div>
-                </div>
             </div>
         </section>
 
@@ -216,10 +194,6 @@
                                     </button>
                                 </div>
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">4. 連絡事項 (任意)</label>
-                                <input type="text" id="att-comment" placeholder="遅刻します、等" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none transition-shadow bg-slate-50 focus:bg-white">
-                            </div>
                             <button onclick="submitAttendance()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 shadow-lg mt-4 group">
                                 <i data-lucide="send" class="w-4 h-4 text-amber-400 group-hover:translate-x-1 transition-transform"></i>
                                 <span>この内容で登録する</span>
@@ -242,22 +216,35 @@
 
         <!-- 💰 3. 会計・ダッシュボードビュー -->
         <section id="view-finance" class="hidden space-y-8 animate-fade-in">
-            
             <div class="bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-800 rounded-3xl p-6 md:p-10 text-white shadow-xl relative overflow-hidden">
                 <div class="absolute right-0 top-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
                 <div class="absolute -right-6 -bottom-10 opacity-10 rotate-12 pointer-events-none"><i data-lucide="coins" class="w-56 h-56"></i></div>
                 
-                <div class="relative z-10">
-                    <div class="flex items-center gap-2 mb-2 opacity-90">
-                        <div class="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm"><i data-lucide="piggy-bank" class="w-5 h-5 text-emerald-100"></i></div>
-                        <h3 class="text-sm font-bold tracking-widest uppercase">チーム総資産 (貯金額)</h3>
+                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2 opacity-90">
+                            <div class="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm"><i data-lucide="piggy-bank" class="w-5 h-5 text-emerald-100"></i></div>
+                            <h3 class="text-sm font-bold tracking-widest uppercase">チーム総資産 (貯金額)</h3>
+                        </div>
+                        <div class="flex items-baseline gap-1 mb-6 md:mb-0">
+                            <span class="text-3xl font-bold opacity-80">¥</span>
+                            <span id="finance-total-balance" class="text-5xl md:text-7xl font-black tracking-tighter drop-shadow-md">0</span>
+                        </div>
                     </div>
                     
-                    <div class="flex items-baseline gap-1 mb-8">
-                        <span class="text-3xl font-bold opacity-80">¥</span>
-                        <span id="finance-total-balance" class="text-5xl md:text-7xl font-black tracking-tighter drop-shadow-md">0</span>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                        <button onclick="openPaypayLink()" id="btn-paypay" class="bg-[#FF0033] hover:bg-[#E6002E] text-white font-bold py-3 px-5 rounded-xl transition-colors shadow-md flex items-center justify-center gap-2">
+                            <i data-lucide="smartphone" class="w-5 h-5"></i>
+                            <span>PayPayで送金</span>
+                        </button>
+                        <button onclick="generateReport()" class="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white font-bold py-3 px-5 rounded-xl transition-colors shadow-md flex items-center justify-center gap-2">
+                            <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                            <span>📊 収支レポートを作成</span>
+                        </button>
                     </div>
-                    
+                </div>
+                
+                <div class="relative z-10 mt-8">
                     <div class="bg-black/20 rounded-2xl p-5 md:p-6 backdrop-blur-md border border-white/10 shadow-inner group relative">
                         <div class="flex justify-between items-end mb-3">
                             <span class="text-sm md:text-base font-bold flex items-center gap-2">
@@ -271,13 +258,11 @@
                                 </button>
                             </div>
                         </div>
-                        
                         <div class="w-full h-4 bg-black/40 rounded-full overflow-hidden border border-white/5 relative">
                             <div id="finance-goal-bar" class="bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 h-full transition-all duration-1000 ease-out relative" style="width: 0%">
                                 <div class="absolute top-0 right-0 bottom-0 left-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
                             </div>
                         </div>
-                        
                         <div class="mt-3 flex justify-between items-center text-sm">
                             <span id="finance-goal-pct" class="font-black text-amber-300 tracking-wide">0%</span>
                             <span id="finance-goal-text" class="font-bold text-white opacity-90">あと 10,000円</span>
@@ -293,9 +278,7 @@
                     </h3>
                     <span class="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-md">最新15件</span>
                 </div>
-                <div id="finance-history-list" class="space-y-0 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
-                    <!-- JS生成 -->
-                </div>
+                <div id="finance-history-list" class="space-y-0 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent"></div>
             </div>
         </section>
 
@@ -397,17 +380,47 @@
                                 </div>
                             </div>
 
-                            <button onclick="addFinanceRecord()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 shadow-lg relative z-10 mt-2">
+                            <!-- 立替入力エリア -->
+                            <div id="advance-input-area" class="hidden relative z-10 bg-orange-50 p-4 rounded-xl border border-orange-200 mt-2">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <input type="checkbox" id="fin-is-advance" class="w-4 h-4 text-orange-600 rounded cursor-pointer">
+                                    <label for="fin-is-advance" class="text-sm font-bold text-orange-800 cursor-pointer flex items-center gap-1.5">
+                                        <i data-lucide="alert-circle" class="w-4 h-4"></i> この支払いは「メンバーの立て替え」である
+                                    </label>
+                                </div>
+                                <div>
+                                    <input type="text" id="fin-advance-person" placeholder="立て替えてくれた人の名前 (例: 山田さん)" class="w-full px-4 py-2.5 rounded-lg border border-orange-200 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white">
+                                </div>
+                            </div>
+
+                            <!-- 🖼️ レシートアップロードエリア (NEW) -->
+                            <div class="relative z-10 bg-slate-50 p-4 rounded-xl border border-slate-200 mt-2">
+                                <label class="block text-xs font-bold text-slate-500 mb-2 flex items-center gap-1.5">
+                                    <i data-lucide="camera" class="w-4 h-4 text-indigo-500"></i> レシート・領収書のアップロード (任意)
+                                </label>
+                                <input type="file" id="fin-receipt" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-colors bg-white border border-slate-200 rounded-xl cursor-pointer">
+                            </div>
+
+                            <button id="fin-submit-btn" onclick="addFinanceRecord()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 shadow-lg relative z-10 mt-2">
                                 <i data-lucide="save" class="w-4 h-4 text-emerald-400"></i> 帳簿に登録する
                             </button>
                         </div>
-                        <div class="lg:col-span-5 bg-slate-50 p-5 md:p-6 rounded-2xl border border-slate-200 flex flex-col">
-                            <h4 class="font-bold text-slate-500 text-xs uppercase tracking-wider mb-4 border-b border-slate-200 pb-2">最近の登録データ</h4>
-                            <div id="admin-finance-list" class="space-y-3 flex-1 custom-scroll overflow-y-auto pr-1"></div>
+                        
+                        <div class="lg:col-span-5 flex flex-col gap-4">
+                            <!-- 未精算の立替リスト -->
+                            <div id="advance-alert-container" class="hidden bg-orange-50 border border-orange-200 p-4 rounded-2xl shadow-sm space-y-3">
+                                <h4 class="font-bold text-orange-800 text-xs flex items-center gap-1"><i data-lucide="alert-triangle" class="w-4 h-4"></i> 未精算の立て替えがあります</h4>
+                                <div id="advance-list" class="space-y-2 max-h-[150px] overflow-y-auto custom-scroll pr-1"></div>
+                            </div>
+
+                            <div class="bg-slate-50 p-5 md:p-6 rounded-2xl border border-slate-200 flex-1 flex flex-col">
+                                <h4 class="font-bold text-slate-500 text-xs uppercase tracking-wider mb-4 border-b border-slate-200 pb-2">最近の登録データ</h4>
+                                <div id="admin-finance-list" class="space-y-3 flex-1 custom-scroll overflow-y-auto pr-1"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- ✅ 月謝管理チェックリスト -->
                 <div class="space-y-5 border-t border-slate-200 pt-8">
                     <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
@@ -534,16 +547,32 @@
                     </div>
                 </div>
 
-                <!-- ⚙️ システム管理・テスト機能 -->
+                <!-- ⚙️ システム管理・設定 -->
                 <div class="space-y-5 border-t border-slate-200 pt-8">
                     <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
-                        <span class="p-1.5 bg-slate-100 text-slate-600 rounded-lg"><i data-lucide="database" class="w-5 h-5"></i></span>
-                        システム管理・テスト機能
+                        <span class="p-1.5 bg-slate-100 text-slate-600 rounded-lg"><i data-lucide="settings" class="w-5 h-5"></i></span>
+                        システム設定・テスト機能
                     </h3>
+                    
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2 mb-1">
+                                <i data-lucide="smartphone" class="w-4 h-4 text-slate-500"></i> PayPay送金リンクの設定
+                            </h4>
+                            <p class="text-xs text-slate-500 leading-relaxed mb-3">ここにPayPayの「マイコードURL」を入力しておくと、メンバーが会計ダッシュボードからワンタップで送金できるようになります。</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="admin-paypay-link" placeholder="https://paypay.ne.jp/p/..." class="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-colors">
+                            <button onclick="savePaypayLink()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-md transition-colors whitespace-nowrap">
+                                登録
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="bg-amber-50 p-5 md:p-6 rounded-2xl border border-amber-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div>
                             <h4 class="font-bold text-amber-800 text-sm mb-1">初期データの展開</h4>
-                            <p class="text-xs text-amber-700 leading-relaxed">6/13(土)、6/16(火)以降の練習予定と、テスト用の会計データ（6/15までの集計など）を一括でクラウドに登録します。</p>
+                            <p class="text-xs text-amber-700 leading-relaxed">テスト用のスケジュールと会計データを一括でクラウドに登録します。</p>
                         </div>
                         <button onclick="seedInitialData()" class="w-full sm:w-auto shrink-0 bg-white border border-amber-300 hover:bg-amber-400 text-amber-800 text-xs font-bold px-5 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm">
                             <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i> テストデータ(予定+会計)を展開
@@ -555,6 +584,84 @@
         </section>
 
     </main>
+
+    <!-- 🔐 ログイン / アカウント登録モーダル (NEW) -->
+    <div id="auth-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden animate-fade-in">
+        <div class="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden border border-white/20">
+            <div class="p-6 md:p-8 space-y-6">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
+                        <i data-lucide="user" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-800 tracking-tight">メンバー認証</h3>
+                    <p class="text-xs text-slate-500 mt-1.5 font-medium">メールアドレスでログイン・新規登録</p>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5">メールアドレス</label>
+                        <input type="email" id="auth-email" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-colors font-medium" placeholder="hello@example.com">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5">パスワード (6文字以上)</label>
+                        <input type="password" id="auth-password" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-colors font-medium" placeholder="••••••••">
+                    </div>
+                </div>
+                <div class="pt-2 space-y-3">
+                    <button onclick="handleLogin()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition-colors shadow-md flex items-center justify-center gap-2">
+                        ログイン
+                    </button>
+                    <button onclick="handleSignup()" class="w-full bg-white hover:bg-slate-50 text-indigo-600 border border-indigo-200 font-bold py-3.5 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
+                        新規アカウント作成
+                    </button>
+                </div>
+                <div class="text-center">
+                    <button onclick="closeAuthModal()" class="text-xs font-bold text-slate-400 hover:text-slate-600 underline">
+                        キャンセルして戻る
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🖼️ レシート画像プレビューモーダル (NEW) -->
+    <div id="receipt-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] flex items-center justify-center p-4 hidden animate-fade-in">
+        <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-4 py-3 flex justify-between items-center border-b border-slate-100 bg-slate-50">
+                <h3 class="font-bold text-slate-700 flex items-center gap-2"><i data-lucide="receipt" class="w-4 h-4"></i> レシート・領収書</h3>
+                <button onclick="closeReceiptModal()" class="p-1.5 bg-white hover:bg-slate-200 rounded-full transition-colors text-slate-500 shadow-sm border border-slate-200"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="p-4 overflow-auto flex-1 flex justify-center items-center bg-slate-100/50">
+                <img id="receipt-image" src="" alt="Receipt" class="max-w-full rounded-lg shadow-sm border border-slate-200">
+            </div>
+        </div>
+    </div>
+
+    <!-- 📊 レポート生成モーダル -->
+    <div id="report-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
+        <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden transform scale-100 transition-all border border-white/20">
+            <div class="bg-slate-50 px-6 py-4 flex justify-between items-center border-b border-slate-100">
+                <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
+                    <i data-lucide="bar-chart-2" class="w-5 h-5 text-indigo-500"></i> 会計レポートの自動生成
+                </h3>
+                <button onclick="closeReportModal()" class="p-2 bg-white hover:bg-slate-100 rounded-full transition-colors text-slate-400 shadow-sm border border-slate-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-sm text-slate-600">全期間の会計データを集計しました。下のテキストをコピーして、LINEのノート等に貼り付けて報告できます。</p>
+                <textarea id="report-textarea" rows="10" class="w-full p-4 rounded-xl border border-slate-200 text-sm bg-slate-50 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500" readonly></textarea>
+                
+                <div class="pt-2 flex gap-3">
+                    <button onclick="closeReportModal()" class="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors text-sm">
+                        閉じる
+                    </button>
+                    <button onclick="copyReportText()" class="flex-1 py-3.5 bg-[#06C755] hover:bg-[#05b34c] text-white font-bold rounded-xl transition-colors text-sm shadow-md flex items-center justify-center gap-2">
+                        <i data-lucide="copy" class="w-4 h-4"></i> テキストをコピー
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- 🎯 目標設定の変更モーダル -->
     <div id="goal-edit-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
@@ -701,8 +808,10 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // ✨ 新規追加: Firebase Storage (画像アップロード用)
+        import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         const appId = 'pickleball-club-portal';
         const firebaseConfig = {
@@ -717,6 +826,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app); // Storage初期化
 
         let user = null;
         let allSchedules = [];
@@ -727,6 +837,7 @@
         let allFeeChecks = {}; 
         
         let financeGoal = { title: "ポータブルネット購入", amount: 10000 }; 
+        let teamPaypayLink = "";
 
         let currentYear = 2026;
         let currentMonth = 5; 
@@ -734,6 +845,7 @@
         let selectedModalStatus = '出席'; 
         let currentOpenScheduleId = null; 
 
+        // Global functions
         window.switchView = switchView;
         window.prevMonth = prevMonth;
         window.nextMonth = nextMonth;
@@ -753,12 +865,11 @@
         window.setFinanceType = setFinanceType;
         window.addFinanceRecord = addFinanceRecord;
         window.deleteFinanceRecord = deleteFinanceRecord;
-
+        window.settleAdvance = settleAdvance;
         window.addTournament = addTournament;
         window.deleteTournament = deleteTournament;
         window.showTournamentDetailModal = showTournamentDetailModal;
         window.closeTournamentDetailModal = closeTournamentDetailModal;
-
         window.openGoalEditModal = openGoalEditModal;
         window.closeGoalEditModal = closeGoalEditModal;
         window.saveGoalSettings = saveGoalSettings;
@@ -766,34 +877,105 @@
         window.shareToLine = shareToLine; 
         window.toggleFeeStatus = toggleFeeStatus; 
         window.renderFeeChecklist = renderFeeChecklist; 
+        window.generateReport = generateReport;
+        window.closeReportModal = closeReportModal;
+        window.copyReportText = copyReportText;
+        window.savePaypayLink = savePaypayLink;
+        window.openPaypayLink = openPaypayLink;
+
+        // 新規追加: Auth UI と 画像プレビュー関数
+        window.openAuthModal = () => document.getElementById('auth-modal').classList.remove('hidden');
+        window.closeAuthModal = () => document.getElementById('auth-modal').classList.add('hidden');
+        window.handleLogin = handleLogin;
+        window.handleSignup = handleSignup;
+        window.handleLogout = handleLogout;
+        window.viewReceipt = viewReceipt;
+        window.closeReceiptModal = closeReceiptModal;
 
         function getTodayString() {
             const d = new Date();
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
 
+        // ==========================================
+        // 🔐 認証 (Auth) ロジック
+        // ==========================================
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
+                    // 初期は匿名で入る（ゲスト状態）
                     await signInAnonymously(auth);
                 }
             } catch (err) {
-                user = { uid: 'local-test-user' };
+                user = { uid: 'local-test-user', isAnonymous: true };
                 onUserLoaded(user);
             }
         };
 
         onAuthStateChanged(auth, (userData) => {
+            const badge = document.getElementById('user-info-badge');
+            const authBtn = document.getElementById('header-auth-btn');
+            
             if (userData) {
                 user = userData;
-                const badge = document.getElementById('user-info-badge');
-                if(badge) badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.8)]"></span> 部員ID: ${user.uid.substring(0, 5)}...`;
+                if (!userData.isAnonymous) {
+                    // メンバーログイン中
+                    if(badge) badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.8)]"></span> メンバー接続: ${user.email.split('@')[0]}`;
+                    if(authBtn) {
+                        authBtn.innerHTML = `<i data-lucide="log-out" class="w-3.5 h-3.5"></i> ログアウト`;
+                        authBtn.onclick = handleLogout;
+                    }
+                } else {
+                    // ゲスト（匿名）接続中
+                    if(badge) badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> ゲスト接続`;
+                    if(authBtn) {
+                        authBtn.innerHTML = `<i data-lucide="log-in" class="w-3.5 h-3.5"></i> ログイン / 登録`;
+                        authBtn.onclick = openAuthModal;
+                    }
+                }
                 onUserLoaded(user);
+                lucide.createIcons();
             }
         });
 
+        async function handleSignup() {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-password').value;
+            if(!email || pass.length < 6) return showToast("メールアドレスと6文字以上のパスワードを入力してください");
+            try {
+                await createUserWithEmailAndPassword(auth, email, pass);
+                showToast("メンバー登録が完了しました！");
+                closeAuthModal();
+            } catch (e) {
+                showToast("登録エラー: コンソールのAuth設定(Email)を確認してください");
+            }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-password').value;
+            if(!email || !pass) return showToast("入力してください");
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                showToast("ログインしました！");
+                closeAuthModal();
+            } catch (e) {
+                showToast("ログイン失敗。アドレスかパスワードが違います。");
+            }
+        }
+
+        async function handleLogout() {
+            if(confirm("ログアウトしますか？")) {
+                await signOut(auth);
+                window.location.reload(); // 匿名に切り替えるためリロード
+            }
+        }
+
+        // ==========================================
+        // データロード
+        // ==========================================
         const onUserLoaded = async (currentUser) => {
             if (!currentUser) return;
             const schedulesRef = collection(db, 'artifacts', appId, 'public', 'data', 'schedules');
@@ -805,8 +987,11 @@
 
             try {
                 const goalDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'finance_goal'));
-                if (goalDoc.exists()) {
-                    financeGoal = goalDoc.data();
+                if (goalDoc.exists()) financeGoal = goalDoc.data();
+                const paypayDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'paypay'));
+                if (paypayDoc.exists() && paypayDoc.data().url) {
+                    teamPaypayLink = paypayDoc.data().url;
+                    document.getElementById('admin-paypay-link').value = teamPaypayLink;
                 }
             } catch (err) {}
 
@@ -851,9 +1036,7 @@
 
             onSnapshot(feesRef, (snapshot) => {
                 allFeeChecks = {};
-                snapshot.forEach(doc => {
-                    allFeeChecks[doc.id] = doc.data();
-                });
+                snapshot.forEach(doc => { allFeeChecks[doc.id] = doc.data(); });
                 renderFeeChecklist();
             });
 
@@ -888,18 +1071,22 @@
         }
 
         // ==========================================
-        // 💰 会計システム
+        // 💰 会計システム ＆ 🖼️ 画像アップロード
         // ==========================================
         function setFinanceType(type) {
             document.getElementById('fin-type-value').value = type;
             const btnInc = document.getElementById('fin-type-income');
             const btnExp = document.getElementById('fin-type-expense');
+            const advanceArea = document.getElementById('advance-input-area'); 
+
             if(type === 'income') {
                 btnInc.className = "flex-1 py-3 bg-emerald-500 text-white font-bold rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-1.5 transform scale-[1.02] ring-2 ring-emerald-200";
                 btnExp.className = "flex-1 py-3 bg-transparent text-slate-500 hover:bg-slate-200 font-bold rounded-lg text-sm transition-all flex items-center justify-center gap-1.5";
+                advanceArea.classList.add('hidden'); 
             } else {
                 btnExp.className = "flex-1 py-3 bg-rose-500 text-white font-bold rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-1.5 transform scale-[1.02] ring-2 ring-rose-200";
                 btnInc.className = "flex-1 py-3 bg-transparent text-slate-500 hover:bg-slate-200 font-bold rounded-lg text-sm transition-all flex items-center justify-center gap-1.5";
+                advanceArea.classList.remove('hidden'); 
             }
         }
 
@@ -909,21 +1096,59 @@
             const amount = parseInt(document.getElementById('fin-amount').value, 10);
             const category = document.getElementById('fin-category').value;
             const desc = document.getElementById('fin-desc').value.trim();
+            const isAdvance = type === 'expense' && document.getElementById('fin-is-advance').checked;
+            const advancePerson = document.getElementById('fin-advance-person').value.trim();
+            const fileInput = document.getElementById('fin-receipt');
+            const file = fileInput.files[0];
 
             if(!date || isNaN(amount) || amount <= 0 || !desc) {
                 return showToast("すべて正しく入力してください");
             }
+            if (isAdvance && !advancePerson) {
+                return showToast("立て替えてくれた人の名前を入力してください");
+            }
 
+            const submitBtn = document.getElementById('fin-submit-btn');
+            const originalBtnText = submitBtn.innerHTML;
             const finId = `fin_${Date.now()}`;
+            let receiptUrl = null;
+
             try {
+                submitBtn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> 登録中...`;
+                submitBtn.disabled = true;
+
+                // 🖼️ レシート画像がある場合はStorageにアップロード
+                if (file) {
+                    submitBtn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> 画像をアップロード中...`;
+                    const fileRef = storageRef(storage, `receipts/${finId}_${file.name}`);
+                    await uploadBytesResumable(fileRef, file);
+                    receiptUrl = await getDownloadURL(fileRef);
+                }
+
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', finId), {
-                    type, date, amount, category, description: desc, timestamp: new Date().toISOString()
+                    type, date, amount, category, description: desc, 
+                    isAdvance, advancePerson, isSettled: false,
+                    receiptUrl, // 取得した画像URLを保存
+                    timestamp: new Date().toISOString()
                 });
+
                 showToast("帳簿に登録しました！");
                 document.getElementById('fin-amount').value = '';
                 document.getElementById('fin-desc').value = '';
+                document.getElementById('fin-is-advance').checked = false;
+                document.getElementById('fin-advance-person').value = '';
+                fileInput.value = ''; // ファイル選択をクリア
             } catch(err) {
-                showToast("登録に失敗しました");
+                console.error(err);
+                if (err.message.includes("unauthorized")) {
+                    showToast("画像の保存に失敗。FirebaseのStorageルールを確認してください。");
+                } else {
+                    showToast("登録に失敗しました");
+                }
+            } finally {
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+                lucide.createIcons();
             }
         }
 
@@ -931,6 +1156,40 @@
             if(!confirm("削除しますか？")) return;
             await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', id));
             showToast("削除しました");
+        }
+
+        async function settleAdvance(id) {
+            if(!confirm("この立て替えを精算済みにしますか？\n(※チームのお金から返金したことになります)")) return;
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', id), { isSettled: true });
+                showToast("精算済みに変更しました");
+            } catch (e) { showToast("エラーが発生しました"); }
+        }
+
+        // レシート画像プレビュー処理
+        function viewReceipt(url) {
+            document.getElementById('receipt-image').src = url;
+            document.getElementById('receipt-modal').classList.remove('hidden');
+        }
+
+        function closeReceiptModal() {
+            document.getElementById('receipt-modal').classList.add('hidden');
+            document.getElementById('receipt-image').src = '';
+        }
+
+        // PayPayリンク設定
+        async function savePaypayLink() {
+            const link = document.getElementById('admin-paypay-link').value.trim();
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'paypay'), { url: link });
+                teamPaypayLink = link;
+                showToast("PayPayリンクを保存しました！");
+            } catch(err) { showToast("保存に失敗しました"); }
+        }
+
+        function openPaypayLink() {
+            if (!teamPaypayLink) return showToast("管理者がPayPayリンクを設定していません");
+            window.open(teamPaypayLink, '_blank');
         }
 
         function openGoalEditModal() {
@@ -947,7 +1206,6 @@
             const title = document.getElementById('goal-edit-title').value.trim();
             const amount = parseInt(document.getElementById('goal-edit-amount').value, 10);
             if(!title || isNaN(amount) || amount <= 0) return showToast("正しく入力してください");
-
             financeGoal = { title, amount };
             try {
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'finance_goal'), financeGoal);
@@ -955,6 +1213,48 @@
                 renderFinanceDashboard();
                 closeGoalEditModal();
             } catch(err) { showToast("更新に失敗しました"); }
+        }
+
+        // レポート生成機能
+        function generateReport() {
+            let totalIn = 0; let totalOut = 0; let outByCategory = {};
+            allFinance.forEach(f => {
+                if (f.type === 'income') totalIn += f.amount;
+                else {
+                    totalOut += f.amount;
+                    outByCategory[f.category] = (outByCategory[f.category] || 0) + f.amount;
+                }
+            });
+
+            let reportText = `【ライジングムーン 収支サマリー】\n`;
+            const d = new Date();
+            reportText += `作成日: ${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日\n\n`;
+            reportText += `💰 総収入: ${totalIn.toLocaleString()}円\n`;
+            reportText += `💸 総支出: ${totalOut.toLocaleString()}円\n`;
+            reportText += `💎 現在の貯金残高: ${(totalIn - totalOut).toLocaleString()}円\n\n`;
+            
+            if (totalOut > 0) {
+                reportText += `【支出の内訳】\n`;
+                for (const [cat, amt] of Object.entries(outByCategory)) reportText += `・${cat}: ${amt.toLocaleString()}円\n`;
+            }
+
+            const unsettled = allFinance.filter(f => f.isAdvance && !f.isSettled);
+            if (unsettled.length > 0) {
+                reportText += `\n⚠️ 【未精算の立て替え】\n`;
+                unsettled.forEach(u => reportText += `・${u.advancePerson}さん: ${u.amount.toLocaleString()}円 (${u.description})\n`);
+            }
+            reportText += `\n※詳細な履歴はポータルサイトの「会計報告」をご確認ください！`;
+            document.getElementById('report-textarea').value = reportText;
+            document.getElementById('report-modal').classList.remove('hidden');
+        }
+
+        function closeReportModal() { document.getElementById('report-modal').classList.add('hidden'); }
+        function copyReportText() {
+            const copyText = document.getElementById('report-textarea');
+            copyText.select(); copyText.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            showToast("レポートテキストをコピーしました！");
+            closeReportModal();
         }
 
         function renderFinanceDashboard() {
@@ -1008,17 +1308,30 @@
                 const color = isInc ? 'text-emerald-600' : 'text-rose-500';
                 const dotColor = isInc ? 'bg-emerald-500' : 'bg-rose-500';
 
+                let advanceBadge = '';
+                if (f.isAdvance) {
+                    if (f.isSettled) advanceBadge = `<span class="bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded text-[9px] font-bold ml-1">精算済</span>`;
+                    else advanceBadge = `<span class="bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded text-[9px] font-bold ml-1 border border-orange-200">${f.advancePerson}さん立替</span>`;
+                }
+                
+                let receiptBtn = '';
+                if (f.receiptUrl) {
+                    receiptBtn = `<button onclick="viewReceipt('${f.receiptUrl}')" class="ml-2 p-1 bg-indigo-50 text-indigo-500 hover:bg-indigo-100 rounded shadow-sm transition-colors" title="レシートを見る"><i data-lucide="image" class="w-3 h-3"></i></button>`;
+                }
+
                 div.innerHTML = `
                     <div class="flex items-center gap-4 relative z-10 w-2/3">
                         <div class="w-10 h-10 rounded-full bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center shrink-0 group-hover:border-slate-300 transition-colors z-10 hidden md:flex">
                             <div class="w-3 h-3 rounded-full ${dotColor}"></div>
                         </div>
                         <div class="min-w-0">
-                            <div class="text-[11px] font-bold text-slate-400 mb-0.5 flex items-center gap-2">
+                            <div class="text-[11px] font-bold text-slate-400 mb-0.5 flex items-center gap-2 flex-wrap">
                                 <span>${d.getMonth()+1}/${d.getDate()}</span>
                                 <span class="bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider">${f.category}</span>
                             </div>
-                            <div class="text-sm font-bold text-slate-800 truncate">${f.description}</div>
+                            <div class="text-sm font-bold text-slate-800 truncate flex items-center">
+                                ${f.description} ${advanceBadge} ${receiptBtn}
+                            </div>
                         </div>
                     </div>
                     <div class="font-black text-lg md:text-xl ${color} shrink-0 text-right">
@@ -1027,27 +1340,50 @@
                 `;
                 listEl.appendChild(div);
             });
+            lucide.createIcons();
         }
 
         function renderAdminFinanceList() {
             const listEl = document.getElementById('admin-finance-list');
-            if(!listEl) return;
-            listEl.innerHTML = '';
-            if(allFinance.length === 0) return;
+            const advanceListEl = document.getElementById('advance-list');
+            const advanceAlert = document.getElementById('advance-alert-container');
+            
+            if(listEl) listEl.innerHTML = '';
+            if(advanceListEl) advanceListEl.innerHTML = '';
+            let hasUnsettled = false;
 
             allFinance.forEach(f => {
                 const d = new Date(f.date);
+                const isInc = f.type === 'income';
+
+                if (f.isAdvance && !f.isSettled) {
+                    hasUnsettled = true;
+                    const adDiv = document.createElement('div');
+                    adDiv.className = "flex justify-between items-center bg-white p-2 rounded-lg text-xs shadow-sm border border-orange-100";
+                    adDiv.innerHTML = `
+                        <div class="flex-1 mr-2">
+                            <span class="font-bold text-orange-800">${f.advancePerson}</span>さん立替分
+                            <span class="font-bold text-rose-500 ml-1">¥${f.amount.toLocaleString()}</span>
+                            <div class="text-[9px] text-slate-400 mt-0.5">${d.getMonth()+1}/${d.getDate()} - ${f.description}</div>
+                        </div>
+                        <button onclick="settleAdvance('${f.id}')" class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-3 py-1.5 rounded-lg transition-colors shrink-0">精算済にする</button>
+                    `;
+                    if(advanceListEl) advanceListEl.appendChild(adDiv);
+                }
+
                 const div = document.createElement('div');
                 div.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-xs shadow-sm hover:border-slate-300 transition-colors group";
-                const isInc = f.type === 'income';
                 
+                let receiptIcon = f.receiptUrl ? `<i data-lucide="image" class="w-3 h-3 text-indigo-400 inline ml-1"></i>` : '';
+
                 div.innerHTML = `
                     <div class="flex-1 min-w-0 pr-2">
                         <div class="flex items-center gap-2 mb-1">
                             <span class="text-slate-400 font-bold">${d.getMonth()+1}/${d.getDate()}</span>
                             <span class="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">${f.category}</span>
+                            ${f.isAdvance ? (f.isSettled ? '<span class="text-[9px] text-slate-400">立替(済)</span>' : '<span class="text-[9px] text-orange-500 font-bold">立替(未)</span>') : ''}
                         </div>
-                        <div class="font-bold text-slate-700 truncate">${f.description}</div>
+                        <div class="font-bold text-slate-700 truncate">${f.description} ${receiptIcon}</div>
                     </div>
                     <div class="flex flex-col items-end shrink-0">
                         <div class="font-black text-sm ${isInc ? 'text-emerald-600' : 'text-rose-500'}">
@@ -1058,12 +1394,18 @@
                         </button>
                     </div>
                 `;
-                listEl.appendChild(div);
+                if(listEl) listEl.appendChild(div);
             });
+
+            if (advanceAlert) {
+                if (hasUnsettled) advanceAlert.classList.remove('hidden');
+                else advanceAlert.classList.add('hidden');
+            }
+            lucide.createIcons();
         }
 
         // ==========================================
-        // 💰 月謝チェックリスト (NEW)
+        // 💰 月謝チェックリスト
         // ==========================================
         function renderFeeChecklist() {
             const listEl = document.getElementById('admin-fee-checklist');
@@ -1073,7 +1415,6 @@
             const uniqueNames = [...new Set(allAttendance.map(a => a.name))].sort();
             
             listEl.innerHTML = '';
-            
             if (uniqueNames.length === 0) {
                 listEl.innerHTML = '<div class="p-4 text-center text-sm text-slate-400">まだ出欠に登録されたメンバーがいません</div>';
                 return;
@@ -1107,9 +1448,7 @@
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fees', docId), {
                     month: monthVal, name: name, isPaid: isPaid, timestamp: new Date().toISOString()
                 });
-            } catch (err) {
-                showToast("保存に失敗しました");
-            }
+            } catch (err) { showToast("保存に失敗しました"); }
         }
 
         // ==========================================
@@ -1127,7 +1466,7 @@
 
             for (let i = 0; i < firstDayIndex; i++) {
                 const empty = document.createElement('div');
-                empty.className = 'h-20 sm:h-28 border border-transparent';
+                empty.className = 'h-16 sm:h-28 border border-transparent';
                 daysContainer.appendChild(empty);
             }
 
@@ -1135,11 +1474,11 @@
                 const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
                 const dayCell = document.createElement('button');
-                dayCell.className = `h-20 sm:h-28 rounded-2xl flex flex-col justify-between p-1.5 transition-all duration-200 text-xs relative border border-slate-200 bg-white hover:border-amber-300 hover:shadow-md group`;
+                dayCell.className = `h-16 sm:h-28 rounded-2xl flex flex-col justify-between items-stretch p-1.5 transition-all duration-200 text-xs font-bold relative border border-slate-100 bg-white hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 overflow-hidden group`;
 
-                const dateNum = document.createElement('div');
-                dateNum.className = 'text-left font-black text-slate-400 pl-1 pt-0.5 transition-colors';
+                const dateNum = document.createElement('span');
                 dateNum.innerText = day;
+                dateNum.className = 'text-left inline-block w-8 h-8 leading-8 text-center rounded-full text-slate-700 transition-colors';
 
                 const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
                 if (dayOfWeek === 0) dateNum.classList.add('!text-rose-500');
@@ -1150,11 +1489,11 @@
 
                 if (tournament) {
                     dayCell.classList.add('bg-amber-50/80', '!border-amber-300', 'hover:shadow-md');
-                    dateNum.classList.add('!text-amber-700');
+                    dateNum.classList.add('!bg-amber-500', '!text-white', 'shadow-sm');
                     
                     const badgeDiv = document.createElement('div');
-                    badgeDiv.className = 'w-full mt-auto transition-transform group-hover:scale-105';
-                    badgeDiv.innerHTML = `<div class="bg-amber-400 text-slate-900 text-[10px] sm:text-xs font-black rounded py-1 px-1 text-center shadow-sm">🏆 大会</div>`;
+                    badgeDiv.className = 'mt-auto w-full px-0.5 pb-0.5 transition-transform group-hover:scale-105';
+                    badgeDiv.innerHTML = `<div class="bg-amber-400 text-slate-900 text-[10px] sm:text-xs font-black rounded-lg py-1 text-center shadow-sm">🏆 大会</div>`;
                     
                     dayCell.appendChild(dateNum);
                     dayCell.appendChild(badgeDiv);
@@ -1162,24 +1501,22 @@
                 } else if (schedule) {
                     if (schedule.label.includes('定期')) {
                         dayCell.classList.add('bg-emerald-50/50', '!border-emerald-200');
+                        dateNum.classList.add('!bg-emerald-500', '!text-white', 'shadow-sm');
                     } else if (schedule.label.includes('土曜')) {
                         dayCell.classList.add('bg-sky-50/50', '!border-sky-200');
+                        dateNum.classList.add('!bg-sky-500', '!text-white', 'shadow-sm');
                     }
 
                     const sAtts = allAttendance.filter(a => a.scheduleId === schedule.id);
                     const atts = sAtts.filter(a => a.status === '出席').length;
-                    const maybes = sAtts.filter(a => a.status === '未定').length;
                     
                     const summaryDiv = document.createElement('div');
-                    summaryDiv.className = 'w-full flex flex-col gap-0.5 mt-auto transition-transform group-hover:scale-105';
+                    summaryDiv.className = 'mt-auto w-full px-0.5 pb-0.5 transition-transform group-hover:scale-105';
                     
-                    if(atts > 0 || maybes > 0) {
-                        let html = '';
-                        if(atts > 0) html += `<div class="bg-emerald-100 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold rounded py-0.5 px-1 flex justify-between items-center shadow-sm"><span>出</span><span>${atts}人</span></div>`;
-                        if(maybes > 0) html += `<div class="bg-amber-100 text-amber-700 border border-amber-200 text-[10px] font-extrabold rounded py-0.5 px-1 flex justify-between items-center shadow-sm"><span>未</span><span>${maybes}人</span></div>`;
-                        summaryDiv.innerHTML = html;
+                    if(atts > 0) {
+                        summaryDiv.innerHTML = `<div class="bg-emerald-500 text-white text-[10px] sm:text-xs font-bold rounded-lg py-1 text-center shadow-sm">🟢 ${atts}人</div>`;
                     } else {
-                        summaryDiv.innerHTML = `<div class="bg-white text-slate-400 border border-slate-200 text-[10px] font-bold rounded py-1 px-1 text-center">未回答</div>`;
+                        summaryDiv.innerHTML = `<div class="bg-slate-100 text-slate-400 text-[9px] sm:text-[10px] font-bold rounded-lg py-1 text-center">未回答</div>`;
                     }
                     
                     dayCell.appendChild(dateNum);
@@ -1218,6 +1555,29 @@
             const nextD = new Date(next.date);
             const dayWeek = ['日','月','火','水','木','金','土'][nextD.getDay()];
             if(dateWidget) dateWidget.innerText = `${nextD.getMonth() + 1}/${nextD.getDate()}(${dayWeek}) ${next.time ? next.time.split('~')[0] : ''}`;
+        }
+
+        // ==========================================
+        // 💬 LINE連携 
+        // ==========================================
+        function shareToLine() {
+            if (!currentOpenScheduleId) return;
+            const schedule = allSchedules.find(s => s.id === currentOpenScheduleId);
+            if (!schedule) return;
+
+            const d = new Date(schedule.date);
+            const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
+            const dateStr = `${d.getMonth() + 1}/${d.getDate()}(${dayWeek})`;
+
+            const sAtts = allAttendance.filter(a => a.scheduleId === currentOpenScheduleId);
+            const attsCount = sAtts.filter(a => a.status === '出席').length;
+            const maybesCount = sAtts.filter(a => a.status === '未定').length;
+
+            const portalUrl = window.location.href; 
+            const message = `お疲れ様です！\n${dateStr} ${schedule.time || ''} の練習ですが、\n現在【出席: ${attsCount}名 / 未定: ${maybesCount}名】です💪✨\n\nまだ出欠を入力していない方は、こちらのサイトから登録をお願いします👇\n${portalUrl}`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`line://msg/text/${encodedMessage}`, '_blank');
         }
 
         // ==========================================
@@ -1343,7 +1703,7 @@
                     <div class="space-y-1 text-xs">
                         ${atts.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-emerald-500 shrink-0 mt-0.5">🟢</span><span class="text-slate-700 leading-relaxed">${atts.map(a=>`<span class="font-bold">${a.name}</span>${a.comment ? `<span class="text-[10px] text-slate-400">(${a.comment})</span>` : ''}`).join(', ')}</span></div>` : ''}
                         ${maybes.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-amber-400 shrink-0 mt-0.5">🟡</span><span class="text-slate-600 leading-relaxed">${maybes.map(a=>`${a.name}`).join(', ')}</span></div>` : ''}
-                        ${absents.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-rose-400 shrink-0 mt-0.5">🔴</span><span class="text-slate-400 leading-relaxed">${absents.map(a=>`${a.name}`).join(', ')}</span></div>` : ''}
+                        ${absents.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-rose-400 shrink-0 mt-0.5">🔴</span><span class="text-slate-400 leading-relaxed">${absents.length > 0 ? absents.map(a=>`${a.name}`).join(', ') : ''}</span></div>` : ''}
                     </div>
                 `;
                 list.appendChild(div);
@@ -1408,31 +1768,6 @@
 
         function closeModal() {
             document.getElementById('detail-modal').classList.add('hidden');
-        }
-
-        // ==========================================
-        // 💬 LINE連携 
-        // ==========================================
-        function shareToLine() {
-            if (!currentOpenScheduleId) return;
-            const schedule = allSchedules.find(s => s.id === currentOpenScheduleId);
-            if (!schedule) return;
-
-            const d = new Date(schedule.date);
-            const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
-            const dateStr = `${d.getMonth() + 1}/${d.getDate()}(${dayWeek})`;
-
-            const sAtts = allAttendance.filter(a => a.scheduleId === currentOpenScheduleId);
-            const attsCount = sAtts.filter(a => a.status === '出席').length;
-            const maybesCount = sAtts.filter(a => a.status === '未定').length;
-
-            const portalUrl = window.location.href; 
-
-            // 絵文字を修正 (🏓 -> ✨)
-            const message = `お疲れ様です！\n${dateStr} ${schedule.time || ''} の練習ですが、\n現在【出席: ${attsCount}名 / 未定: ${maybesCount}名】です✨\n\nまだ出欠を入力していない方は、こちらのサイトから登録をお願いします👇\n${portalUrl}`;
-            
-            const encodedMessage = encodeURIComponent(message);
-            window.open(`line://msg/text/${encodedMessage}`, '_blank');
         }
 
         // ==========================================
