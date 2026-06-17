@@ -410,15 +410,38 @@
                     </div>
                 </div>
 
+                <!-- 👥 本登録メンバーの管理 (NEW) -->
+                <div class="space-y-5 border-t border-slate-200 pt-8">
+                    <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
+                        <span class="p-1.5 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="users" class="w-5 h-5"></i></span>
+                        本登録メンバーの管理
+                    </h3>
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <p class="text-sm text-slate-500 font-medium mb-2">月謝管理のベースとなる「メンバー名簿」です。ここで登録した名前が月謝チェックリストに表示されます。</p>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <input type="text" id="new-member-name" placeholder="メンバー名 (例: 山田 太郎)" class="flex-1 px-4 py-3.5 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-colors">
+                            <button onclick="addMember()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-8 py-3.5 rounded-xl text-base shadow-md transition-colors whitespace-nowrap flex justify-center items-center gap-2">
+                                <i data-lucide="user-plus" class="w-5 h-5"></i> 追加
+                            </button>
+                        </div>
+                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 mt-4">
+                            <h4 class="font-bold text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200 pb-2 mb-3">登録済みメンバー</h4>
+                            <div id="admin-member-list" class="space-y-2 max-h-[250px] overflow-y-auto custom-scroll pr-1">
+                                <!-- JS生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- ✅ 月謝管理チェックリスト -->
                 <div class="space-y-5 border-t border-slate-200 pt-8">
                     <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
-                        <span class="p-1.5 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></span>
+                        <span class="p-1.5 bg-violet-100 text-violet-600 rounded-lg"><i data-lucide="check-square" class="w-5 h-5"></i></span>
                         月謝・会費の徴収チェック
                     </h3>
                     <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-2">
-                            <p class="text-sm text-slate-500 font-medium">出欠に登録された名前を元にリスト化しています。</p>
+                            <p class="text-sm text-slate-500 font-medium">上の「本登録メンバー」に登録された人がリスト化されています。</p>
                             <div class="flex items-center gap-2 w-full sm:w-auto">
                                 <select id="fee-month-selector" onchange="renderFeeChecklist()" class="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-slate-200 text-base bg-slate-50 focus:outline-none font-bold text-slate-700">
                                     <option value="2026-06">2026年 6月</option>
@@ -679,9 +702,9 @@
                             <button type="button" onclick="setModalFormStatus('欠席')" id="modal-status-欠席" class="flex-1 py-3 rounded-xl text-sm font-bold bg-white border border-slate-200 text-slate-600 transition-colors">🔴</button>
                         </div>
                     </div>
-                    <div class="flex gap-2">
-                        <input type="text" id="modal-att-comment" placeholder="連絡事項 (任意)" class="flex-1 px-4 py-3.5 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-amber-500 bg-white">
-                        <button type="button" onclick="submitModalAttendance()" class="bg-slate-900 text-white font-bold text-base px-6 py-3.5 rounded-xl shadow-md transition-transform hover:scale-105 active:scale-95 shrink-0">登録</button>
+                    <div class="flex flex-col gap-3 mt-1">
+                        <input type="text" id="modal-att-comment" placeholder="連絡事項 (任意)" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-amber-500 bg-white">
+                        <button type="button" onclick="submitModalAttendance()" class="w-full bg-slate-900 text-white font-bold text-sm py-3.5 rounded-xl shadow-md transition-transform hover:scale-105 active:scale-95">出欠を登録する</button>
                     </div>
                 </div>
                 <div class="space-y-3">
@@ -770,6 +793,7 @@
         let allFinance = []; 
         let allTournaments = []; 
         let allFeeChecks = {}; 
+        let allMembers = [];
         
         let financeGoal = { title: "ポータブルネット購入", amount: 10000 }; 
         let teamPaypayLink = "";
@@ -818,6 +842,9 @@
         window.savePaypayLink = savePaypayLink;
         window.openPaypayLink = openPaypayLink;
 
+        window.addMember = addMember;
+        window.deleteMember = deleteMember;
+
 
         function getTodayString() {
             const d = new Date();
@@ -859,6 +886,7 @@
             const financeRef = collection(db, 'artifacts', appId, 'public', 'data', 'finance'); 
             const tournamentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'tournaments');
             const feesRef = collection(db, 'artifacts', appId, 'public', 'data', 'fees'); 
+            const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
 
             try {
                 const goalDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'finance_goal'));
@@ -912,6 +940,14 @@
             onSnapshot(feesRef, (snapshot) => {
                 allFeeChecks = {};
                 snapshot.forEach(doc => { allFeeChecks[doc.id] = doc.data(); });
+                renderFeeChecklist();
+            });
+
+            onSnapshot(membersRef, (snapshot) => {
+                allMembers = [];
+                snapshot.forEach(doc => allMembers.push({ id: doc.id, ...doc.data() }));
+                allMembers.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+                renderAdminMemberList();
                 renderFeeChecklist();
             });
 
@@ -1244,22 +1280,66 @@
         }
 
         // ==========================================
-        // 💰 月謝チェックリスト
+        // 👥 本登録メンバー管理 ＆ 💰 月謝チェックリスト
         // ==========================================
+        async function addMember() {
+            const name = document.getElementById('new-member-name').value.trim();
+            if (!name) return showToast("メンバー名を入力してください");
+            const memberId = `mem_${Date.now()}`;
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', memberId), {
+                    name, timestamp: new Date().toISOString()
+                });
+                showToast("メンバーを追加しました！");
+                document.getElementById('new-member-name').value = '';
+            } catch (err) {
+                showToast("追加に失敗しました。");
+            }
+        }
+
+        async function deleteMember(id, name) {
+            if (!confirm(`メンバー「${name}」を名簿から削除しますか？\n（※過去の出欠や会計履歴は消えません）`)) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', id));
+                showToast("削除しました。");
+            } catch (err) {
+                showToast("削除に失敗しました。");
+            }
+        }
+
+        function renderAdminMemberList() {
+            const listEl = document.getElementById('admin-member-list');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+            if (allMembers.length === 0) {
+                listEl.innerHTML = '<div class="text-sm text-slate-400 py-2">メンバーが登録されていません。</div>';
+                return;
+            }
+            allMembers.forEach(m => {
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 text-sm shadow-sm group hover:border-slate-300 transition-colors";
+                div.innerHTML = `
+                    <span class="font-bold text-slate-700 ml-1">${m.name}</span>
+                    <button onclick="deleteMember('${m.id}', '${m.name}')" class="text-xs text-rose-400 hover:text-rose-600 font-bold px-3 py-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-rose-50 rounded-lg">削除</button>
+                `;
+                listEl.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
         function renderFeeChecklist() {
             const listEl = document.getElementById('admin-fee-checklist');
             const monthVal = document.getElementById('fee-month-selector').value; 
             if (!listEl || !monthVal) return;
-
-            const uniqueNames = [...new Set(allAttendance.map(a => a.name))].sort();
             
             listEl.innerHTML = '';
-            if (uniqueNames.length === 0) {
-                listEl.innerHTML = '<div class="p-4 text-center text-sm text-slate-400">まだ出欠に登録されたメンバーがいません</div>';
+            if (allMembers.length === 0) {
+                listEl.innerHTML = '<div class="p-4 text-center text-sm text-slate-400">本登録メンバーがいません。「メンバー管理」から追加してください。</div>';
                 return;
             }
 
-            uniqueNames.forEach(name => {
+            allMembers.forEach(m => {
+                const name = m.name;
                 const docId = `fee_${monthVal}_${name}`.replace(/\s+/g, '');
                 const isPaid = allFeeChecks[docId]?.isPaid || false;
                 
