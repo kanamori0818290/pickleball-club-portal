@@ -1332,7 +1332,7 @@
                     
                     const badgeDiv = document.createElement('div');
                     badgeDiv.className = 'mt-auto w-full px-0.5 pb-0.5 transition-transform group-hover:scale-105';
-                    badgeDiv.innerHTML = `<div class="bg-amber-400 text-slate-900 text-[10px] sm:text-xs font-black rounded-lg py-1 text-center shadow-sm">🏆 大会</div>`;
+                    badgeDiv.innerHTML = `<div class="bg-amber-400 text-slate-900 text-[9px] sm:text-xs font-black rounded py-0.5 text-center shadow-sm overflow-hidden text-ellipsis whitespace-nowrap">🏆大会</div>`;
                     
                     dayCell.appendChild(dateNum);
                     dayCell.appendChild(badgeDiv);
@@ -1353,9 +1353,11 @@
                     summaryDiv.className = 'mt-auto w-full px-0.5 pb-0.5 transition-transform group-hover:scale-105';
                     
                     if(atts > 0) {
-                        summaryDiv.innerHTML = `<div class="bg-emerald-500 text-white text-[10px] sm:text-xs font-bold rounded-lg py-1 text-center shadow-sm">🟢 ${atts}人</div>`;
+                        // 絵文字を削り、文字幅を詰めて太字で「〇名」と表示
+                        summaryDiv.innerHTML = `<div class="bg-emerald-500 text-white text-[12px] sm:text-sm font-black rounded py-0.5 text-center shadow-sm tracking-tighter whitespace-nowrap">${atts}名</div>`;
                     } else {
-                        summaryDiv.innerHTML = `<div class="bg-slate-100 text-slate-400 text-[9px] sm:text-[10px] font-bold rounded-lg py-1 text-center">未回答</div>`;
+                        // 未回答もはみ出ないように設定
+                        summaryDiv.innerHTML = `<div class="bg-slate-100 text-slate-400 text-[9px] sm:text-xs font-bold rounded py-0.5 text-center overflow-hidden text-ellipsis whitespace-nowrap">未回答</div>`;
                     }
                     
                     dayCell.appendChild(dateNum);
