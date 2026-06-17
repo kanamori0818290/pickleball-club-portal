@@ -1393,11 +1393,11 @@
                 const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
                 const dayCell = document.createElement('button');
-                dayCell.className = `h-16 sm:h-28 rounded-2xl flex flex-col justify-between items-stretch p-1.5 transition-all duration-200 text-xs font-bold relative border border-slate-100 bg-white hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 overflow-hidden group`;
+                dayCell.className = `h-16 sm:h-28 rounded-xl sm:rounded-2xl flex flex-col justify-between items-stretch p-0.5 sm:p-1.5 transition-all duration-200 text-xs font-bold relative border border-slate-100 bg-white hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 overflow-hidden group`;
 
                 const dateNum = document.createElement('span');
                 dateNum.innerText = day;
-                dateNum.className = 'text-left inline-block w-8 h-8 leading-8 text-center rounded-full text-slate-700 transition-colors';
+                dateNum.className = 'text-left inline-block w-6 h-6 sm:w-8 sm:h-8 leading-6 sm:leading-8 text-center rounded-full text-slate-700 transition-colors text-[10px] sm:text-base';
 
                 const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
                 if (dayOfWeek === 0) dateNum.classList.add('!text-rose-500');
@@ -1412,7 +1412,7 @@
                     
                     const badgeDiv = document.createElement('div');
                     badgeDiv.className = 'mt-auto w-full px-0.5 pb-0.5 transition-transform group-hover:scale-105';
-                    badgeDiv.innerHTML = `<div class="bg-amber-400 text-slate-900 text-[10px] sm:text-xs font-black rounded-lg py-1 text-center shadow-sm">🏆 大会</div>`;
+                    badgeDiv.innerHTML = `<div class="bg-amber-400 text-slate-900 text-[9px] sm:text-xs font-black rounded sm:rounded-lg py-0.5 sm:py-1 text-center shadow-sm">🏆 大会</div>`;
                     
                     dayCell.appendChild(dateNum);
                     dayCell.appendChild(badgeDiv);
@@ -1435,20 +1435,20 @@
                     
                     if(sAtts.length > 0) {
                         summaryDiv.innerHTML = `
-                            <div class="flex justify-evenly items-center bg-white rounded px-1 sm:px-1.5 py-0.5 sm:py-1 border border-slate-200 shadow-sm">
-                                <div class="flex flex-col sm:flex-row sm:gap-1 items-center leading-none text-emerald-600">
-                                    <span class="text-[8px] font-bold opacity-80 mb-0.5 sm:mb-0">出</span>
-                                    <span class="text-[11px] sm:text-sm font-black">${atts}</span>
+                            <div class="flex flex-col sm:flex-row justify-center items-center bg-white rounded sm:rounded-lg p-0.5 sm:px-2 sm:py-1 border border-slate-200 shadow-sm gap-0 sm:gap-2">
+                                <div class="flex items-center gap-0.5 text-emerald-600 leading-none">
+                                    <span class="text-[8px] sm:text-[10px] font-bold opacity-80">出</span>
+                                    <span class="text-[10px] sm:text-sm font-black">${atts}</span>
                                 </div>
-                                <div class="w-px h-4 bg-slate-200 mx-0.5 sm:mx-1"></div>
-                                <div class="flex flex-col sm:flex-row sm:gap-1 items-center leading-none text-rose-500">
-                                    <span class="text-[8px] font-bold opacity-80 mb-0.5 sm:mb-0">欠</span>
-                                    <span class="text-[11px] sm:text-sm font-black">${absents}</span>
+                                <div class="hidden sm:block w-px h-3 bg-slate-200"></div>
+                                <div class="flex items-center gap-0.5 text-rose-500 leading-none mt-0.5 sm:mt-0">
+                                    <span class="text-[8px] sm:text-[10px] font-bold opacity-80">欠</span>
+                                    <span class="text-[10px] sm:text-sm font-black">${absents}</span>
                                 </div>
                             </div>
                         `;
                     } else {
-                        summaryDiv.innerHTML = `<div class="bg-white/60 text-slate-400 text-[9px] sm:text-[10px] font-bold rounded py-1 text-center border border-slate-200/50">未回答</div>`;
+                        summaryDiv.innerHTML = `<div class="bg-white/60 text-slate-400 text-[8px] sm:text-[10px] font-bold rounded py-0.5 sm:py-1 text-center border border-slate-200/50">未回答</div>`;
                     }
                     
                     dayCell.appendChild(dateNum);
@@ -1564,27 +1564,33 @@
             const name = document.getElementById('att-name').value.trim();
             const schedId = document.getElementById('att-schedule-id').value;
             const comment = document.getElementById('att-comment').value.trim();
+            const isProxy = document.getElementById('att-is-proxy').checked;
+            
             if (!name || !schedId) return showToast("お名前と日程を入力してください");
 
             const responseId = `${name}_${schedId}`.replace(/\s+/g, '');
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', responseId), {
-                scheduleId: schedId, name, status: selectedStatus, comment, timestamp: new Date().toISOString()
+                scheduleId: schedId, name, status: selectedStatus, comment, isProxy, timestamp: new Date().toISOString()
             });
             showToast("出欠を登録しました！");
             document.getElementById('att-comment').value = '';
+            document.getElementById('att-is-proxy').checked = false;
         }
 
         async function submitModalAttendance() {
             const name = document.getElementById('modal-att-name').value.trim();
             const comment = document.getElementById('modal-att-comment').value.trim();
+            const isProxy = document.getElementById('modal-att-is-proxy').checked;
+            
             if (!name) return showToast("お名前を入力してください");
             
             const responseId = `${name}_${currentOpenScheduleId}`.replace(/\s+/g, '');
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', responseId), {
-                scheduleId: currentOpenScheduleId, name, status: selectedModalStatus, comment, timestamp: new Date().toISOString()
+                scheduleId: currentOpenScheduleId, name, status: selectedModalStatus, comment, isProxy, timestamp: new Date().toISOString()
             });
             showToast("登録しました！");
             document.getElementById('modal-att-comment').value = '';
+            document.getElementById('modal-att-is-proxy').checked = false;
             showDetailModal(currentOpenScheduleId);
         }
 
@@ -1633,9 +1639,9 @@
                     </div>
 
                     <div class="space-y-1 text-xs">
-                        ${atts.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-emerald-500 shrink-0 mt-0.5">🟢</span><span class="text-slate-700 leading-relaxed">${atts.map(a=>`<span class="font-bold">${a.name}</span>${a.comment ? `<span class="text-[10px] text-slate-400">(${a.comment})</span>` : ''}`).join(', ')}</span></div>` : ''}
-                        ${maybes.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-amber-400 shrink-0 mt-0.5">🟡</span><span class="text-slate-600 leading-relaxed">${maybes.map(a=>`${a.name}`).join(', ')}</span></div>` : ''}
-                        ${absents.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-rose-400 shrink-0 mt-0.5">🔴</span><span class="text-slate-400 leading-relaxed">${absents.length > 0 ? absents.map(a=>`${a.name}`).join(', ') : ''}</span></div>` : ''}
+                        ${atts.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-emerald-500 shrink-0 mt-0.5">🟢</span><span class="text-slate-700 leading-relaxed">${atts.map(a=>`<span class="font-bold">${a.name}</span>${a.isProxy ? '<span class="text-[9px] bg-slate-200 text-slate-500 px-1 py-0.5 rounded ml-1 font-medium">代理</span>' : ''}${a.comment ? `<span class="text-[10px] text-slate-400 ml-1">(${a.comment})</span>` : ''}`).join(', ')}</span></div>` : ''}
+                        ${maybes.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-amber-400 shrink-0 mt-0.5">🟡</span><span class="text-slate-600 leading-relaxed">${maybes.map(a=>`<span class="font-bold">${a.name}</span>${a.isProxy ? '<span class="text-[9px] bg-slate-200 text-slate-500 px-1 py-0.5 rounded ml-1 font-medium">代理</span>' : ''}${a.comment ? `<span class="text-[10px] text-slate-400 ml-1">(${a.comment})</span>` : ''}`).join(', ')}</span></div>` : ''}
+                        ${absents.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-rose-400 shrink-0 mt-0.5">🔴</span><span class="text-slate-400 leading-relaxed">${absents.map(a=>`<span class="font-bold">${a.name}</span>${a.isProxy ? '<span class="text-[9px] bg-slate-200 text-slate-500 px-1 py-0.5 rounded ml-1 font-medium">代理</span>' : ''}${a.comment ? `<span class="text-[10px] text-slate-400 ml-1">(${a.comment})</span>` : ''}`).join(', ')}</span></div>` : ''}
                     </div>
                 `;
                 list.appendChild(div);
@@ -1683,10 +1689,11 @@
                     const item = document.createElement('div');
                     item.className = "flex justify-between items-center border-b border-slate-100 py-2 last:border-0";
                     let dot = a.status==='出席'?'🟢':a.status==='未定'?'🟡':'🔴';
+                    let proxyBadge = a.isProxy ? `<span class="text-[9px] bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded ml-1 font-medium">代理</span>` : '';
                     item.innerHTML = `
                         <div>
-                            <span class="font-bold text-slate-700">${dot} ${a.name}</span>
-                            ${a.comment ? `<p class="text-[10px] text-slate-400 ml-5 mt-0.5">${a.comment}</p>` : ''}
+                            <span class="font-bold text-slate-700 flex items-center">${dot} <span class="ml-1">${a.name}</span> ${proxyBadge}</span>
+                            ${a.comment ? `<p class="text-[10px] text-slate-400 ml-6 mt-0.5">${a.comment}</p>` : ''}
                         </div>
                         <span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded">${a.status}</span>
                     `;
