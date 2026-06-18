@@ -123,6 +123,14 @@
             </div>
         </div>
 
+        <!-- 🔰 ビジター・体験参加の案内ボタン (NEW) -->
+        <div class="px-2">
+            <button onclick="openVisitorModal()" class="w-full bg-gradient-to-r from-orange-400 to-rose-400 text-white font-bold py-4 rounded-xl shadow-md flex items-center justify-center gap-2 hover:opacity-90 transition-opacity transform hover:scale-[1.01] duration-200">
+                <i data-lucide="hand" class="w-5 h-5"></i>
+                初めて参加・見学を希望される方はこちら
+            </button>
+        </div>
+
         <div id="news-section" class="hidden bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100/50 rounded-2xl p-5 shadow-sm relative overflow-hidden">
             <div class="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
             <div class="flex gap-4">
@@ -168,7 +176,13 @@
                         <div class="space-y-5">
                             <div>
                                 <label class="block text-sm font-bold text-slate-500 mb-2 uppercase tracking-wide">1. お名前</label>
-                                <input type="text" id="att-name" placeholder="部員名を入力" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-amber-500 focus:outline-none transition-shadow bg-slate-50 focus:bg-white font-medium">
+                                <div class="relative">
+                                    <select id="att-name-select" onchange="toggleAttNameInput(this.value, 'main')" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none appearance-none font-medium cursor-pointer transition-shadow">
+                                        <option value="">お名前を選択してください</option>
+                                    </select>
+                                    <i data-lucide="chevron-down" class="w-4 h-4 absolute right-4 top-4 text-slate-400 pointer-events-none"></i>
+                                </div>
+                                <input type="text" id="att-name-input" placeholder="ゲスト・ビジター名を入力" class="w-full mt-3 px-4 py-3.5 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-amber-500 focus:outline-none transition-shadow bg-slate-50 focus:bg-white font-medium hidden">
                             </div>
                             <div>
                                 <label class="block text-sm font-bold text-slate-500 mb-2 uppercase tracking-wide">2. 練習日程を選択</label>
@@ -179,7 +193,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-bold text-slate-500 mb-2 uppercase tracking-wide">3. 参加状況</label>
-                                <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                                <div class="grid grid-cols-4 gap-2 sm:gap-3">
                                     <button type="button" onclick="setFormStatus('出席')" id="status-btn-出席" class="py-3.5 rounded-xl border border-slate-200 text-sm font-bold transition-all bg-white text-slate-600 hover:bg-slate-50 flex flex-col items-center gap-1">
                                         <span class="text-xl">🟢</span><span>出席</span>
                                     </button>
@@ -188,6 +202,9 @@
                                     </button>
                                     <button type="button" onclick="setFormStatus('欠席')" id="status-btn-欠席" class="py-3.5 rounded-xl border border-slate-200 text-sm font-bold transition-all bg-white text-slate-600 hover:bg-slate-50 flex flex-col items-center gap-1">
                                         <span class="text-xl">🔴</span><span>欠席</span>
+                                    </button>
+                                    <button type="button" onclick="setFormStatus('削除')" id="status-btn-削除" class="py-3.5 rounded-xl border border-slate-200 text-[11px] sm:text-xs font-bold transition-all bg-slate-50 text-slate-400 hover:bg-slate-100 flex flex-col items-center gap-1">
+                                        <span class="text-xl opacity-50">✖</span><span class="whitespace-nowrap">回答取消</span>
                                     </button>
                                 </div>
                             </div>
@@ -211,7 +228,23 @@
                     </div>
                 </div>
 
-                <div class="lg:col-span-7">
+                <div class="lg:col-span-7 space-y-8">
+                    <!-- 🏅 参加回数ランキング (NEW) -->
+                    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-rose-50 text-rose-500 rounded-xl"><i data-lucide="award" class="w-6 h-6"></i></div>
+                                <h3 class="font-extrabold text-lg text-slate-800 tracking-tight">メンバー別 参加回数ランキング</h3>
+                            </div>
+                            <select id="ranking-month-selector" onchange="renderAttendanceRanking()" class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-slate-50 focus:outline-none font-bold text-slate-700 cursor-pointer">
+                                <option value="2026-06">2026年 6月</option>
+                                <option value="2026-07">2026年 7月</option>
+                                <option value="all">全期間 (累計)</option>
+                            </select>
+                        </div>
+                        <div id="attendance-ranking-list" class="space-y-1 max-h-[300px] overflow-y-auto custom-scroll pr-2"></div>
+                    </div>
+
                     <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200">
                         <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
                             <div class="p-2 bg-sky-50 text-sky-500 rounded-xl"><i data-lucide="clipboard-list" class="w-6 h-6"></i></div>
@@ -604,10 +637,80 @@
                     </div>
                 </div>
 
+                <!-- 🔰 ビジター・体験希望の問い合わせ一覧 (NEW) -->
+                <div class="space-y-5 border-t border-slate-200 pt-8">
+                    <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
+                        <span class="p-1.5 bg-rose-100 text-rose-600 rounded-lg"><i data-lucide="mail" class="w-5 h-5"></i></span>
+                        ビジター・体験希望の問い合わせ
+                    </h3>
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center mb-2 border-b border-slate-100 pb-3">
+                            <p class="text-sm text-slate-500 font-medium">サイトのトップから送信された「見学・体験希望」のメッセージです。</p>
+                        </div>
+                        <div id="admin-visitor-list" class="space-y-3 custom-scroll max-h-[400px] overflow-y-auto pr-1">
+                            <!-- JS生成 -->
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>
 
     </main>
+
+    <!-- 🔰 ビジター・体験希望モーダル (NEW) -->
+    <div id="visitor-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden transform scale-100 transition-all border border-white/20 flex flex-col max-h-[90vh]">
+            <div class="bg-gradient-to-r from-orange-50 to-rose-50 px-6 py-4 flex justify-between items-center border-b border-orange-100 shrink-0">
+                <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
+                    <i data-lucide="hand" class="w-5 h-5 text-orange-500"></i> 初回参加・見学の申し込み
+                </h3>
+                <button onclick="closeVisitorModal()" class="p-2 bg-white hover:bg-slate-100 rounded-full transition-colors text-slate-400 shadow-sm border border-slate-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-5 overflow-y-auto custom-scroll flex-1 min-h-0">
+                <p class="text-sm text-slate-600 font-medium leading-relaxed bg-white">
+                    ピックルボールに興味を持っていただきありがとうございます！<br>以下のフォームからお気軽にご連絡ください。管理者が確認いたします。
+                </p>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-2">お名前 (ニックネーム可)</label>
+                    <input type="text" id="vis-name" placeholder="例: やまだ" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-orange-400 focus:outline-none bg-slate-50 focus:bg-white font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-2">ご連絡先 (メールアドレスやLINE IDなど)</label>
+                    <input type="text" id="vis-contact" placeholder="折り返し連絡が取れるもの" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-orange-400 focus:outline-none bg-slate-50 focus:bg-white font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-2">希望日 (見学・体験)</label>
+                    <div class="relative">
+                        <select id="vis-date" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-orange-400 focus:outline-none appearance-none font-medium cursor-pointer transition-shadow">
+                            <!-- JS生成 -->
+                        </select>
+                        <i data-lucide="chevron-down" class="w-4 h-4 absolute right-4 top-4 text-slate-400 pointer-events-none"></i>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-2">ラケットスポーツの経験</label>
+                    <select id="vis-exp" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-orange-400 focus:outline-none appearance-none font-medium cursor-pointer transition-shadow">
+                        <option value="未経験・初心者">未経験・初心者</option>
+                        <option value="テニス経験あり">テニス経験あり</option>
+                        <option value="卓球・バドミントン経験あり">卓球・バドミントン等の経験あり</option>
+                        <option value="ピックルボール経験者">ピックルボール経験者</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-2">メッセージ・質問など</label>
+                    <textarea id="vis-message" rows="3" placeholder="「見学だけしたいです」「ラケットは借りられますか？」など" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-orange-400 focus:outline-none bg-slate-50 focus:bg-white font-medium"></textarea>
+                </div>
+                <div class="pt-2">
+                    <button onclick="submitVisitorRequest()" class="w-full py-4 bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white font-bold rounded-xl transition-all text-sm shadow-md flex justify-center items-center gap-2 transform hover:scale-[1.02]">
+                        <i data-lucide="send" class="w-4 h-4"></i> この内容で送信する
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- 📊 レポート生成モーダル -->
     <div id="report-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
@@ -707,11 +810,19 @@
                         <i data-lucide="edit-3" class="w-4 h-4 text-amber-500"></i> その場で出欠回答
                     </h4>
                     <div class="grid grid-cols-1 gap-3">
-                        <input type="text" id="modal-att-name" placeholder="お名前" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-amber-500 bg-white">
+                        <div class="relative">
+                            <select id="modal-att-name-select" onchange="toggleAttNameInput(this.value, 'modal')" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none appearance-none cursor-pointer font-medium">
+                                <option value="">お名前を選択</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="w-4 h-4 absolute right-4 top-4 text-slate-400 pointer-events-none"></i>
+                        </div>
+                        <input type="text" id="modal-att-name-input" placeholder="ゲスト・ビジター名を入力" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-amber-500 bg-white hidden font-medium">
+                        
                         <div class="flex gap-2">
                             <button type="button" onclick="setModalFormStatus('出席')" id="modal-status-出席" class="flex-1 py-3 rounded-xl text-sm font-bold bg-white border border-slate-200 text-slate-600 transition-colors">🟢</button>
                             <button type="button" onclick="setModalFormStatus('未定')" id="modal-status-未定" class="flex-1 py-3 rounded-xl text-sm font-bold bg-white border border-slate-200 text-slate-600 transition-colors">🟡</button>
                             <button type="button" onclick="setModalFormStatus('欠席')" id="modal-status-欠席" class="flex-1 py-3 rounded-xl text-sm font-bold bg-white border border-slate-200 text-slate-600 transition-colors">🔴</button>
+                            <button type="button" onclick="setModalFormStatus('削除')" id="modal-status-削除" class="flex-none px-3 py-3 rounded-xl text-[10px] font-bold bg-slate-50 border border-slate-200 text-slate-400 transition-colors" title="回答を取り消す">✖</button>
                         </div>
                     </div>
                     <div class="flex flex-col gap-3 mt-1">
@@ -785,7 +896,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const appId = 'pickleball-club-portal';
@@ -810,6 +921,7 @@
         let allTournaments = []; 
         let allFeeChecks = {}; 
         let allMembers = [];
+        let allVisitorRequests = [];
         
         let financeGoal = { title: "ポータブルネット購入", amount: 10000 }; 
         let teamPaypayLink = "";
@@ -861,6 +973,13 @@
         window.addMember = addMember;
         window.deleteMember = deleteMember;
 
+        window.toggleAttNameInput = toggleAttNameInput;
+        window.renderAttendanceRanking = renderAttendanceRanking;
+        
+        window.openVisitorModal = openVisitorModal;
+        window.closeVisitorModal = closeVisitorModal;
+        window.submitVisitorRequest = submitVisitorRequest;
+        window.deleteVisitorRequest = deleteVisitorRequest;
 
         function getTodayString() {
             const d = new Date();
@@ -872,11 +991,7 @@
         // ==========================================
         const initAuth = async () => {
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                await signInAnonymously(auth);
             } catch (err) {
                 user = { uid: 'local-test-user', isAnonymous: true };
                 onUserLoaded(user);
@@ -903,6 +1018,7 @@
             const tournamentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'tournaments');
             const feesRef = collection(db, 'artifacts', appId, 'public', 'data', 'fees'); 
             const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
+            const visitorsRef = collection(db, 'artifacts', appId, 'public', 'data', 'visitor_requests');
 
             try {
                 const goalDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'finance_goal'));
@@ -926,6 +1042,7 @@
                 snapshot.forEach(doc => allAttendance.push({ id: doc.id, ...doc.data() }));
                 refreshAllUI();
                 renderFeeChecklist(); 
+                renderAttendanceRanking();
                 if (currentOpenScheduleId) showDetailModal(currentOpenScheduleId);
             });
 
@@ -965,6 +1082,15 @@
                 allMembers.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
                 renderAdminMemberList();
                 renderFeeChecklist();
+                updateMemberSelects();
+                renderAttendanceRanking();
+            });
+
+            onSnapshot(visitorsRef, (snapshot) => {
+                allVisitorRequests = [];
+                snapshot.forEach(doc => allVisitorRequests.push({ id: doc.id, ...doc.data() }));
+                allVisitorRequests.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                renderVisitorRequests();
             });
 
             const finDateEl = document.getElementById('fin-date');
@@ -974,6 +1100,7 @@
         function refreshAllUI() {
             renderCalendar();
             updateAttendanceFormSchedules();
+            updateVisitorSchedules();
             renderAttendanceSummary();
             renderAdminScheduleList();
             updateNextPracticeWidget();
@@ -1336,12 +1463,8 @@
                 div.className = "flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 text-sm shadow-sm group hover:border-slate-300 transition-colors";
                 div.innerHTML = `
                     <span class="font-bold text-slate-700 ml-1">${m.name}</span>
-                    <button onclick="deleteMember('${m.id}', '${m.name}')" class="text-xs text-rose-400 hover:text-rose-600 font-bold px-3 py-1.5 opacity-0 md:group-hover:opacity-100 transition-opacity bg-rose-50 rounded-lg">削除</button>
+                    <button onclick="deleteMember('${m.id}', '${m.name}')" class="text-xs text-rose-400 hover:text-rose-600 font-bold px-3 py-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-rose-50 rounded-lg">削除</button>
                 `;
-                // スマホでは常に削除ボタンが見えるようにする微調整
-                if (window.innerWidth < 768) {
-                    div.querySelector('button').classList.remove('opacity-0');
-                }
                 listEl.appendChild(div);
             });
             lucide.createIcons();
@@ -1413,11 +1536,11 @@
                 const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
                 const dayCell = document.createElement('button');
-                dayCell.className = `h-16 sm:h-28 rounded-2xl flex flex-col justify-between items-stretch p-0.5 sm:p-1.5 transition-all duration-200 text-xs font-bold relative border border-slate-100 bg-white hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 overflow-hidden group`;
+                dayCell.className = `h-16 sm:h-28 rounded-2xl flex flex-col justify-between items-stretch p-1.5 transition-all duration-200 text-xs font-bold relative border border-slate-100 bg-white hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 overflow-hidden group`;
 
                 const dateNum = document.createElement('span');
                 dateNum.innerText = day;
-                dateNum.className = 'text-left inline-block w-6 h-6 sm:w-8 sm:h-8 leading-6 sm:leading-8 text-[10px] sm:text-base text-center rounded-full text-slate-700 transition-colors';
+                dateNum.className = 'text-left inline-block w-8 h-8 leading-8 text-center rounded-full text-slate-700 transition-colors';
 
                 const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
                 if (dayOfWeek === 0) dateNum.classList.add('!text-rose-500');
@@ -1535,32 +1658,73 @@
         // ==========================================
         // 出欠ロジック
         // ==========================================
+        function updateMemberSelects() {
+            const selects = ['att-name-select', 'modal-att-name-select'];
+            selects.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const currentVal = el.value;
+                el.innerHTML = '<option value="">お名前を選択してください</option>';
+                
+                allMembers.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.name;
+                    opt.innerText = m.name;
+                    el.appendChild(opt);
+                });
+                
+                const otherOpt = document.createElement('option');
+                otherOpt.value = 'other';
+                otherOpt.innerText = 'その他 (ビジター・手入力)';
+                el.appendChild(otherOpt);
+                
+                if (currentVal && Array.from(el.options).some(o => o.value === currentVal)) {
+                    el.value = currentVal;
+                }
+            });
+        }
+
+        function toggleAttNameInput(val, type) {
+            const inputId = type === 'main' ? 'att-name-input' : 'modal-att-name-input';
+            const inputEl = document.getElementById(inputId);
+            if(val === 'other') {
+                inputEl.classList.remove('hidden');
+                inputEl.focus();
+            } else {
+                inputEl.classList.add('hidden');
+            }
+        }
+
         function setFormStatus(status) {
             selectedStatus = status;
-            ['出席', '未定', '欠席'].forEach(s => {
+            ['出席', '未定', '欠席', '削除'].forEach(s => {
                 const btn = document.getElementById(`status-btn-${s}`);
                 if (!btn) return;
                 if (s === status) {
                     if (s === '出席') btn.className = "py-3.5 rounded-xl border-2 border-emerald-500 text-sm font-bold bg-emerald-50 text-emerald-800 flex flex-col items-center gap-1 shadow-sm transform scale-[1.02] transition-all";
                     if (s === '未定') btn.className = "py-3.5 rounded-xl border-2 border-amber-500 text-sm font-bold bg-amber-50 text-amber-800 flex flex-col items-center gap-1 shadow-sm transform scale-[1.02] transition-all";
                     if (s === '欠席') btn.className = "py-3.5 rounded-xl border-2 border-rose-500 text-sm font-bold bg-rose-50 text-rose-800 flex flex-col items-center gap-1 shadow-sm transform scale-[1.02] transition-all";
+                    if (s === '削除') btn.className = "py-3.5 rounded-xl border-2 border-slate-400 text-[11px] sm:text-xs font-bold bg-slate-100 text-slate-700 flex flex-col items-center gap-1 shadow-sm transform scale-[1.02] transition-all";
                 } else {
-                    btn.className = "py-3.5 rounded-xl border-2 border-transparent border-slate-200 text-sm font-bold bg-white text-slate-500 flex flex-col items-center gap-1 hover:bg-slate-50 transition-all";
+                    if (s === '削除') btn.className = "py-3.5 rounded-xl border-2 border-transparent border-slate-200 text-[11px] sm:text-xs font-bold bg-slate-50 text-slate-400 flex flex-col items-center gap-1 hover:bg-slate-100 transition-all";
+                    else btn.className = "py-3.5 rounded-xl border-2 border-transparent border-slate-200 text-sm font-bold bg-white text-slate-500 flex flex-col items-center gap-1 hover:bg-slate-50 transition-all";
                 }
             });
         }
 
         function setModalFormStatus(status) {
             selectedModalStatus = status;
-            ['出席', '未定', '欠席'].forEach(s => {
+            ['出席', '未定', '欠席', '削除'].forEach(s => {
                 const btn = document.getElementById(`modal-status-${s}`);
                 if (!btn) return;
                 if (s === status) {
                     if (s === '出席') btn.className = "flex-1 py-3 rounded-xl text-sm font-bold bg-emerald-500 text-white shadow-sm transition-colors border border-emerald-600";
                     if (s === '未定') btn.className = "flex-1 py-3 rounded-xl text-sm font-bold bg-amber-500 text-white shadow-sm transition-colors border border-amber-600";
                     if (s === '欠席') btn.className = "flex-1 py-3 rounded-xl text-sm font-bold bg-rose-500 text-white shadow-sm transition-colors border border-rose-600";
+                    if (s === '削除') btn.className = "flex-none px-3 py-3 rounded-xl text-[10px] font-bold bg-slate-500 text-white shadow-sm transition-colors border border-slate-600";
                 } else {
-                    btn.className = "flex-1 py-3 rounded-xl text-sm font-bold bg-white border border-slate-200 text-slate-400 hover:bg-slate-50 transition-colors";
+                    if (s === '削除') btn.className = "flex-none px-3 py-3 rounded-xl text-[10px] font-bold bg-slate-50 border border-slate-200 text-slate-400 transition-colors hover:bg-slate-100";
+                    else btn.className = "flex-1 py-3 rounded-xl text-sm font-bold bg-white border border-slate-200 text-slate-400 hover:bg-slate-50 transition-colors";
                 }
             });
         }
@@ -1581,41 +1745,125 @@
         }
 
         async function submitAttendance() {
-            const name = document.getElementById('att-name').value.trim();
+            const selectVal = document.getElementById('att-name-select').value;
+            const inputVal = document.getElementById('att-name-input').value.trim();
+            const name = selectVal === 'other' ? inputVal : selectVal;
+
             const schedId = document.getElementById('att-schedule-id').value;
-            const commentEl = document.getElementById('att-comment');
-            const comment = commentEl ? commentEl.value.trim() : '';
-            const isProxyEl = document.getElementById('att-is-proxy');
-            const isProxy = isProxyEl ? isProxyEl.checked : false;
+            const comment = document.getElementById('att-comment').value.trim();
+            const isProxy = document.getElementById('att-is-proxy') ? document.getElementById('att-is-proxy').checked : false;
 
-            if (!name || !schedId) return showToast("お名前と日程を入力してください");
+            if (!name || !schedId) return showToast("お名前と日程を選択・入力してください");
 
+            // クラウド上でデータを「上書き（または削除）」するためのユニークIDを作る
+            // 「山田太郎_sched_20260615」のような形式になります
             const responseId = `${name}_${schedId}`.replace(/\s+/g, '');
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', responseId), {
-                scheduleId: schedId, name, status: selectedStatus, comment, isProxy, timestamp: new Date().toISOString()
-            });
-            showToast("出欠を登録しました！");
-            if (commentEl) commentEl.value = '';
-            if (isProxyEl) isProxyEl.checked = false;
+            
+            try {
+                if (selectedStatus === '削除') {
+                    // 削除が選ばれた場合はクラウド上の回答データを消す
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', responseId));
+                    showToast("回答を削除（キャンセル）しました！");
+                } else {
+                    // setDocを使うことで、同じIDなら自動的に過去の回答が上書き更新されます
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', responseId), {
+                        scheduleId: schedId, name, status: selectedStatus, comment, isProxy, timestamp: new Date().toISOString()
+                    });
+                    showToast("出欠を登録（更新）しました！");
+                }
+                
+                document.getElementById('att-comment').value = '';
+                if(document.getElementById('att-is-proxy')) document.getElementById('att-is-proxy').checked = false;
+            } catch (err) {
+                showToast("登録に失敗しました。");
+            }
         }
 
         async function submitModalAttendance() {
-            const name = document.getElementById('modal-att-name').value.trim();
-            const commentEl = document.getElementById('modal-att-comment');
-            const comment = commentEl ? commentEl.value.trim() : '';
-            const isProxyEl = document.getElementById('modal-att-is-proxy');
-            const isProxy = isProxyEl ? isProxyEl.checked : false;
+            const selectVal = document.getElementById('modal-att-name-select').value;
+            const inputVal = document.getElementById('modal-att-name-input').value.trim();
+            const name = selectVal === 'other' ? inputVal : selectVal;
 
-            if (!name) return showToast("お名前を入力してください");
+            const comment = document.getElementById('modal-att-comment').value.trim();
+            const isProxy = document.getElementById('modal-att-is-proxy') ? document.getElementById('modal-att-is-proxy').checked : false;
+
+            if (!name) return showToast("お名前を選択・入力してください");
             
             const responseId = `${name}_${currentOpenScheduleId}`.replace(/\s+/g, '');
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', responseId), {
-                scheduleId: currentOpenScheduleId, name, status: selectedModalStatus, comment, isProxy, timestamp: new Date().toISOString()
+            
+            try {
+                if (selectedModalStatus === '削除') {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', responseId));
+                    showToast("回答を削除（キャンセル）しました！");
+                } else {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', responseId), {
+                        scheduleId: currentOpenScheduleId, name, status: selectedModalStatus, comment, isProxy, timestamp: new Date().toISOString()
+                    });
+                    showToast("登録（更新）しました！");
+                }
+                
+                document.getElementById('modal-att-comment').value = '';
+                if(document.getElementById('modal-att-is-proxy')) document.getElementById('modal-att-is-proxy').checked = false;
+                
+                // モーダル画面の表示を最新状態に更新
+                showDetailModal(currentOpenScheduleId);
+            } catch (err) {
+                showToast("登録に失敗しました。");
+            }
+        }
+
+        function renderAttendanceRanking() {
+            const list = document.getElementById('attendance-ranking-list');
+            const monthVal = document.getElementById('ranking-month-selector').value;
+            if (!list) return;
+            list.innerHTML = '';
+
+            let attendanceToCount = allAttendance;
+            if (monthVal !== 'all') {
+                const targetSchedules = allSchedules.filter(s => s.date.startsWith(monthVal)).map(s => s.id);
+                attendanceToCount = allAttendance.filter(a => targetSchedules.includes(a.scheduleId));
+            }
+
+            const counts = {};
+            allMembers.forEach(m => counts[m.name] = 0);
+            
+            attendanceToCount.forEach(a => {
+                if (a.status === '出席' && counts.hasOwnProperty(a.name)) {
+                    counts[a.name]++;
+                }
             });
-            showToast("登録しました！");
-            if (commentEl) commentEl.value = '';
-            if (isProxyEl) isProxyEl.checked = false;
-            showDetailModal(currentOpenScheduleId);
+
+            const ranking = Object.entries(counts)
+                .map(([name, count]) => ({ name, count }))
+                .sort((a, b) => b.count - a.count);
+
+            if (ranking.length === 0 || ranking[0].count === 0) {
+                list.innerHTML = '<div class="text-center text-sm text-slate-400 py-4">まだ出席記録がありません</div>';
+                return;
+            }
+
+            ranking.forEach((item, index) => {
+                if (item.count === 0) return;
+                
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between py-2 px-4 rounded-xl hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0";
+                
+                let rankBadge = `<span class="w-6 font-black text-slate-400 text-sm">${index + 1}</span>`;
+                if (index === 0) rankBadge = `<span class="w-6 text-xl" title="1位">🥇</span>`;
+                if (index === 1) rankBadge = `<span class="w-6 text-xl" title="2位">🥈</span>`;
+                if (index === 2) rankBadge = `<span class="w-6 text-xl" title="3位">🥉</span>`;
+
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        ${rankBadge}
+                        <span class="font-bold text-slate-700">${item.name}</span>
+                    </div>
+                    <div class="font-black text-slate-800">
+                        ${item.count} <span class="text-xs font-medium text-slate-500">回</span>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
         }
 
         function renderAttendanceSummary() {
@@ -1663,9 +1911,9 @@
                     </div>
 
                     <div class="space-y-1 text-xs">
-                        ${atts.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-emerald-500 shrink-0 mt-0.5">🟢</span><span class="text-slate-700 leading-relaxed">${atts.map(a=>`<span class="font-bold">${a.name}</span>${a.isProxy ? '<span class="text-[9px] bg-slate-200 text-slate-500 px-1 py-0.5 rounded ml-1 font-medium">代理</span>' : ''}${a.comment ? `<span class="text-[10px] text-slate-400 ml-1">(${a.comment})</span>` : ''}`).join(', ')}</span></div>` : ''}
-                        ${maybes.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-amber-400 shrink-0 mt-0.5">🟡</span><span class="text-slate-600 leading-relaxed">${maybes.map(a=>`<span class="font-bold">${a.name}</span>${a.isProxy ? '<span class="text-[9px] bg-slate-200 text-slate-500 px-1 py-0.5 rounded ml-1 font-medium">代理</span>' : ''}${a.comment ? `<span class="text-[10px] text-slate-400 ml-1">(${a.comment})</span>` : ''}`).join(', ')}</span></div>` : ''}
-                        ${absents.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-rose-400 shrink-0 mt-0.5">🔴</span><span class="text-slate-400 leading-relaxed">${absents.map(a=>`<span class="font-bold">${a.name}</span>${a.isProxy ? '<span class="text-[9px] bg-slate-200 text-slate-500 px-1 py-0.5 rounded ml-1 font-medium">代理</span>' : ''}${a.comment ? `<span class="text-[10px] text-slate-400 ml-1">(${a.comment})</span>` : ''}`).join(', ')}</span></div>` : ''}
+                        ${atts.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-emerald-500 shrink-0 mt-0.5">🟢</span><span class="text-slate-700 leading-relaxed">${atts.map(a=>`<span class="font-bold">${a.name}</span>${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''}${a.comment ? `<span class="text-[10px] text-slate-400">(${a.comment})</span>` : ''}`).join(', ')}</span></div>` : ''}
+                        ${maybes.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-amber-400 shrink-0 mt-0.5">🟡</span><span class="text-slate-600 leading-relaxed">${maybes.map(a=>`${a.name}${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''}`).join(', ')}</span></div>` : ''}
+                        ${absents.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-rose-400 shrink-0 mt-0.5">🔴</span><span class="text-slate-400 leading-relaxed">${absents.length > 0 ? absents.map(a=>`${a.name}${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''}`).join(', ') : ''}</span></div>` : ''}
                     </div>
                 `;
                 list.appendChild(div);
@@ -1713,11 +1961,11 @@
                     const item = document.createElement('div');
                     item.className = "flex justify-between items-center border-b border-slate-100 py-2 last:border-0";
                     let dot = a.status==='出席'?'🟢':a.status==='未定'?'🟡':'🔴';
-                    let proxyBadge = a.isProxy ? `<span class="text-[9px] bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded ml-1 font-medium">代理</span>` : '';
                     item.innerHTML = `
                         <div>
-                            <span class="font-bold text-slate-700 flex items-center">${dot} <span class="ml-1">${a.name}</span> ${proxyBadge}</span>
-                            ${a.comment ? `<p class="text-[10px] text-slate-400 ml-6 mt-0.5">${a.comment}</p>` : ''}
+                            <span class="font-bold text-slate-700">${dot} ${a.name}</span>
+                            ${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''}
+                            ${a.comment ? `<p class="text-[10px] text-slate-400 ml-5 mt-0.5">${a.comment}</p>` : ''}
                         </div>
                         <span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded">${a.status}</span>
                     `;
@@ -2007,6 +2255,104 @@
             } catch (err) {
                 showToast("展開に失敗しました。");
             }
+        }
+
+        // ==========================================
+        // ビジター・体験希望の機能
+        // ==========================================
+        function updateVisitorSchedules() {
+            const select = document.getElementById('vis-date');
+            if (!select) return;
+            select.innerHTML = '<option value="未定">未定（まずは相談したい）</option>';
+            const upcoming = allSchedules.filter(s => new Date(s.date + ' 23:59:59') > new Date());
+            upcoming.forEach(s => {
+                const d = new Date(s.date);
+                const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
+                const opt = document.createElement('option');
+                opt.value = `${d.getMonth() + 1}/${d.getDate()}(${dayWeek}) ${s.label}`;
+                opt.innerText = `${d.getMonth() + 1}/${d.getDate()}(${dayWeek}) ${s.time ? s.time.split('~')[0] : ''} 【${s.label}】`;
+                select.appendChild(opt);
+            });
+        }
+
+        function openVisitorModal() {
+            document.getElementById('visitor-modal').classList.remove('hidden');
+        }
+
+        function closeVisitorModal() {
+            document.getElementById('visitor-modal').classList.add('hidden');
+        }
+
+        async function submitVisitorRequest() {
+            const name = document.getElementById('vis-name').value.trim();
+            const contact = document.getElementById('vis-contact').value.trim();
+            const date = document.getElementById('vis-date').value;
+            const exp = document.getElementById('vis-exp').value;
+            const message = document.getElementById('vis-message').value.trim();
+
+            if (!name || !contact) return showToast("お名前とご連絡先を入力してください");
+
+            const reqId = `vis_${Date.now()}`;
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'visitor_requests', reqId), {
+                    name, contact, date, exp, message, isRead: false, timestamp: new Date().toISOString()
+                });
+                showToast("送信しました！管理者からの連絡をお待ちください");
+                document.getElementById('vis-name').value = '';
+                document.getElementById('vis-contact').value = '';
+                document.getElementById('vis-message').value = '';
+                closeVisitorModal();
+            } catch (err) {
+                showToast("送信に失敗しました。");
+            }
+        }
+
+        async function deleteVisitorRequest(id) {
+            if(!confirm("この問い合わせを削除しますか？")) return;
+            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'visitor_requests', id));
+            showToast("削除しました");
+        }
+
+        function renderVisitorRequests() {
+            const listEl = document.getElementById('admin-visitor-list');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+            
+            if (allVisitorRequests.length === 0) {
+                listEl.innerHTML = '<div class="text-sm text-slate-400 py-4 text-center bg-slate-50 rounded-xl">現在、新規の問い合わせはありません。</div>';
+                return;
+            }
+
+            allVisitorRequests.forEach(req => {
+                const d = new Date(req.timestamp);
+                const div = document.createElement('div');
+                div.className = "bg-white p-4 rounded-xl border border-slate-200 shadow-sm relative group";
+                
+                div.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="font-black text-slate-800 text-base">${req.name} <span class="text-xs font-normal text-slate-500">さん</span></span>
+                            <span class="text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-bold border border-orange-200">${req.exp}</span>
+                        </div>
+                        <div class="text-[10px] text-slate-400 font-bold">${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</div>
+                    </div>
+                    <div class="mb-3 space-y-2">
+                        <div class="text-xs text-slate-600 font-bold bg-slate-50 px-2 py-1.5 rounded border border-slate-100 inline-block">希望日: <span class="text-slate-800">${req.date}</span></div>
+                        ${req.contact ? `<div class="text-xs text-slate-600 font-bold bg-indigo-50 px-2 py-1.5 rounded border border-indigo-100 block w-full"><i data-lucide="mail" class="w-3.5 h-3.5 inline-block -mt-0.5 mr-1 text-indigo-500"></i>連絡先: <span class="text-indigo-800">${req.contact}</span></div>` : ''}
+                    </div>
+                    ${req.message ? `<div class="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100 whitespace-pre-wrap">${req.message}</div>` : ''}
+                    
+                    <button onclick="deleteVisitorRequest('${req.id}')" class="absolute top-2 right-2 p-2 bg-white rounded-full text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors opacity-0 md:group-hover:opacity-100">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                    <!-- スマホ用削除ボタン -->
+                    <div class="mt-3 text-right md:hidden">
+                        <button onclick="deleteVisitorRequest('${req.id}')" class="text-[10px] font-bold text-rose-500 bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-100">削除する</button>
+                    </div>
+                `;
+                listEl.appendChild(div);
+            });
+            lucide.createIcons();
         }
 
         initAuth();
