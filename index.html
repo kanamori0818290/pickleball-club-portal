@@ -209,7 +209,7 @@
                                 </div>
                             </div>
                             
-                            <!-- 📝 連絡事項 ＆ 代理入力 (修正部分) -->
+                            <!-- 📝 連絡事項 ＆ 代理入力 -->
                             <div class="space-y-3 pt-2">
                                 <input type="text" id="att-comment" placeholder="連絡事項 (任意)" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-amber-500 focus:outline-none transition-shadow bg-slate-50 focus:bg-white font-medium">
                                 <div class="flex items-center gap-2 px-1">
@@ -229,7 +229,7 @@
                 </div>
 
                 <div class="lg:col-span-7 space-y-8">
-                    <!-- 🏅 参加回数ランキング (NEW) -->
+                    <!-- 🏅 参加回数ランキング -->
                     <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
                             <div class="flex items-center gap-3">
@@ -1465,6 +1465,10 @@
                     <span class="font-bold text-slate-700 ml-1">${m.name}</span>
                     <button onclick="deleteMember('${m.id}', '${m.name}')" class="text-xs text-rose-400 hover:text-rose-600 font-bold px-3 py-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-rose-50 rounded-lg">削除</button>
                 `;
+                // スマホでは常に削除ボタンが見えるようにする微調整
+                if (window.innerWidth < 768) {
+                    div.querySelector('button').classList.remove('opacity-0');
+                }
                 listEl.appendChild(div);
             });
             lucide.createIcons();
@@ -1506,10 +1510,31 @@
 
         async function toggleFeeStatus(monthVal, name, isPaid) {
             const docId = `fee_${monthVal}_${name}`.replace(/\s+/g, '');
+            const finId = `fin_autofee_${docId}`; // 自動連動用の固有ID
+
             try {
+                // 1. 月謝のチェック状態を保存
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fees', docId), {
                     month: monthVal, name: name, isPaid: isPaid, timestamp: new Date().toISOString()
                 });
+
+                // 2. 会計帳簿への自動連動
+                if (isPaid) {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', finId), {
+                        type: 'income',
+                        date: getTodayString(), // チェックした日を入金日とする
+                        amount: 1000, // 月額1000円と仮定
+                        category: 'メンバー会費',
+                        description: `[自動] ${name}さん (${monthVal.split('-')[1]}月分会費)`,
+                        isAdvance: false,
+                        isSettled: false,
+                        timestamp: new Date().toISOString()
+                    });
+                    showToast(`${name}さんの月謝を「済」にし、帳簿に連動しました！`);
+                } else {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', finId));
+                    showToast(`${name}さんの月謝を「未」に戻し、帳簿から取り消しました。`);
+                }
             } catch (err) { showToast("保存に失敗しました"); }
         }
 
@@ -1578,15 +1603,15 @@
                     
                     if(sAtts.length > 0) {
                         summaryDiv.innerHTML = `
-                            <div class="flex flex-col sm:flex-row justify-center items-center bg-white rounded sm:rounded-lg p-0.5 sm:px-2 sm:py-1 border border-slate-200 shadow-sm gap-0 sm:gap-2">
-                                <div class="flex items-center gap-0.5 text-emerald-600 leading-none">
-                                    <span class="text-[8px] sm:text-[10px] font-bold opacity-80">出</span>
-                                    <span class="text-[10px] sm:text-sm font-black">${atts}</span>
+                            <div class="flex justify-evenly items-center bg-white rounded px-1 sm:px-1.5 py-0.5 sm:py-1 border border-slate-200 shadow-sm">
+                                <div class="flex flex-col sm:flex-row sm:gap-1 items-center leading-none text-emerald-600">
+                                    <span class="text-[8px] font-bold opacity-80 mb-0.5 sm:mb-0">出</span>
+                                    <span class="text-[11px] sm:text-sm font-black">${atts}</span>
                                 </div>
-                                <div class="hidden sm:block w-px h-3 bg-slate-200"></div>
-                                <div class="flex items-center gap-0.5 text-rose-500 leading-none mt-0.5 sm:mt-0">
-                                    <span class="text-[8px] sm:text-[10px] font-bold opacity-80">欠</span>
-                                    <span class="text-[10px] sm:text-sm font-black">${absents}</span>
+                                <div class="w-px h-4 bg-slate-200 mx-0.5 sm:mx-1"></div>
+                                <div class="flex flex-col sm:flex-row sm:gap-1 items-center leading-none text-rose-500">
+                                    <span class="text-[8px] font-bold opacity-80 mb-0.5 sm:mb-0">欠</span>
+                                    <span class="text-[11px] sm:text-sm font-black">${absents}</span>
                                 </div>
                             </div>
                         `;
