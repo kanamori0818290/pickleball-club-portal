@@ -209,7 +209,6 @@
                                 </div>
                             </div>
                             
-                            <!-- 📝 連絡事項 ＆ 代理入力 -->
                             <div class="space-y-3 pt-2">
                                 <input type="text" id="att-comment" placeholder="連絡事項 (任意)" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base focus:ring-2 focus:ring-amber-500 focus:outline-none transition-shadow bg-slate-50 focus:bg-white font-medium">
                                 <div class="flex items-center gap-2 px-1">
@@ -236,10 +235,8 @@
                                 <div class="p-2 bg-rose-50 text-rose-500 rounded-xl"><i data-lucide="award" class="w-6 h-6"></i></div>
                                 <h3 class="font-extrabold text-lg text-slate-800 tracking-tight">メンバー別 参加回数ランキング</h3>
                             </div>
+                            <!-- JS自動生成されるプルダウン -->
                             <select id="ranking-month-selector" onchange="renderAttendanceRanking()" class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-slate-50 focus:outline-none font-bold text-slate-700 cursor-pointer">
-                                <option value="2026-06">2026年 6月</option>
-                                <option value="2026-07">2026年 7月</option>
-                                <option value="all">全期間 (累計)</option>
                             </select>
                         </div>
                         <div id="attendance-ranking-list" class="space-y-1 max-h-[300px] overflow-y-auto custom-scroll pr-2"></div>
@@ -371,8 +368,39 @@
                     </button>
                 </div>
 
-                <!-- 💰 会計管理 -->
+                <!-- 📢 チームからのお知らせ配信 -->
                 <div class="space-y-5">
+                    <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
+                        <span class="p-1.5 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="bell" class="w-5 h-5"></i></span>
+                        チームからのお知らせ配信
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-500 mb-1.5">タイトル</label>
+                                <input type="text" id="news-title" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-500 mb-1.5">内容</label>
+                                <textarea id="news-content" rows="3" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white"></textarea>
+                            </div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <input type="checkbox" id="news-is-urgent" class="w-5 h-5 text-rose-500 rounded border-slate-300">
+                                <label for="news-is-urgent" class="text-sm font-bold text-slate-600">「重要」マークをつける</label>
+                            </div>
+                            <button onclick="addNews()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-sm transition-colors shadow-md">
+                                配信する
+                            </button>
+                        </div>
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col h-full max-h-[300px]">
+                            <h4 class="font-bold text-slate-500 text-xs uppercase tracking-wider mb-3">配信済みのお知らせ</h4>
+                            <div id="admin-news-list" class="space-y-2 flex-1 custom-scroll overflow-y-auto pr-1"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 💰 会計管理 -->
+                <div class="space-y-5 border-t border-slate-200 pt-8">
                     <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
                         <span class="p-1.5 bg-emerald-100 text-emerald-600 rounded-lg"><i data-lucide="wallet" class="w-5 h-5"></i></span>
                         会計・収支の現場入力
@@ -455,7 +483,7 @@
                     </div>
                 </div>
 
-                <!-- 👥 本登録メンバーの管理 (NEW) -->
+                <!-- 👥 本登録メンバーの管理 -->
                 <div class="space-y-5 border-t border-slate-200 pt-8">
                     <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
                         <span class="p-1.5 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="users" class="w-5 h-5"></i></span>
@@ -486,11 +514,10 @@
                     </h3>
                     <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-2">
-                            <p class="text-sm text-slate-500 font-medium">上の「本登録メンバー」に登録された人がリスト化されています。</p>
+                            <p class="text-sm text-slate-500 font-medium">ここで「済」にすると、<strong>自動的に会計帳簿にも入金として記録されます。</strong></p>
                             <div class="flex items-center gap-2 w-full sm:w-auto">
+                                <!-- JS自動生成されるプルダウン -->
                                 <select id="fee-month-selector" onchange="renderFeeChecklist()" class="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-slate-200 text-base bg-slate-50 focus:outline-none font-bold text-slate-700">
-                                    <option value="2026-06">2026年 6月</option>
-                                    <option value="2026-07">2026年 7月</option>
                                 </select>
                             </div>
                         </div>
@@ -524,7 +551,12 @@
                                     <select id="sched-label" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 appearance-none">
                                         <option value="月曜定期枠">月曜定期枠 (19:00~21:00)</option>
                                         <option value="火曜定期枠">火曜定期枠 (19:00~21:00)</option>
+                                        <option value="水曜定期枠">水曜定期枠 (19:00~21:00)</option>
+                                        <option value="木曜定期枠">木曜定期枠 (19:00~21:00)</option>
+                                        <option value="金曜定期枠">金曜定期枠 (19:00~21:00)</option>
                                         <option value="土曜特別枠">土曜特別枠 (14:00~17:00)</option>
+                                        <option value="日曜・祝日枠">日曜・祝日枠</option>
+                                        <option value="臨時・その他枠">臨時・その他枠</option>
                                     </select>
                                 </div>
                             </div>
@@ -637,7 +669,7 @@
                     </div>
                 </div>
 
-                <!-- 🔰 ビジター・体験希望の問い合わせ一覧 (NEW) -->
+                <!-- 🔰 ビジター・体験希望の問い合わせ一覧 -->
                 <div class="space-y-5 border-t border-slate-200 pt-8">
                     <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
                         <span class="p-1.5 bg-rose-100 text-rose-600 rounded-lg"><i data-lucide="mail" class="w-5 h-5"></i></span>
@@ -658,7 +690,7 @@
 
     </main>
 
-    <!-- 🔰 ビジター・体験希望モーダル (NEW) -->
+    <!-- 🔰 ビジター・体験希望モーダル -->
     <div id="visitor-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
         <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden transform scale-100 transition-all border border-white/20 flex flex-col max-h-[90vh]">
             <div class="bg-gradient-to-r from-orange-50 to-rose-50 px-6 py-4 flex justify-between items-center border-b border-orange-100 shrink-0">
@@ -822,7 +854,7 @@
                             <button type="button" onclick="setModalFormStatus('出席')" id="modal-status-出席" class="flex-1 py-3 rounded-xl text-sm font-bold bg-white border border-slate-200 text-slate-600 transition-colors">🟢</button>
                             <button type="button" onclick="setModalFormStatus('未定')" id="modal-status-未定" class="flex-1 py-3 rounded-xl text-sm font-bold bg-white border border-slate-200 text-slate-600 transition-colors">🟡</button>
                             <button type="button" onclick="setModalFormStatus('欠席')" id="modal-status-欠席" class="flex-1 py-3 rounded-xl text-sm font-bold bg-white border border-slate-200 text-slate-600 transition-colors">🔴</button>
-                            <button type="button" onclick="setModalFormStatus('削除')" id="modal-status-削除" class="flex-none px-3 py-3 rounded-xl text-[10px] font-bold bg-slate-50 border border-slate-200 text-slate-400 transition-colors" title="回答を取り消す">✖</button>
+                            <button type="button" onclick="setModalFormStatus('削除')" id="modal-status-削除" class="flex-none px-3 py-3 rounded-xl text-[10px] font-bold bg-slate-50 border border-slate-200 text-slate-400 transition-colors hover:bg-slate-100" title="回答を取り消す">✖</button>
                         </div>
                     </div>
                     <div class="flex flex-col gap-3 mt-1">
@@ -888,7 +920,7 @@
         </div>
     </div>
 
-    <!-- ⚠️ 共通確認モーダル (NEW) -->
+    <!-- ⚠️ 共通確認モーダル -->
     <div id="confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden animate-fade-in">
         <div class="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden transform scale-100 transition-all border border-white/20 p-6 text-center">
             <div class="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -962,6 +994,7 @@
         window.showDetailModal = showDetailModal;
         window.closeModal = closeModal;
         window.addNews = addNews;
+        window.deleteNews = deleteNews;
         
         window.setFinanceType = setFinanceType;
         window.addFinanceRecord = addFinanceRecord;
@@ -996,7 +1029,7 @@
         window.deleteVisitorRequest = deleteVisitorRequest;
         window.deleteAttendance = deleteAttendance;
 
-        // 確認モーダル用カスタム関数 (NEW)
+        // 確認モーダル用カスタム関数
         function customConfirm(message) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('confirm-modal');
@@ -1026,6 +1059,65 @@
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
 
+        // 月謝とランキングのプルダウンを現在から3ヶ月先まで自動生成する
+        function populateMonthSelectors() {
+            const feeSelector = document.getElementById('fee-month-selector');
+            const rankingSelector = document.getElementById('ranking-month-selector');
+            
+            if (feeSelector) feeSelector.innerHTML = '';
+            if (rankingSelector) rankingSelector.innerHTML = '';
+            
+            if (rankingSelector) {
+                const allOpt = document.createElement('option');
+                allOpt.value = 'all';
+                allOpt.innerText = '全期間 (累計)';
+                rankingSelector.appendChild(allOpt);
+            }
+            
+            const startYear = 2026;
+            const startMonth = 6;
+            
+            const d = new Date();
+            const currentY = d.getFullYear();
+            const currentM = d.getMonth() + 1;
+            
+            let endY = currentY;
+            let endM = currentM + 3;
+            if (endM > 12) { endM -= 12; endY++; }
+            
+            let y = startYear;
+            let m = startMonth;
+            
+            while (y < endY || (y === endY && m <= endM)) {
+                const val = `${y}-${String(m).padStart(2, '0')}`;
+                const text = `${y}年 ${m}月`;
+                
+                if (feeSelector) {
+                    const opt = document.createElement('option');
+                    opt.value = val;
+                    opt.innerText = text;
+                    feeSelector.appendChild(opt);
+                }
+                if (rankingSelector) {
+                    const opt = document.createElement('option');
+                    opt.value = val;
+                    opt.innerText = text;
+                    rankingSelector.appendChild(opt);
+                }
+                
+                m++;
+                if (m > 12) { m = 1; y++; }
+            }
+            
+            const currentVal = `${currentY}-${String(currentM).padStart(2, '0')}`;
+            if (feeSelector && feeSelector.querySelector(`option[value="${currentVal}"]`)) {
+                feeSelector.value = currentVal;
+            }
+            if (rankingSelector && rankingSelector.querySelector(`option[value="${currentVal}"]`)) {
+                rankingSelector.value = currentVal;
+            }
+        }
+
         // ==========================================
         // 🔐 認証 (Auth) ゲストログイン
         // ==========================================
@@ -1051,6 +1143,10 @@
         // ==========================================
         const onUserLoaded = async (currentUser) => {
             if (!currentUser) return;
+            
+            // 🌟 プルダウンを自動生成
+            populateMonthSelectors();
+
             const schedulesRef = collection(db, 'artifacts', appId, 'public', 'data', 'schedules');
             const attendanceRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance');
             const newsRef = collection(db, 'artifacts', appId, 'public', 'data', 'news'); 
@@ -1091,6 +1187,7 @@
                 snapshot.forEach(doc => allNews.push({ id: doc.id, ...doc.data() }));
                 allNews.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 renderNews();
+                renderAdminNewsList();
             });
 
             onSnapshot(financeRef, (snapshot) => {
@@ -1447,7 +1544,7 @@
                         <div class="font-black text-base ${isInc ? 'text-emerald-600' : 'text-rose-500'}">
                             ${isInc ? '+' : '-'}¥${f.amount.toLocaleString()}
                         </div>
-                        <button onclick="deleteFinanceRecord('${f.id}')" class="text-xs text-slate-300 hover:text-rose-500 font-bold mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="deleteFinanceRecord('${f.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold mt-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-rose-50 px-3 py-1.5 rounded-lg">
                             削除
                         </button>
                     </div>
@@ -1505,10 +1602,6 @@
                     <span class="font-bold text-slate-700 ml-1">${m.name}</span>
                     <button onclick="deleteMember('${m.id}', '${m.name}')" class="text-xs text-rose-400 hover:text-rose-600 font-bold px-3 py-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-rose-50 rounded-lg">削除</button>
                 `;
-                // スマホでは常に削除ボタンが見えるようにする微調整
-                if (window.innerWidth < 768) {
-                    div.querySelector('button').classList.remove('opacity-0');
-                }
                 listEl.appendChild(div);
             });
             lucide.createIcons();
@@ -1550,30 +1643,29 @@
 
         async function toggleFeeStatus(monthVal, name, isPaid) {
             const docId = `fee_${monthVal}_${name}`.replace(/\s+/g, '');
-            const finId = `fin_autofee_${docId}`; // 自動連動用の固有ID
-
+            const finDocId = `fin_fee_${monthVal}_${name}`.replace(/\s+/g, ''); 
+            
             try {
-                // 1. 月謝のチェック状態を保存
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'fees', docId), {
                     month: monthVal, name: name, isPaid: isPaid, timestamp: new Date().toISOString()
                 });
-
-                // 2. 会計帳簿への自動連動
+                
+                // 会計への自動連動
                 if (isPaid) {
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', finId), {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', finDocId), {
                         type: 'income',
-                        date: getTodayString(), // チェックした日を入金日とする
-                        amount: 1000, // 月額1000円と仮定
+                        date: getTodayString(),
+                        amount: 1000, 
                         category: 'メンバー会費',
-                        description: `[自動] ${name}さん (${monthVal.split('-')[1]}月分会費)`,
+                        description: `${name}さん ${monthVal}分会費 (自動反映)`,
                         isAdvance: false,
                         isSettled: false,
                         timestamp: new Date().toISOString()
                     });
-                    showToast(`${name}さんの月謝を「済」にし、帳簿に連動しました！`);
+                    showToast(`${name}さんの月謝を会計に自動登録しました`);
                 } else {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', finId));
-                    showToast(`${name}さんの月謝を「未」に戻し、帳簿から取り消しました。`);
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', finDocId));
+                    showToast(`${name}さんの月謝を会計から削除しました`);
                 }
             } catch (err) { showToast("保存に失敗しました"); }
         }
@@ -1632,6 +1724,9 @@
                     } else if (schedule.label.includes('土曜')) {
                         dayCell.classList.add('bg-sky-50/50', '!border-sky-200');
                         dateNum.classList.add('!bg-sky-500', '!text-white', 'shadow-sm');
+                    } else {
+                        dayCell.classList.add('bg-violet-50/50', '!border-violet-200');
+                        dateNum.classList.add('!bg-violet-500', '!text-white', 'shadow-sm');
                     }
 
                     const sAtts = allAttendance.filter(a => a.scheduleId === schedule.id);
@@ -1643,15 +1738,15 @@
                     
                     if(sAtts.length > 0) {
                         summaryDiv.innerHTML = `
-                            <div class="flex justify-evenly items-center bg-white rounded px-1 sm:px-1.5 py-0.5 sm:py-1 border border-slate-200 shadow-sm">
-                                <div class="flex flex-col sm:flex-row sm:gap-1 items-center leading-none text-emerald-600">
-                                    <span class="text-[8px] font-bold opacity-80 mb-0.5 sm:mb-0">出</span>
-                                    <span class="text-[11px] sm:text-sm font-black">${atts}</span>
+                            <div class="flex flex-col sm:flex-row justify-center items-center bg-white rounded sm:rounded-lg p-0.5 sm:px-2 sm:py-1 border border-slate-200 shadow-sm gap-0 sm:gap-2">
+                                <div class="flex items-center gap-0.5 text-emerald-600 leading-none">
+                                    <span class="text-[8px] sm:text-[10px] font-bold opacity-80">出</span>
+                                    <span class="text-[10px] sm:text-sm font-black">${atts}</span>
                                 </div>
-                                <div class="w-px h-4 bg-slate-200 mx-0.5 sm:mx-1"></div>
-                                <div class="flex flex-col sm:flex-row sm:gap-1 items-center leading-none text-rose-500">
-                                    <span class="text-[8px] font-bold opacity-80 mb-0.5 sm:mb-0">欠</span>
-                                    <span class="text-[11px] sm:text-sm font-black">${absents}</span>
+                                <div class="hidden sm:block w-px h-3 bg-slate-200"></div>
+                                <div class="flex items-center gap-0.5 text-rose-500 leading-none mt-0.5 sm:mt-0">
+                                    <span class="text-[8px] sm:text-[10px] font-bold opacity-80">欠</span>
+                                    <span class="text-[10px] sm:text-sm font-black">${absents}</span>
                                 </div>
                             </div>
                         `;
@@ -1820,17 +1915,13 @@
 
             if (!name || !schedId) return showToast("お名前と日程を選択・入力してください");
 
-            // クラウド上でデータを「上書き（または削除）」するためのユニークIDを作る
-            // 「山田太郎_sched_20260615」のような形式になります
             const responseId = `${name}_${schedId}`.replace(/\s+/g, '');
             
             try {
                 if (selectedStatus === '削除') {
-                    // 削除が選ばれた場合はクラウド上の回答データを消す
                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', responseId));
                     showToast("回答を削除（キャンセル）しました！");
                 } else {
-                    // setDocを使うことで、同じIDなら自動的に過去の回答が上書き更新されます
                     await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', responseId), {
                         scheduleId: schedId, name, status: selectedStatus, comment, isProxy, timestamp: new Date().toISOString()
                     });
@@ -1870,7 +1961,6 @@
                 document.getElementById('modal-att-comment').value = '';
                 if(document.getElementById('modal-att-is-proxy')) document.getElementById('modal-att-is-proxy').checked = false;
                 
-                // モーダル画面の表示を最新状態に更新
                 if (currentOpenScheduleId) showDetailModal(currentOpenScheduleId);
             } catch (err) {
                 showToast("登録に失敗しました。");
@@ -1966,10 +2056,12 @@
                     noPercent = (absents.length / sAtts.length) * 100;
                 }
 
+                const bgColorClass = s.label.includes('定期') ? 'bg-emerald-100 text-emerald-800' : (s.label.includes('土曜') ? 'bg-sky-100 text-sky-800' : 'bg-violet-100 text-violet-800');
+
                 div.innerHTML = `
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3 mb-4">
                         <div>
-                            <span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded ${s.label.includes('定期') ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'} mb-1">${s.label}</span>
+                            <span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded ${bgColorClass} mb-1">${s.label}</span>
                             <h4 class="text-base font-black text-slate-800">${d.getMonth() + 1}/${d.getDate()}(${dayWeek}) <span class="text-sm text-slate-500 font-bold ml-1">${s.time || ''}</span></h4>
                         </div>
                         <div class="flex gap-1 text-[11px] font-bold">
@@ -1986,9 +2078,9 @@
                     </div>
 
                     <div class="space-y-1 text-xs">
-                        ${atts.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-emerald-500 shrink-0 mt-0.5">🟢</span><span class="text-slate-700 leading-relaxed">${atts.map(a=>`<span class="font-bold">${a.name}</span>${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''}${a.comment ? `<span class="text-[10px] text-slate-400">(${a.comment})</span>` : ''}`).join(', ')}</span></div>` : ''}
-                        ${maybes.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-amber-400 shrink-0 mt-0.5">🟡</span><span class="text-slate-600 leading-relaxed">${maybes.map(a=>`${a.name}${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''}`).join(', ')}</span></div>` : ''}
-                        ${absents.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-rose-400 shrink-0 mt-0.5">🔴</span><span class="text-slate-400 leading-relaxed">${absents.length > 0 ? absents.map(a=>`${a.name}${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''}`).join(', ') : ''}</span></div>` : ''}
+                        ${atts.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-emerald-500 shrink-0 mt-0.5">🟢</span><span class="text-slate-700 leading-relaxed w-full">${atts.map(a=>`<span class="inline-flex items-center"><span class="font-bold">${a.name}</span>${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''}${a.comment ? `<span class="text-[10px] text-slate-400 ml-1">(${a.comment})</span>` : ''} <button onclick="deleteAttendance('${a.id}', '${a.name}')" class="ml-1 text-rose-300 hover:text-rose-500"><i data-lucide="x" class="w-3 h-3"></i></button></span>`).join(', ')}</span></div>` : ''}
+                        ${maybes.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-amber-400 shrink-0 mt-0.5">🟡</span><span class="text-slate-600 leading-relaxed w-full">${maybes.map(a=>`<span class="inline-flex items-center">${a.name}${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''} <button onclick="deleteAttendance('${a.id}', '${a.name}')" class="ml-1 text-rose-300 hover:text-rose-500"><i data-lucide="x" class="w-3 h-3"></i></button></span>`).join(', ')}</span></div>` : ''}
+                        ${absents.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-rose-400 shrink-0 mt-0.5">🔴</span><span class="text-slate-400 leading-relaxed w-full">${absents.map(a=>`<span class="inline-flex items-center">${a.name}${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''} <button onclick="deleteAttendance('${a.id}', '${a.name}')" class="ml-1 text-rose-300 hover:text-rose-500"><i data-lucide="x" class="w-3 h-3"></i></button></span>`).join(', ')}</span></div>` : ''}
                     </div>
                 `;
                 list.appendChild(div);
@@ -2004,7 +2096,8 @@
             const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
             
             document.getElementById('modal-label').innerText = schedule.label;
-            document.getElementById('modal-label').className = `text-[10px] font-extrabold px-2.5 py-1 rounded-full tracking-wider ${schedule.label.includes('定期') ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'}`;
+            const bgColorClass = schedule.label.includes('定期') ? 'bg-emerald-100 text-emerald-800' : (schedule.label.includes('土曜') ? 'bg-sky-100 text-sky-800' : 'bg-violet-100 text-violet-800');
+            document.getElementById('modal-label').className = `text-[10px] font-extrabold px-2.5 py-1 rounded-full tracking-wider ${bgColorClass}`;
             
             document.getElementById('modal-date').innerText = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})`;
             document.getElementById('modal-time').innerHTML = `<i data-lucide="clock" class="w-4 h-4 text-slate-400"></i> ${schedule.time || ''}`;
@@ -2044,9 +2137,7 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded">${a.status}</span>
-                            <button onclick="deleteAttendance('${a.id}', '${a.name}')" class="p-1 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded transition-colors" title="回答を取り消す">
-                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                            </button>
+                            <button onclick="deleteAttendance('${a.id}', '${a.name}')" class="p-1 text-slate-300 hover:text-rose-500 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
                         </div>
                     `;
                     list.appendChild(item);
@@ -2172,7 +2263,7 @@
                         <span class="font-bold text-slate-400 mr-2">${d.getMonth() + 1}/${d.getDate()}</span>
                         <span class="font-bold text-slate-700">${t.title}</span>
                     </div>
-                    <button onclick="deleteTournament('${t.id}')" class="text-red-500 hover:text-red-700 font-bold opacity-0 group-hover:opacity-100 transition-opacity px-2">削除</button>
+                    <button onclick="deleteTournament('${t.id}')" class="text-rose-500 hover:text-rose-700 font-bold opacity-0 group-hover:opacity-100 transition-opacity px-2">削除</button>
                 `;
                 container.appendChild(item);
             });
@@ -2252,22 +2343,53 @@
                         <span class="text-slate-400 font-bold mr-2">${s.date.substring(5).replace('-','/')}</span>
                         <span class="font-bold text-slate-700">${s.label}</span>
                     </div>
-                    <button onclick="deleteSchedule('${s.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold px-3 py-1.5 bg-rose-50 rounded-lg opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">削除</button>
+                    <button onclick="deleteSchedule('${s.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-rose-50 px-3 py-1.5 rounded-lg">削除</button>
                 `;
                 list.appendChild(div);
             });
         }
 
         async function addNews() {
-            const title = document.getElementById('news-title').value;
-            const content = document.getElementById('news-content').value;
-            if(!title) return;
+            const title = document.getElementById('news-title').value.trim();
+            const content = document.getElementById('news-content').value.trim();
+            if(!title) return showToast('タイトルを入力してください');
+            
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'news', `news_${Date.now()}`), {
                 title, content, isUrgent: document.getElementById('news-is-urgent').checked, timestamp: new Date().toISOString()
             });
-            showToast('お知らせを公開しました');
+            showToast('お知らせを配信しました');
             document.getElementById('news-title').value = '';
             document.getElementById('news-content').value = '';
+            document.getElementById('news-is-urgent').checked = false;
+        }
+
+        async function deleteNews(id) {
+            if(!(await customConfirm("このお知らせを削除しますか？"))) return;
+            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'news', id));
+            showToast('削除しました');
+        }
+
+        function renderAdminNewsList() {
+            const list = document.getElementById('admin-news-list');
+            if(!list) return;
+            list.innerHTML = '';
+            if(allNews.length === 0) {
+                list.innerHTML = '<div class="text-sm text-slate-400 py-2 text-center bg-slate-50 rounded-xl">配信済みのお知らせはありません。</div>';
+                return;
+            }
+            allNews.forEach(n => {
+                const d = new Date(n.timestamp);
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-xs shadow-sm group hover:border-slate-300 transition-colors";
+                div.innerHTML = `
+                    <div class="flex-1 truncate mr-2">
+                        <div class="text-[10px] text-slate-400 font-bold mb-0.5">${d.getMonth()+1}/${d.getDate()}</div>
+                        <span class="font-bold text-slate-700">${n.isUrgent ? '<span class="text-rose-500 mr-1">【重要】</span>' : ''}${n.title}</span>
+                    </div>
+                    <button onclick="deleteNews('${n.id}')" class="text-rose-500 hover:text-rose-700 font-bold opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-rose-50 px-3 py-1.5 rounded-lg shrink-0">削除</button>
+                `;
+                list.appendChild(div);
+            });
         }
 
         function renderNews() {
@@ -2285,7 +2407,7 @@
                         ${n.isUrgent ? `<span class="bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm">重要</span>` : ''}
                         <span class="font-black text-slate-800 text-sm">${n.title}</span>
                     </div>
-                    <p class="text-xs text-slate-600 font-medium leading-relaxed pl-1">${n.content}</p>
+                    ${n.content ? `<p class="text-xs text-slate-600 font-medium leading-relaxed pl-1 whitespace-pre-wrap">${n.content}</p>` : ''}
                 `;
                 list.appendChild(div);
             });
@@ -2422,7 +2544,7 @@
                     </div>
                     ${req.message ? `<div class="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100 whitespace-pre-wrap">${req.message}</div>` : ''}
                     
-                    <button onclick="deleteVisitorRequest('${req.id}')" class="absolute top-2 right-2 p-2 bg-white rounded-full text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors opacity-0 md:group-hover:opacity-100">
+                    <button onclick="deleteVisitorRequest('${req.id}')" class="absolute top-2 right-2 p-2 bg-white rounded-full text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors opacity-0 md:group-hover:opacity-100 hidden md:block">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>
                     <!-- スマホ用削除ボタン -->
