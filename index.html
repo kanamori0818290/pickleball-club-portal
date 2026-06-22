@@ -123,7 +123,7 @@
             </div>
         </div>
 
-        <!-- 🔰 ビジター・体験参加の案内ボタン (NEW) -->
+        <!-- 🔰 ビジター・体験参加の案内ボタン -->
         <div class="px-2">
             <button onclick="openVisitorModal()" class="w-full bg-gradient-to-r from-orange-400 to-rose-400 text-white font-bold py-4 rounded-xl shadow-md flex items-center justify-center gap-2 hover:opacity-90 transition-opacity transform hover:scale-[1.01] duration-200">
                 <i data-lucide="hand" class="w-5 h-5"></i>
@@ -888,6 +888,20 @@
         </div>
     </div>
 
+    <!-- ⚠️ 共通確認モーダル (NEW) -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden animate-fade-in">
+        <div class="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden transform scale-100 transition-all border border-white/20 p-6 text-center">
+            <div class="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+            </div>
+            <h3 id="confirm-message" class="text-base font-black text-slate-800 mb-6 whitespace-pre-wrap leading-relaxed">確認メッセージ</h3>
+            <div class="flex gap-3">
+                <button id="btn-confirm-cancel" class="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors text-sm">キャンセル</button>
+                <button id="btn-confirm-ok" class="flex-1 py-3.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-colors text-sm shadow-md">OK</button>
+            </div>
+        </div>
+    </div>
+
     <!-- UI共通トースト表示 -->
     <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-sm font-bold px-6 py-3.5 rounded-full shadow-xl transform translate-y-24 opacity-0 transition-all duration-300 flex items-center gap-2 border border-slate-700">
         <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
@@ -980,6 +994,32 @@
         window.closeVisitorModal = closeVisitorModal;
         window.submitVisitorRequest = submitVisitorRequest;
         window.deleteVisitorRequest = deleteVisitorRequest;
+        window.deleteAttendance = deleteAttendance;
+
+        // 確認モーダル用カスタム関数 (NEW)
+        function customConfirm(message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('confirm-modal');
+                document.getElementById('confirm-message').innerText = message;
+                const btnOk = document.getElementById('btn-confirm-ok');
+                const btnCancel = document.getElementById('btn-confirm-cancel');
+                
+                const cleanup = () => {
+                    modal.classList.add('hidden');
+                    btnOk.removeEventListener('click', onOk);
+                    btnCancel.removeEventListener('click', onCancel);
+                };
+                
+                const onOk = () => { cleanup(); resolve(true); };
+                const onCancel = () => { cleanup(); resolve(false); };
+                
+                btnOk.addEventListener('click', onOk);
+                btnCancel.addEventListener('click', onCancel);
+                
+                modal.classList.remove('hidden');
+                lucide.createIcons();
+            });
+        }
 
         function getTodayString() {
             const d = new Date();
@@ -1189,13 +1229,13 @@
         }
 
         async function deleteFinanceRecord(id) {
-            if(!confirm("削除しますか？")) return;
+            if(!(await customConfirm("削除しますか？"))) return;
             await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', id));
             showToast("削除しました");
         }
 
         async function settleAdvance(id) {
-            if(!confirm("この立て替えを精算済みにしますか？\n(※チームのお金から返金したことになります)")) return;
+            if(!(await customConfirm("この立て替えを精算済みにしますか？\n(※チームのお金から返金したことになります)"))) return;
             try {
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', id), { isSettled: true });
                 showToast("精算済みに変更しました");
@@ -1441,7 +1481,7 @@
         }
 
         async function deleteMember(id, name) {
-            if (!confirm(`メンバー「${name}」を名簿から削除しますか？\n（※過去の出欠や会計履歴は消えません）`)) return;
+            if (!(await customConfirm(`メンバー「${name}」を名簿から削除しますか？\n（※過去の出欠や会計履歴は消えません）`))) return;
             try {
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', id));
                 showToast("削除しました。");
@@ -1831,9 +1871,19 @@
                 if(document.getElementById('modal-att-is-proxy')) document.getElementById('modal-att-is-proxy').checked = false;
                 
                 // モーダル画面の表示を最新状態に更新
-                showDetailModal(currentOpenScheduleId);
+                if (currentOpenScheduleId) showDetailModal(currentOpenScheduleId);
             } catch (err) {
                 showToast("登録に失敗しました。");
+            }
+        }
+
+        async function deleteAttendance(responseId, name) {
+            if(!(await customConfirm(`${name}さんの回答を取り消しますか？`))) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance', responseId));
+                showToast("回答を取り消しました");
+            } catch(err) {
+                showToast("取り消しに失敗しました");
             }
         }
 
@@ -1987,12 +2037,17 @@
                     item.className = "flex justify-between items-center border-b border-slate-100 py-2 last:border-0";
                     let dot = a.status==='出席'?'🟢':a.status==='未定'?'🟡':'🔴';
                     item.innerHTML = `
-                        <div>
+                        <div class="flex-1">
                             <span class="font-bold text-slate-700">${dot} ${a.name}</span>
                             ${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''}
                             ${a.comment ? `<p class="text-[10px] text-slate-400 ml-5 mt-0.5">${a.comment}</p>` : ''}
                         </div>
-                        <span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded">${a.status}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded">${a.status}</span>
+                            <button onclick="deleteAttendance('${a.id}', '${a.name}')" class="p-1 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded transition-colors" title="回答を取り消す">
+                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
                     `;
                     list.appendChild(item);
                 });
@@ -2095,7 +2150,7 @@
         }
 
         async function deleteTournament(tournId) {
-            if (!confirm("大会情報を削除しますか？")) return;
+            if (!(await customConfirm("大会情報を削除しますか？"))) return;
             try {
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'tournaments', tournId));
                 showToast("削除しました。");
@@ -2180,7 +2235,7 @@
         }
 
         async function deleteSchedule(id) {
-            if(!confirm("削除しますか？")) return;
+            if(!(await customConfirm("削除しますか？"))) return;
             await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', id));
             showToast('削除しました');
         }
@@ -2197,7 +2252,7 @@
                         <span class="text-slate-400 font-bold mr-2">${s.date.substring(5).replace('-','/')}</span>
                         <span class="font-bold text-slate-700">${s.label}</span>
                     </div>
-                    <button onclick="deleteSchedule('${s.id}')" class="text-xs text-slate-300 hover:text-rose-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity px-2">削除</button>
+                    <button onclick="deleteSchedule('${s.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold px-3 py-1.5 bg-rose-50 rounded-lg opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">削除</button>
                 `;
                 list.appendChild(div);
             });
@@ -2244,7 +2299,7 @@
         }
 
         async function seedInitialData() {
-            if (!confirm("6月13日(土)、6月16日(火)以降の練習予定と\nテスト用の「会計データ」を一括で展開しますか？")) return;
+            if (!(await customConfirm("6月13日(土)、6月16日(火)以降の練習予定と\nテスト用の「会計データ」を一括で展開しますか？"))) return;
             showToast("展開中...");
 
             const schedules = [
@@ -2333,7 +2388,7 @@
         }
 
         async function deleteVisitorRequest(id) {
-            if(!confirm("この問い合わせを削除しますか？")) return;
+            if(!(await customConfirm("この問い合わせを削除しますか？"))) return;
             await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'visitor_requests', id));
             showToast("削除しました");
         }
