@@ -116,14 +116,12 @@
             </div>
         </nav>
 
-        <!-- ✨ ステータス バッジエリア -->
         <div class="flex justify-end items-center gap-3 px-2">
             <div id="user-info-badge" class="text-[10px] font-bold text-slate-400 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm flex items-center gap-1.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> ゲスト接続
             </div>
         </div>
 
-        <!-- 🔰 ビジター・体験参加の案内ボタン -->
         <div class="px-2">
             <button onclick="openVisitorModal()" class="w-full bg-gradient-to-r from-orange-400 to-rose-400 text-white font-bold py-4 rounded-xl shadow-md flex items-center justify-center gap-2 hover:opacity-90 transition-opacity transform hover:scale-[1.01] duration-200">
                 <i data-lucide="hand" class="w-5 h-5"></i>
@@ -235,7 +233,6 @@
                                 <div class="p-2 bg-rose-50 text-rose-500 rounded-xl"><i data-lucide="award" class="w-6 h-6"></i></div>
                                 <h3 class="font-extrabold text-lg text-slate-800 tracking-tight">メンバー別 参加回数ランキング</h3>
                             </div>
-                            <!-- JS自動生成されるプルダウン -->
                             <select id="ranking-month-selector" onchange="renderAttendanceRanking()" class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm bg-slate-50 focus:outline-none font-bold text-slate-700 cursor-pointer">
                             </select>
                         </div>
@@ -409,6 +406,12 @@
                         <div class="lg:col-span-7 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5 relative overflow-hidden">
                             <i data-lucide="calculator" class="absolute -right-4 -bottom-4 w-32 h-32 text-slate-50 opacity-50 pointer-events-none"></i>
                             
+                            <!-- 編集モード中を示すバッジ -->
+                            <div id="finance-edit-badge" class="hidden bg-amber-100 border border-amber-200 text-amber-800 text-xs font-bold px-3 py-2 rounded-xl flex items-center justify-between">
+                                <span class="flex items-center gap-1.5"><i data-lucide="pencil" class="w-4 h-4"></i> 会計データを編集中...</span>
+                                <button onclick="cancelFinanceEdit()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+                            </div>
+
                             <div class="flex gap-2 bg-slate-100 p-1.5 rounded-xl relative z-10">
                                 <button id="fin-type-income" onclick="setFinanceType('income')" class="flex-1 py-3 bg-emerald-500 text-white font-bold rounded-lg text-base transition-all shadow-sm flex items-center justify-center gap-1.5 transform hover:scale-[1.02]">
                                     <i data-lucide="plus-circle" class="w-5 h-5"></i> 収入 (入金)
@@ -418,6 +421,7 @@
                                 </button>
                             </div>
                             <input type="hidden" id="fin-type-value" value="income">
+                            <input type="hidden" id="fin-edit-id" value="">
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
                                 <div>
@@ -464,7 +468,7 @@
                             </div>
 
                             <button id="fin-submit-btn" onclick="addFinanceRecord()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl text-base transition-colors flex items-center justify-center gap-2 shadow-lg relative z-10 mt-2">
-                                <i data-lucide="save" class="w-5 h-5 text-emerald-400"></i> 帳簿に登録する
+                                <i data-lucide="save" class="w-5 h-5 text-emerald-400"></i> <span id="fin-btn-text">帳簿に登録する</span>
                             </button>
                         </div>
                         
@@ -516,7 +520,6 @@
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-2">
                             <p class="text-sm text-slate-500 font-medium">ここで「済」にすると、<strong>自動的に会計帳簿にも入金として記録されます。</strong></p>
                             <div class="flex items-center gap-2 w-full sm:w-auto">
-                                <!-- JS自動生成されるプルダウン -->
                                 <select id="fee-month-selector" onchange="renderFeeChecklist()" class="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-slate-200 text-base bg-slate-50 focus:outline-none font-bold text-slate-700">
                                 </select>
                             </div>
@@ -972,8 +975,10 @@
         let financeGoal = { title: "ポータブルネット購入", amount: 10000 }; 
         let teamPaypayLink = "";
 
-        let currentYear = 2026;
-        let currentMonth = 5; 
+        // 本日の日付から現在年・月を決定
+        const todayDateObj = new Date();
+        let currentYear = todayDateObj.getFullYear();
+        let currentMonth = todayDateObj.getMonth(); // 0-11
         let selectedStatus = '出席'; 
         let selectedModalStatus = '出席'; 
         let currentOpenScheduleId = null; 
@@ -999,6 +1004,8 @@
         window.setFinanceType = setFinanceType;
         window.addFinanceRecord = addFinanceRecord;
         window.deleteFinanceRecord = deleteFinanceRecord;
+        window.editFinanceRecord = editFinanceRecord;
+        window.cancelFinanceEdit = cancelFinanceEdit;
         window.settleAdvance = settleAdvance;
         window.addTournament = addTournament;
         window.deleteTournament = deleteTournament;
@@ -1074,6 +1081,7 @@
                 rankingSelector.appendChild(allOpt);
             }
             
+            // 2026年6月を起点にする
             const startYear = 2026;
             const startMonth = 6;
             
@@ -1081,6 +1089,7 @@
             const currentY = d.getFullYear();
             const currentM = d.getMonth() + 1;
             
+            // 現在から3ヶ月先までをターゲットにする
             let endY = currentY;
             let endM = currentM + 3;
             if (endM > 12) { endM -= 12; endY++; }
@@ -1109,6 +1118,7 @@
                 if (m > 12) { m = 1; y++; }
             }
             
+            // 今日の年月値をセット
             const currentVal = `${currentY}-${String(currentM).padStart(2, '0')}`;
             if (feeSelector && feeSelector.querySelector(`option[value="${currentVal}"]`)) {
                 feeSelector.value = currentVal;
@@ -1118,9 +1128,6 @@
             }
         }
 
-        // ==========================================
-        // 🔐 認証 (Auth) ゲストログイン
-        // ==========================================
         const initAuth = async () => {
             try {
                 await signInAnonymously(auth);
@@ -1138,13 +1145,9 @@
             }
         });
 
-        // ==========================================
-        // データロード
-        // ==========================================
         const onUserLoaded = async (currentUser) => {
             if (!currentUser) return;
             
-            // 🌟 プルダウンを自動生成
             populateMonthSelectors();
 
             const schedulesRef = collection(db, 'artifacts', appId, 'public', 'data', 'schedules');
@@ -1262,7 +1265,7 @@
         }
 
         // ==========================================
-        // 💰 会計システム
+        // 💰 会計システム ＆ 編集機能
         // ==========================================
         function setFinanceType(type) {
             document.getElementById('fin-type-value').value = type;
@@ -1281,6 +1284,52 @@
             }
         }
 
+        // 特定の会計レコードを編集フォームにロードする
+        function editFinanceRecord(id) {
+            const record = allFinance.find(f => f.id === id);
+            if (!record) return;
+
+            document.getElementById('fin-edit-id').value = id;
+            document.getElementById('fin-date').value = record.date;
+            document.getElementById('fin-amount').value = record.amount;
+            document.getElementById('fin-category').value = record.category;
+            document.getElementById('fin-desc').value = record.description;
+            setFinanceType(record.type);
+
+            if (record.type === 'expense') {
+                document.getElementById('fin-is-advance').checked = record.isAdvance || false;
+                document.getElementById('fin-advance-person').value = record.advancePerson || '';
+            }
+
+            // UIを「編集モード中」にする
+            document.getElementById('finance-edit-badge').classList.remove('hidden');
+            document.getElementById('fin-btn-text').innerText = "帳簿データを更新する";
+            const submitBtn = document.getElementById('fin-submit-btn');
+            submitBtn.className = "w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-xl text-base transition-colors flex items-center justify-center gap-2 shadow-lg relative z-10 mt-2";
+            
+            showToast("編集データをロードしました。修正して保存してください。");
+            document.getElementById('view-admin').scrollIntoView({ behavior: 'smooth' });
+            lucide.createIcons();
+        }
+
+        // 編集モードをキャンセルする
+        function cancelFinanceEdit() {
+            document.getElementById('fin-edit-id').value = "";
+            document.getElementById('finance-edit-badge').classList.add('hidden');
+            document.getElementById('fin-btn-text').innerText = "帳簿に登録する";
+            const submitBtn = document.getElementById('fin-submit-btn');
+            submitBtn.className = "w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl text-base transition-colors flex items-center justify-center gap-2 shadow-lg relative z-10 mt-2";
+            
+            // フォームをリセット
+            document.getElementById('fin-amount').value = '';
+            document.getElementById('fin-desc').value = '';
+            document.getElementById('fin-date').value = getTodayString();
+            document.getElementById('fin-is-advance').checked = false;
+            document.getElementById('fin-advance-person').value = '';
+            setFinanceType('income');
+            lucide.createIcons();
+        }
+
         async function addFinanceRecord() {
             const type = document.getElementById('fin-type-value').value;
             const date = document.getElementById('fin-date').value;
@@ -1289,6 +1338,8 @@
             const desc = document.getElementById('fin-desc').value.trim();
             const isAdvance = type === 'expense' && document.getElementById('fin-is-advance').checked;
             const advancePerson = document.getElementById('fin-advance-person').value.trim();
+            
+            const editId = document.getElementById('fin-edit-id').value;
 
             if(!date || isNaN(amount) || amount <= 0 || !desc) {
                 return showToast("すべて正しく入力してください");
@@ -1299,10 +1350,10 @@
 
             const submitBtn = document.getElementById('fin-submit-btn');
             const originalBtnText = submitBtn.innerHTML;
-            const finId = `fin_${Date.now()}`;
+            const finId = editId ? editId : `fin_${Date.now()}`;
 
             try {
-                submitBtn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> 登録中...`;
+                submitBtn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> 保存中...`;
                 submitBtn.disabled = true;
 
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', finId), {
@@ -1311,13 +1362,18 @@
                     timestamp: new Date().toISOString()
                 });
 
-                showToast("帳簿に登録しました！");
-                document.getElementById('fin-amount').value = '';
-                document.getElementById('fin-desc').value = '';
-                document.getElementById('fin-is-advance').checked = false;
-                document.getElementById('fin-advance-person').value = '';
+                if (editId) {
+                    showToast("帳簿データを更新（上書き保存）しました！");
+                    cancelFinanceEdit();
+                } else {
+                    showToast("帳簿に登録しました！");
+                    document.getElementById('fin-amount').value = '';
+                    document.getElementById('fin-desc').value = '';
+                    document.getElementById('fin-is-advance').checked = false;
+                    document.getElementById('fin-advance-person').value = '';
+                }
             } catch(err) {
-                showToast("登録に失敗しました");
+                showToast("保存に失敗しました");
             } finally {
                 submitBtn.innerHTML = originalBtnText;
                 submitBtn.disabled = false;
@@ -1329,6 +1385,10 @@
             if(!(await customConfirm("削除しますか？"))) return;
             await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', id));
             showToast("削除しました");
+            // もし編集中だったデータを消した場合はフォームもリセット
+            if (document.getElementById('fin-edit-id').value === id) {
+                cancelFinanceEdit();
+            }
         }
 
         async function settleAdvance(id) {
@@ -1441,7 +1501,7 @@
                     bar.style.width = '100%';
                     text.innerText = "目標達成済み！🎉";
                     pctText.innerText = "100% 達成";
-                    bar.className = "bg-gradient-to-r from-emerald-400 to-emerald-500 h-full transition-all duration-1000 ease-out relative shadow-[0_0_10px_rgba(52,211,153,0.5)]";
+                    bar.className = "bg-gradient-to-r from-emerald-400 to-emerald-500 h-full transition-all duration-1000 ease-out relative shadow-[0_0_8px_rgba(52,211,153,0.5)]";
                 } else {
                     const pct = Math.max(0, (total / financeGoal.amount) * 100);
                     bar.style.width = `${pct}%`;
@@ -1544,9 +1604,15 @@
                         <div class="font-black text-base ${isInc ? 'text-emerald-600' : 'text-rose-500'}">
                             ${isInc ? '+' : '-'}¥${f.amount.toLocaleString()}
                         </div>
-                        <button onclick="deleteFinanceRecord('${f.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold mt-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-rose-50 px-3 py-1.5 rounded-lg">
-                            削除
-                        </button>
+                        <div class="flex gap-2 mt-2">
+                            <!-- 📝 編集ボタンを追加 -->
+                            <button onclick="editFinanceRecord('${f.id}')" class="text-xs text-amber-600 hover:text-amber-800 font-bold bg-amber-50 px-2.5 py-1.5 rounded-lg flex items-center gap-1">
+                                <i data-lucide="pencil" class="w-3 h-3"></i> 編集
+                            </button>
+                            <button onclick="deleteFinanceRecord('${f.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold bg-rose-50 px-2.5 py-1.5 rounded-lg">
+                                削除
+                            </button>
+                        </div>
                     </div>
                 `;
                 if(listEl) listEl.appendChild(div);
@@ -1609,8 +1675,10 @@
 
         function renderFeeChecklist() {
             const listEl = document.getElementById('admin-fee-checklist');
-            const monthVal = document.getElementById('fee-month-selector').value; 
-            if (!listEl || !monthVal) return;
+            const feeMonthSelector = document.getElementById('fee-month-selector');
+            if (!listEl || !feeMonthSelector) return;
+            const monthVal = feeMonthSelector.value;
+            if (!monthVal) return;
             
             listEl.innerHTML = '';
             if (allMembers.length === 0) {
@@ -1979,9 +2047,10 @@
 
         function renderAttendanceRanking() {
             const list = document.getElementById('attendance-ranking-list');
-            const monthVal = document.getElementById('ranking-month-selector').value;
-            if (!list) return;
-            list.innerHTML = '';
+            const rankingMonthSelector = document.getElementById('ranking-month-selector');
+            if (!list || !rankingMonthSelector) return;
+            const monthVal = rankingMonthSelector.value;
+            if (!monthVal) return;
 
             let attendanceToCount = allAttendance;
             if (monthVal !== 'all') {
@@ -2293,7 +2362,7 @@
         }
 
         // ==========================================
-        // 管理者システム
+        // 管理者システム ＆ 掲示板（お知らせ）
         // ==========================================
         function authenticateAdmin() {
             const pass = document.getElementById('admin-passcode').value;
@@ -2380,7 +2449,7 @@
             allNews.forEach(n => {
                 const d = new Date(n.timestamp);
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-xs shadow-sm group hover:border-slate-300 transition-colors";
+                div.className = "flex justify-between items-center bg-white p-3 rounded-xl text-xs shadow-sm group hover:border-slate-300 transition-colors";
                 div.innerHTML = `
                     <div class="flex-1 truncate mr-2">
                         <div class="text-[10px] text-slate-400 font-bold mb-0.5">${d.getMonth()+1}/${d.getDate()}</div>
