@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap');
         body {
@@ -85,11 +87,21 @@
                 <p class="text-slate-300 text-sm mt-2 font-medium tracking-wide">練習スケジュール・出欠 ＆ 会計ダッシュボード</p>
             </div>
             
-            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 text-center border border-white/10 shadow-lg min-w-[240px] transform hover:scale-[1.02] transition-transform duration-300">
-                <p class="text-xs text-amber-300 font-bold uppercase tracking-wider mb-1 opacity-90">次回練習日</p>
-                <div id="next-practice-date" class="text-lg font-black mt-1 text-white drop-shadow-md">取得中...</div>
-                <div id="next-practice-countdown" class="text-xs font-bold mt-2 bg-amber-400/20 text-amber-200 border border-amber-400/30 py-1 px-3 rounded-full inline-block shadow-inner">
-                    --:--:--
+            <div class="flex flex-row gap-3 w-full sm:w-auto overflow-x-auto hide-scroll-bar pb-2 sm:pb-0">
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 text-center border border-white/10 shadow-lg flex-1 sm:min-w-[180px] transform hover:scale-[1.02] transition-transform duration-300">
+                    <p class="text-[10px] text-amber-300 font-bold uppercase tracking-wider mb-1 opacity-90">次回練習日</p>
+                    <div id="next-practice-date" class="text-base font-black mt-1 text-white drop-shadow-md whitespace-nowrap">取得中...</div>
+                    <div id="next-practice-countdown" class="text-[10px] font-bold mt-2 bg-amber-400/20 text-amber-200 border border-amber-400/30 py-1 px-2.5 rounded-full inline-block shadow-inner whitespace-nowrap">
+                        --:--:--
+                    </div>
+                </div>
+
+                <!-- 🌬️ ピックルボール用 天気・風速ウィジェット -->
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 text-center border border-white/10 shadow-lg flex-1 sm:min-w-[130px] transform hover:scale-[1.02] transition-transform duration-300 flex flex-col justify-center">
+                    <p class="text-[10px] text-sky-300 font-bold uppercase tracking-wider mb-1 opacity-90">現在の天気・風速</p>
+                    <div id="weather-widget" class="flex flex-col items-center justify-center mt-0.5">
+                        <i data-lucide="loader" class="w-5 h-5 text-white/50 animate-spin my-2"></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -195,7 +207,7 @@
                             </div>
                             
                             <div class="space-y-3 pt-2">
-                                <!-- ⌚ 遅刻・早退メモ (NEW) -->
+                                <!-- ⌚ 遅刻・早退メモ -->
                                 <div id="att-time-memo-container" class="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 hidden animate-fade-in">
                                     <label class="block text-[11px] font-bold text-indigo-600 mb-1.5"><i data-lucide="clock" class="w-3.5 h-3.5 inline -mt-0.5"></i> 遅刻・早退の予定（任意）</label>
                                     <div class="flex gap-1.5 mb-2 overflow-x-auto hide-scroll-bar pb-1">
@@ -225,6 +237,17 @@
                 </div>
 
                 <div class="lg:col-span-7 space-y-8">
+                    
+                    <!-- 📊 曜日別参加人数グラフ (NEW) -->
+                    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200">
+                        <h3 class="font-extrabold text-lg text-slate-800 mb-4 flex items-center gap-2">
+                            <i data-lucide="bar-chart-2" class="w-5 h-5 text-indigo-500"></i> 曜日別の平均参加人数
+                        </h3>
+                        <div class="h-48 relative w-full">
+                            <canvas id="attendanceDayChart"></canvas>
+                        </div>
+                    </div>
+
                     <!-- 🏅 参加回数ランキング -->
                     <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
@@ -273,8 +296,8 @@
                             <span>PayPayで送金</span>
                         </button>
                         <button onclick="generateReport()" class="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white font-bold py-3 px-5 rounded-xl transition-colors shadow-md flex items-center justify-center gap-2">
-                            <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
-                            <span>📊 収支レポートを作成</span>
+                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                            <span>収支レポートを作成</span>
                         </button>
                     </div>
                 </div>
@@ -303,6 +326,16 @@
                             <span id="finance-goal-text" class="font-bold text-white opacity-90">あと 10,000円</span>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- 📊 グラフダッシュボード (横幅いっぱいに変更) -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                <h3 class="font-extrabold text-sm text-slate-800 mb-4 flex items-center gap-2">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 text-indigo-500"></i> 月別 収支推移
+                </h3>
+                <div class="h-56 relative w-full">
+                    <canvas id="trendChart"></canvas>
                 </div>
             </div>
             
@@ -906,6 +939,10 @@
         let financeGoal = { title: "ポータブルネット購入", amount: 10000 }; 
         let teamPaypayLink = "";
 
+        // グラフ用の変数
+        let attendanceDayChartInstance = null; // NEW: 曜日別参加人数グラフ
+        let trendChartInstance = null;
+
         // 本日の日付から現在年・月を決定
         const todayDateObj = new Date();
         let currentYear = todayDateObj.getFullYear();
@@ -920,7 +957,7 @@
         window.nextMonth = nextMonth;
         window.setFormStatus = setFormStatus;
         window.setModalFormStatus = setModalFormStatus;
-        window.insertTimeMemo = insertTimeMemo; // 追加
+        window.insertTimeMemo = insertTimeMemo; 
         window.submitAttendance = submitAttendance;
         window.submitModalAttendance = submitModalAttendance;
         window.authenticateAdmin = authenticateAdmin;
@@ -1160,6 +1197,7 @@
             renderCalendar();
             updateAttendanceFormSchedules();
             renderAttendanceSummary();
+            renderAttendanceChart(); // 曜日別グラフの描画
             renderAdminScheduleList();
             updateNextPracticeWidget();
         }
@@ -1418,11 +1456,29 @@
 
         function renderFinanceDashboard() {
             let total = 0;
+            const monthlyData = {};
+
             allFinance.forEach(f => {
-                if(f.type === 'income') total += f.amount;
+                const isInc = f.type === 'income';
+                if(isInc) total += f.amount;
                 else total -= f.amount;
+
+                // グラフ用データの集計
+                const d = new Date(f.date);
+                const monthKey = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+                
+                if (!monthlyData[monthKey]) {
+                    monthlyData[monthKey] = { income: 0, expense: 0 };
+                }
+                
+                if (!isInc) {
+                    monthlyData[monthKey].expense += f.amount;
+                } else {
+                    monthlyData[monthKey].income += f.amount;
+                }
             });
 
+            // 💰 総資産と目標バーの更新
             const totalEl = document.getElementById('finance-total-balance');
             if(totalEl) totalEl.innerText = total.toLocaleString();
 
@@ -1447,6 +1503,75 @@
                     bar.className = "bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 h-full transition-all duration-1000 ease-out relative";
                 }
             }
+
+            // 📊 グラフの描画 (月別収支推移のみ)
+            const trendCtx = document.getElementById('trendChart');
+
+            if (trendCtx) {
+                // 月別推移（棒グラフ）
+                const sortedMonths = Object.keys(monthlyData).sort();
+                const incTrend = sortedMonths.map(m => monthlyData[m].income);
+                const expTrend = sortedMonths.map(m => monthlyData[m].expense);
+
+                if (trendChartInstance) trendChartInstance.destroy();
+                trendChartInstance = new Chart(trendCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedMonths.length > 0 ? sortedMonths : ['データなし'],
+                        datasets: [
+                            {
+                                label: '収入 (IN)',
+                                data: sortedMonths.length > 0 ? incTrend : [0],
+                                backgroundColor: '#10b981',
+                                borderRadius: 4,
+                                barPercentage: 0.5,
+                                categoryPercentage: 0.8
+                            },
+                            {
+                                label: '支出 (OUT)',
+                                data: sortedMonths.length > 0 ? expTrend : [0],
+                                backgroundColor: '#f43f5e',
+                                borderRadius: 4,
+                                barPercentage: 0.5,
+                                categoryPercentage: 0.8
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        scales: {
+                            y: { 
+                                beginAtZero: true, 
+                                grid: { color: '#f1f5f9' },
+                                border: { display: false },
+                                ticks: { font: { size: 10 }, callback: function(value) { return '¥' + value.toLocaleString(); } }
+                            },
+                            x: { 
+                                grid: { display: false },
+                                border: { display: false },
+                                ticks: { font: { size: 10 } }
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11, family: "'Noto Sans JP', sans-serif" } } },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        if (sortedMonths.length === 0) return '';
+                                        let label = context.dataset.label || '';
+                                        if (label) label += ': ';
+                                        label += new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(context.raw);
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
 
             const listEl = document.getElementById('finance-history-list');
             if(!listEl) return;
@@ -2072,6 +2197,84 @@
             });
         }
 
+        // 📊 曜日別の参加人数グラフを描画する機能
+        function renderAttendanceChart() {
+            const ctx = document.getElementById('attendanceDayChart');
+            if (!ctx) return;
+
+            const dayCounts = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}; 
+            const dayAttendees = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}; 
+
+            const now = new Date();
+
+            allSchedules.forEach(s => {
+                const d = new Date(s.date);
+                const attsCount = allAttendance.filter(a => a.scheduleId === s.id && a.status === '出席').length;
+                const totalAnswers = allAttendance.filter(a => a.scheduleId === s.id).length;
+                
+                // 過去の日程、または既に出欠回答がある未来の日程のみを集計対象にする
+                if (d <= now || totalAnswers > 0) {
+                    const day = d.getDay();
+                    dayCounts[day]++;
+                    dayAttendees[day] += attsCount;
+                }
+            });
+
+            const labels = ['日', '月', '火', '水', '木', '金', '土'];
+            const averages = [];
+            const colors = [];
+            for (let i=0; i<7; i++) {
+                const avg = dayCounts[i] > 0 ? (dayAttendees[i] / dayCounts[i]).toFixed(1) : 0;
+                averages.push(avg);
+                // グラフの色分け（日曜は赤、土曜は青、平日は緑）
+                if (i === 0) colors.push('#f43f5e'); 
+                else if (i === 6) colors.push('#0ea5e9');
+                else colors.push('#10b981');
+            }
+
+            if (attendanceDayChartInstance) attendanceDayChartInstance.destroy();
+            attendanceDayChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '平均出席人数',
+                        data: averages,
+                        backgroundColor: colors,
+                        borderRadius: 6,
+                        barPercentage: 0.6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { color: '#f1f5f9' },
+                            border: { display: false },
+                            ticks: { font: { size: 10 }, stepSize: 2 }
+                        },
+                        x: { 
+                            grid: { display: false },
+                            border: { display: false },
+                            ticks: { font: { size: 12, weight: 'bold' } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.raw + ' 人';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
         function renderAttendanceSummary() {
             const list = document.getElementById('attendance-summary-list');
             if (!list) return;
@@ -2466,7 +2669,53 @@
             setTimeout(() => { t.classList.add('translate-y-24', 'opacity-0'); }, 3000);
         }
 
+        // 🌬️ オープンデータAPI(無料/登録不要)から天気と風速を取得
+        async function fetchWeather() {
+            try {
+                // 東京の緯度経度 (必要に応じて変更可能)
+                const lat = 35.74;
+                const lon = 139.85;
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&windspeed_unit=ms`);
+                const data = await res.json();
+                const cw = data.current_weather;
+                
+                // 天気コードをアイコンに変換
+                const wCode = cw.weathercode;
+                let wIcon = '☀️';
+                if (wCode >= 1 && wCode <= 3) wIcon = '⛅';
+                if (wCode >= 45 && wCode <= 48) wIcon = '🌫️';
+                if (wCode >= 51 && wCode <= 67) wIcon = '🌧️';
+                if (wCode >= 71 && wCode <= 77) wIcon = '❄️';
+                if (wCode >= 80 && wCode <= 82) wIcon = '☔';
+                if (wCode >= 95) wIcon = '⛈️';
+
+                const wind = cw.windspeed;
+                let windColor = 'text-white';
+                let windAlert = '';
+                // 3m/s以上で風注意のアラートを表示
+                if (wind >= 3) {
+                    windColor = 'text-rose-400';
+                    windAlert = '<div class="text-[9px] bg-rose-500/80 text-white px-1.5 py-0.5 rounded mt-1.5 font-bold shadow-sm animate-pulse">風強め注意</div>';
+                }
+
+                document.getElementById('weather-widget').innerHTML = `
+                    <div class="flex items-center gap-1.5 text-white">
+                        <span class="text-xl">${wIcon}</span>
+                        <span class="text-lg font-black tracking-tighter">${cw.temperature}°C</span>
+                    </div>
+                    <div class="flex items-center gap-1 mt-0.5 font-bold text-xs ${windColor}">
+                        <i data-lucide="wind" class="w-3.5 h-3.5"></i> ${wind} m/s
+                    </div>
+                    ${windAlert}
+                `;
+                lucide.createIcons();
+            } catch (err) {
+                document.getElementById('weather-widget').innerHTML = '<span class="text-[10px] text-white/50">取得失敗</span>';
+            }
+        }
+
         initAuth();
+        fetchWeather(); // ウィジェットの読み込みを実行
         lucide.createIcons();
     </script>
 </body>
