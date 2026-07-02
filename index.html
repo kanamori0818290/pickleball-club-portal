@@ -116,19 +116,6 @@
             </div>
         </nav>
 
-        <div class="flex justify-end items-center gap-3 px-2">
-            <div id="user-info-badge" class="text-[10px] font-bold text-slate-400 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> ゲスト接続
-            </div>
-        </div>
-
-        <div class="px-2">
-            <button onclick="openVisitorModal()" class="w-full bg-gradient-to-r from-orange-400 to-rose-400 text-white font-bold py-4 rounded-xl shadow-md flex items-center justify-center gap-2 hover:opacity-90 transition-opacity transform hover:scale-[1.01] duration-200">
-                <i data-lucide="hand" class="w-5 h-5"></i>
-                初めて参加・見学を希望される方はこちら
-            </button>
-        </div>
-
         <div id="news-section" class="hidden bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100/50 rounded-2xl p-5 shadow-sm relative overflow-hidden">
             <div class="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
             <div class="flex gap-4">
@@ -310,11 +297,11 @@
             <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
                     <h3 class="font-extrabold text-lg text-slate-800 flex items-center gap-2">
-                        <i data-lucide="history" class="w-5 h-5 text-slate-400"></i> 直近の収支履歴
+                        <i data-lucide="history" class="w-5 h-5 text-slate-400"></i> すべての収支履歴
                     </h3>
-                    <span class="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-md">最新15件</span>
+                    <span class="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-md">全件表示</span>
                 </div>
-                <div id="finance-history-list" class="space-y-0 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent"></div>
+                <div id="finance-history-list" class="space-y-0 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent max-h-[600px] overflow-y-auto custom-scroll pr-2"></div>
             </div>
         </section>
 
@@ -559,6 +546,7 @@
                                         <option value="金曜定期枠">金曜定期枠 (19:00~21:00)</option>
                                         <option value="土曜特別枠">土曜特別枠 (14:00~17:00)</option>
                                         <option value="日曜・祝日枠">日曜・祝日枠</option>
+                                        <option value="ハードコート枠">ハードコート枠 (屋外)</option>
                                         <option value="臨時・その他枠">臨時・その他枠</option>
                                     </select>
                                 </div>
@@ -643,7 +631,7 @@
                 <div class="space-y-5 border-t border-slate-200 pt-8">
                     <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
                         <span class="p-1.5 bg-slate-100 text-slate-600 rounded-lg"><i data-lucide="settings" class="w-5 h-5"></i></span>
-                        システム設定・テスト機能
+                        システム設定
                     </h3>
                     
                     <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -660,92 +648,12 @@
                             </button>
                         </div>
                     </div>
-
-                    <div class="bg-amber-50 p-5 md:p-6 rounded-2xl border border-amber-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div>
-                            <h4 class="font-bold text-amber-800 text-base mb-1">初期データの展開</h4>
-                            <p class="text-sm text-amber-700 leading-relaxed">テスト用のスケジュールと会計データを一括でクラウドに登録します。</p>
-                        </div>
-                        <button onclick="seedInitialData()" class="w-full sm:w-auto shrink-0 bg-white border border-amber-300 hover:bg-amber-400 text-amber-800 text-sm font-bold px-6 py-4 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm">
-                            <i data-lucide="zap" class="w-5 h-5 text-amber-500"></i> テストデータ(予定+会計)を展開
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 🔰 ビジター・体験希望の問い合わせ一覧 -->
-                <div class="space-y-5 border-t border-slate-200 pt-8">
-                    <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
-                        <span class="p-1.5 bg-rose-100 text-rose-600 rounded-lg"><i data-lucide="mail" class="w-5 h-5"></i></span>
-                        ビジター・体験希望の問い合わせ
-                    </h3>
-                    <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                        <div class="flex justify-between items-center mb-2 border-b border-slate-100 pb-3">
-                            <p class="text-sm text-slate-500 font-medium">サイトのトップから送信された「見学・体験希望」のメッセージです。</p>
-                        </div>
-                        <div id="admin-visitor-list" class="space-y-3 custom-scroll max-h-[400px] overflow-y-auto pr-1">
-                            <!-- JS生成 -->
-                        </div>
-                    </div>
                 </div>
 
             </div>
         </section>
 
     </main>
-
-    <!-- 🔰 ビジター・体験希望モーダル -->
-    <div id="visitor-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
-        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden transform scale-100 transition-all border border-white/20 flex flex-col max-h-[90vh]">
-            <div class="bg-gradient-to-r from-orange-50 to-rose-50 px-6 py-4 flex justify-between items-center border-b border-orange-100 shrink-0">
-                <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
-                    <i data-lucide="hand" class="w-5 h-5 text-orange-500"></i> 初回参加・見学の申し込み
-                </h3>
-                <button onclick="closeVisitorModal()" class="p-2 bg-white hover:bg-slate-100 rounded-full transition-colors text-slate-400 shadow-sm border border-slate-200">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <div class="p-6 space-y-5 overflow-y-auto custom-scroll flex-1 min-h-0">
-                <p class="text-sm text-slate-600 font-medium leading-relaxed bg-white">
-                    ピックルボールに興味を持っていただきありがとうございます！<br>以下のフォームからお気軽にご連絡ください。管理者が確認いたします。
-                </p>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-2">お名前 (ニックネーム可)</label>
-                    <input type="text" id="vis-name" placeholder="例: やまだ" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-orange-400 focus:outline-none bg-slate-50 focus:bg-white font-medium">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-2">ご連絡先 (メールアドレスやLINE IDなど)</label>
-                    <input type="text" id="vis-contact" placeholder="折り返し連絡が取れるもの" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-orange-400 focus:outline-none bg-slate-50 focus:bg-white font-medium">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-2">希望日 (見学・体験)</label>
-                    <div class="relative">
-                        <select id="vis-date" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-orange-400 focus:outline-none appearance-none font-medium cursor-pointer transition-shadow">
-                            <!-- JS生成 -->
-                        </select>
-                        <i data-lucide="chevron-down" class="w-4 h-4 absolute right-4 top-4 text-slate-400 pointer-events-none"></i>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-2">ラケットスポーツの経験</label>
-                    <select id="vis-exp" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-orange-400 focus:outline-none appearance-none font-medium cursor-pointer transition-shadow">
-                        <option value="未経験・初心者">未経験・初心者</option>
-                        <option value="テニス経験あり">テニス経験あり</option>
-                        <option value="卓球・バドミントン経験あり">卓球・バドミントン等の経験あり</option>
-                        <option value="ピックルボール経験者">ピックルボール経験者</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-2">メッセージ・質問など</label>
-                    <textarea id="vis-message" rows="3" placeholder="「見学だけしたいです」「ラケットは借りられますか？」など" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-orange-400 focus:outline-none bg-slate-50 focus:bg-white font-medium"></textarea>
-                </div>
-                <div class="pt-2">
-                    <button onclick="submitVisitorRequest()" class="w-full py-4 bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white font-bold rounded-xl transition-all text-sm shadow-md flex justify-center items-center gap-2 transform hover:scale-[1.02]">
-                        <i data-lucide="send" class="w-4 h-4"></i> この内容で送信する
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- 📊 レポート生成モーダル -->
     <div id="report-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
@@ -970,7 +878,6 @@
         let allTournaments = []; 
         let allFeeChecks = {}; 
         let allMembers = [];
-        let allVisitorRequests = [];
         
         let financeGoal = { title: "ポータブルネット購入", amount: 10000 }; 
         let teamPaypayLink = "";
@@ -995,7 +902,6 @@
         window.lockAdmin = lockAdmin;
         window.addSingleSchedule = addSingleSchedule;
         window.deleteSchedule = deleteSchedule;
-        window.seedInitialData = seedInitialData;
         window.showDetailModal = showDetailModal;
         window.closeModal = closeModal;
         window.addNews = addNews;
@@ -1030,10 +936,6 @@
         window.toggleAttNameInput = toggleAttNameInput;
         window.renderAttendanceRanking = renderAttendanceRanking;
         
-        window.openVisitorModal = openVisitorModal;
-        window.closeVisitorModal = closeVisitorModal;
-        window.submitVisitorRequest = submitVisitorRequest;
-        window.deleteVisitorRequest = deleteVisitorRequest;
         window.deleteAttendance = deleteAttendance;
 
         // 確認モーダル用カスタム関数
@@ -1157,7 +1059,6 @@
             const tournamentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'tournaments');
             const feesRef = collection(db, 'artifacts', appId, 'public', 'data', 'fees'); 
             const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
-            const visitorsRef = collection(db, 'artifacts', appId, 'public', 'data', 'visitor_requests');
 
             try {
                 const goalDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'finance_goal'));
@@ -1226,13 +1127,6 @@
                 renderAttendanceRanking();
             });
 
-            onSnapshot(visitorsRef, (snapshot) => {
-                allVisitorRequests = [];
-                snapshot.forEach(doc => allVisitorRequests.push({ id: doc.id, ...doc.data() }));
-                allVisitorRequests.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                renderVisitorRequests();
-            });
-
             const finDateEl = document.getElementById('fin-date');
             if(finDateEl) finDateEl.value = getTodayString();
         };
@@ -1240,7 +1134,6 @@
         function refreshAllUI() {
             renderCalendar();
             updateAttendanceFormSchedules();
-            updateVisitorSchedules();
             renderAttendanceSummary();
             renderAdminScheduleList();
             updateNextPracticeWidget();
@@ -1439,33 +1332,52 @@
 
         // レポート生成機能
         function generateReport() {
-            let totalIn = 0; let totalOut = 0; let outByCategory = {};
+            let totalIn = 0; let totalOut = 0; 
+            let inByCategory = {};
+            let outByCategory = {};
+            
             allFinance.forEach(f => {
-                if (f.type === 'income') totalIn += f.amount;
-                else {
+                if (f.type === 'income') {
+                    totalIn += f.amount;
+                    inByCategory[f.category] = (inByCategory[f.category] || 0) + f.amount;
+                } else {
                     totalOut += f.amount;
                     outByCategory[f.category] = (outByCategory[f.category] || 0) + f.amount;
                 }
             });
 
-            let reportText = `【ライジングムーン 収支サマリー】\n`;
+            let reportText = `【ライジングムーン 収支レポート】\n`;
             const d = new Date();
-            reportText += `作成日: ${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日\n\n`;
-            reportText += `💰 総収入: ${totalIn.toLocaleString()}円\n`;
-            reportText += `💸 総支出: ${totalOut.toLocaleString()}円\n`;
-            reportText += `💎 現在の貯金残高: ${(totalIn - totalOut).toLocaleString()}円\n\n`;
+            reportText += `作成日: ${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日\n`;
+            reportText += `──────────────\n`;
+            reportText += `💎 現在の貯金残高: ${(totalIn - totalOut).toLocaleString()}円\n`;
+            reportText += `──────────────\n\n`;
+
+            reportText += `【💰 収入の内訳】（合計: ${totalIn.toLocaleString()}円）\n`;
+            if (Object.keys(inByCategory).length > 0) {
+                for (const [cat, amt] of Object.entries(inByCategory)) {
+                    reportText += `・${cat}: ${amt.toLocaleString()}円\n`;
+                }
+            } else {
+                reportText += `・収入データなし\n`;
+            }
+            reportText += `\n`;
             
-            if (totalOut > 0) {
-                reportText += `【支出の内訳】\n`;
-                for (const [cat, amt] of Object.entries(outByCategory)) reportText += `・${cat}: ${amt.toLocaleString()}円\n`;
+            reportText += `【💸 支出の内訳】（合計: ${totalOut.toLocaleString()}円）\n`;
+            if (Object.keys(outByCategory).length > 0) {
+                for (const [cat, amt] of Object.entries(outByCategory)) {
+                    reportText += `・${cat}: ${amt.toLocaleString()}円\n`;
+                }
+            } else {
+                reportText += `・支出データなし\n`;
             }
 
             const unsettled = allFinance.filter(f => f.isAdvance && !f.isSettled);
             if (unsettled.length > 0) {
-                reportText += `\n⚠️ 【未精算の立て替え】\n`;
+                reportText += `\n⚠️ 【未精算の立て替え（返金待ち）】\n`;
                 unsettled.forEach(u => reportText += `・${u.advancePerson}さん: ${u.amount.toLocaleString()}円 (${u.description})\n`);
             }
-            reportText += `\n※詳細な履歴はポータルサイトの「会計報告」をご確認ください！`;
+            reportText += `\n※詳細な履歴はポータルサイトをご確認ください。`;
             document.getElementById('report-textarea').value = reportText;
             document.getElementById('report-modal').classList.remove('hidden');
         }
@@ -1516,11 +1428,11 @@
             listEl.innerHTML = '';
             
             if(allFinance.length === 0) {
-                listEl.innerHTML = '<p class="text-sm text-slate-400 py-8 text-center bg-slate-50 rounded-xl">まだ会計データがありません</p>';
+                listEl.innerHTML = '<p class="text-sm text-slate-400 py-8 text-center bg-slate-50 rounded-xl relative z-10">まだ会計データがありません</p>';
                 return;
             }
 
-            allFinance.slice(0, 15).forEach((f, idx) => {
+            allFinance.forEach((f, idx) => {
                 const d = new Date(f.date);
                 const div = document.createElement('div');
                 div.className = "relative flex items-center justify-between py-4 group transition-colors hover:bg-slate-50 rounded-xl px-2 sm:px-4";
@@ -1605,7 +1517,7 @@
                             ${isInc ? '+' : '-'}¥${f.amount.toLocaleString()}
                         </div>
                         <div class="flex gap-2 mt-2">
-                            <!-- 📝 編集ボタンを追加 -->
+                            <!-- 📝 編集ボタン -->
                             <button onclick="editFinanceRecord('${f.id}')" class="text-xs text-amber-600 hover:text-amber-800 font-bold bg-amber-50 px-2.5 py-1.5 rounded-lg flex items-center gap-1">
                                 <i data-lucide="pencil" class="w-3 h-3"></i> 編集
                             </button>
@@ -1786,12 +1698,16 @@
                     dayCell.appendChild(badgeDiv);
                     dayCell.onclick = () => showTournamentDetailModal(tournament.id);
                 } else if (schedule) {
+                    // ハードコート枠の追加と色分け
                     if (schedule.label.includes('定期')) {
                         dayCell.classList.add('bg-emerald-50/50', '!border-emerald-200');
                         dateNum.classList.add('!bg-emerald-500', '!text-white', 'shadow-sm');
                     } else if (schedule.label.includes('土曜')) {
                         dayCell.classList.add('bg-sky-50/50', '!border-sky-200');
                         dateNum.classList.add('!bg-sky-500', '!text-white', 'shadow-sm');
+                    } else if (schedule.label.includes('ハードコート')) {
+                        dayCell.classList.add('bg-orange-50/50', '!border-orange-200');
+                        dateNum.classList.add('!bg-orange-500', '!text-white', 'shadow-sm');
                     } else {
                         dayCell.classList.add('bg-violet-50/50', '!border-violet-200');
                         dateNum.classList.add('!bg-violet-500', '!text-white', 'shadow-sm');
@@ -2125,7 +2041,9 @@
                     noPercent = (absents.length / sAtts.length) * 100;
                 }
 
-                const bgColorClass = s.label.includes('定期') ? 'bg-emerald-100 text-emerald-800' : (s.label.includes('土曜') ? 'bg-sky-100 text-sky-800' : 'bg-violet-100 text-violet-800');
+                const bgColorClass = s.label.includes('定期') ? 'bg-emerald-100 text-emerald-800' : 
+                                     (s.label.includes('土曜') ? 'bg-sky-100 text-sky-800' : 
+                                     (s.label.includes('ハードコート') ? 'bg-orange-100 text-orange-800' : 'bg-violet-100 text-violet-800'));
 
                 div.innerHTML = `
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3 mb-4">
@@ -2165,7 +2083,9 @@
             const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
             
             document.getElementById('modal-label').innerText = schedule.label;
-            const bgColorClass = schedule.label.includes('定期') ? 'bg-emerald-100 text-emerald-800' : (schedule.label.includes('土曜') ? 'bg-sky-100 text-sky-800' : 'bg-violet-100 text-violet-800');
+            const bgColorClass = schedule.label.includes('定期') ? 'bg-emerald-100 text-emerald-800' : 
+                                 (schedule.label.includes('土曜') ? 'bg-sky-100 text-sky-800' : 
+                                 (schedule.label.includes('ハードコート') ? 'bg-orange-100 text-orange-800' : 'bg-violet-100 text-violet-800'));
             document.getElementById('modal-label').className = `text-[10px] font-extrabold px-2.5 py-1 rounded-full tracking-wider ${bgColorClass}`;
             
             document.getElementById('modal-date').innerText = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})`;
@@ -2487,143 +2407,6 @@
             document.getElementById('toast-message').innerText = msg;
             t.classList.remove('translate-y-24', 'opacity-0');
             setTimeout(() => { t.classList.add('translate-y-24', 'opacity-0'); }, 3000);
-        }
-
-        async function seedInitialData() {
-            if (!(await customConfirm("6月13日(土)、6月16日(火)以降の練習予定と\nテスト用の「会計データ」を一括で展開しますか？"))) return;
-            showToast("展開中...");
-
-            const schedules = [
-                { date: '2026-06-13', label: '土曜特別枠', time: '14:00 ~ 17:00' },
-                { date: '2026-06-15', label: '月曜定期枠', time: '19:00 ~ 21:00' },
-                { date: '2026-06-16', label: '火曜定期枠', time: '19:00 ~ 21:00' },
-                { date: '2026-06-22', label: '月曜定期枠', time: '19:00 ~ 21:00' },
-                { date: '2026-06-23', label: '火曜定期枠', time: '19:00 ~ 21:00' },
-                { date: '2026-06-29', label: '月曜定期枠', time: '19:00 ~ 21:00' },
-                { date: '2026-06-30', label: '火曜定期枠', time: '19:00 ~ 21:00' },
-            ];
-
-            const finances = [
-                { id: 'f1', type: 'income', date: '2026-06-15', amount: 15400, cat: 'その他', desc: 'これまでの集金合計(〜6/15 14時)' },
-                { id: 'f2', type: 'expense', date: '2026-06-15', amount: 5299, cat: '用具・設備代', desc: 'ボール購入 X26×12' },
-                { id: 'f3', type: 'expense', date: '2026-06-15', amount: 6000, cat: '用具・設備代', desc: 'ボール購入 X40×12' },
-                { id: 'f4', type: 'expense', date: '2026-06-15', amount: 2520, cat: '用具・設備代', desc: 'ボール購入 X26×3' },
-                { id: 'f5', type: 'income', date: '2026-06-15', amount: 1800, cat: 'ビジター参加費', desc: '6/15 夜練習参加費 9名分' },
-            ];
-
-            try {
-                for (let s of schedules) {
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'schedules', `sched_${s.date.replace(/-/g,'')}`), {
-                        date: s.date, time: s.time, label: s.label, location: 'ケミカル体育館'
-                    });
-                }
-                for (let f of finances) {
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', f.id), {
-                        type: f.type, date: f.date, amount: f.amount, category: f.cat, description: f.desc, timestamp: new Date().toISOString()
-                    });
-                }
-                showToast("展開が完了しました！");
-            } catch (err) {
-                showToast("展開に失敗しました。");
-            }
-        }
-
-        // ==========================================
-        // ビジター・体験希望の機能
-        // ==========================================
-        function updateVisitorSchedules() {
-            const select = document.getElementById('vis-date');
-            if (!select) return;
-            select.innerHTML = '<option value="未定">未定（まずは相談したい）</option>';
-            const upcoming = allSchedules.filter(s => new Date(s.date + ' 23:59:59') > new Date());
-            upcoming.forEach(s => {
-                const d = new Date(s.date);
-                const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
-                const opt = document.createElement('option');
-                opt.value = `${d.getMonth() + 1}/${d.getDate()}(${dayWeek}) ${s.label}`;
-                opt.innerText = `${d.getMonth() + 1}/${d.getDate()}(${dayWeek}) ${s.time ? s.time.split('~')[0] : ''} 【${s.label}】`;
-                select.appendChild(opt);
-            });
-        }
-
-        function openVisitorModal() {
-            document.getElementById('visitor-modal').classList.remove('hidden');
-        }
-
-        function closeVisitorModal() {
-            document.getElementById('visitor-modal').classList.add('hidden');
-        }
-
-        async function submitVisitorRequest() {
-            const name = document.getElementById('vis-name').value.trim();
-            const contact = document.getElementById('vis-contact').value.trim();
-            const date = document.getElementById('vis-date').value;
-            const exp = document.getElementById('vis-exp').value;
-            const message = document.getElementById('vis-message').value.trim();
-
-            if (!name || !contact) return showToast("お名前とご連絡先を入力してください");
-
-            const reqId = `vis_${Date.now()}`;
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'visitor_requests', reqId), {
-                    name, contact, date, exp, message, isRead: false, timestamp: new Date().toISOString()
-                });
-                showToast("送信しました！管理者からの連絡をお待ちください");
-                document.getElementById('vis-name').value = '';
-                document.getElementById('vis-contact').value = '';
-                document.getElementById('vis-message').value = '';
-                closeVisitorModal();
-            } catch (err) {
-                showToast("送信に失敗しました。");
-            }
-        }
-
-        async function deleteVisitorRequest(id) {
-            if(!(await customConfirm("この問い合わせを削除しますか？"))) return;
-            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'visitor_requests', id));
-            showToast("削除しました");
-        }
-
-        function renderVisitorRequests() {
-            const listEl = document.getElementById('admin-visitor-list');
-            if (!listEl) return;
-            listEl.innerHTML = '';
-            
-            if (allVisitorRequests.length === 0) {
-                listEl.innerHTML = '<div class="text-sm text-slate-400 py-4 text-center bg-slate-50 rounded-xl">現在、新規の問い合わせはありません。</div>';
-                return;
-            }
-
-            allVisitorRequests.forEach(req => {
-                const d = new Date(req.timestamp);
-                const div = document.createElement('div');
-                div.className = "bg-white p-4 rounded-xl border border-slate-200 shadow-sm relative group";
-                
-                div.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="font-black text-slate-800 text-base">${req.name} <span class="text-xs font-normal text-slate-500">さん</span></span>
-                            <span class="text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-bold border border-orange-200">${req.exp}</span>
-                        </div>
-                        <div class="text-[10px] text-slate-400 font-bold">${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</div>
-                    </div>
-                    <div class="mb-3 space-y-2">
-                        <div class="text-xs text-slate-600 font-bold bg-slate-50 px-2 py-1.5 rounded border border-slate-100 inline-block">希望日: <span class="text-slate-800">${req.date}</span></div>
-                        ${req.contact ? `<div class="text-xs text-slate-600 font-bold bg-indigo-50 px-2 py-1.5 rounded border border-indigo-100 block w-full"><i data-lucide="mail" class="w-3.5 h-3.5 inline-block -mt-0.5 mr-1 text-indigo-500"></i>連絡先: <span class="text-indigo-800">${req.contact}</span></div>` : ''}
-                    </div>
-                    ${req.message ? `<div class="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100 whitespace-pre-wrap">${req.message}</div>` : ''}
-                    
-                    <button onclick="deleteVisitorRequest('${req.id}')" class="absolute top-2 right-2 p-2 bg-white rounded-full text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors opacity-0 md:group-hover:opacity-100 hidden md:block">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
-                    <!-- スマホ用削除ボタン -->
-                    <div class="mt-3 text-right md:hidden">
-                        <button onclick="deleteVisitorRequest('${req.id}')" class="text-[10px] font-bold text-rose-500 bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-100">削除する</button>
-                    </div>
-                `;
-                listEl.appendChild(div);
-            });
-            lucide.createIcons();
         }
 
         initAuth();
