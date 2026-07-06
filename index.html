@@ -238,7 +238,7 @@
 
                 <div class="lg:col-span-7 space-y-8">
                     
-                    <!-- 📊 曜日別参加人数グラフ (NEW) -->
+                    <!-- 📊 曜日別参加人数グラフ -->
                     <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200">
                         <h3 class="font-extrabold text-lg text-slate-800 mb-4 flex items-center gap-2">
                             <i data-lucide="bar-chart-2" class="w-5 h-5 text-indigo-500"></i> 曜日別の平均参加人数
@@ -282,11 +282,19 @@
                     <div>
                         <div class="flex items-center gap-2 mb-2 opacity-90">
                             <div class="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm"><i data-lucide="piggy-bank" class="w-5 h-5 text-emerald-100"></i></div>
-                            <h3 class="text-sm font-bold tracking-widest uppercase">チーム総資産 (貯金額)</h3>
+                            <h3 class="text-sm font-bold tracking-widest uppercase">チーム総資産 (実質)</h3>
                         </div>
-                        <div class="flex items-baseline gap-1 mb-6 md:mb-0">
-                            <span class="text-3xl font-bold opacity-80">¥</span>
-                            <span id="finance-total-balance" class="text-5xl md:text-7xl font-black tracking-tighter drop-shadow-md">0</span>
+                        <!-- 💰 金額の分離表示 (NEW) -->
+                        <div class="flex flex-col gap-1 mb-6 md:mb-0">
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-3xl font-bold opacity-80">¥</span>
+                                <span id="finance-total-balance" class="text-5xl md:text-7xl font-black tracking-tighter drop-shadow-md">0</span>
+                            </div>
+                            <div class="text-xs font-medium text-emerald-50 mt-1 bg-black/20 px-3 py-1.5 rounded-lg inline-flex items-center gap-2 border border-white/10 w-fit shadow-inner">
+                                <span>🏦 手元現金: ¥<span id="finance-cash-balance">0</span></span>
+                                <span class="w-px h-3 bg-white/30"></span>
+                                <span class="text-orange-300">⚠️ 未精算: ¥<span id="finance-unsettled-balance">0</span></span>
+                            </div>
                         </div>
                     </div>
                     
@@ -329,7 +337,7 @@
                 </div>
             </div>
 
-            <!-- 📊 グラフダッシュボード (横幅いっぱいに変更) -->
+            <!-- 📊 グラフダッシュボード -->
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
                 <h3 class="font-extrabold text-sm text-slate-800 mb-4 flex items-center gap-2">
                     <i data-lucide="bar-chart-3" class="w-4 h-4 text-indigo-500"></i> 月別 収支推移
@@ -1350,7 +1358,10 @@
         async function settleAdvance(id) {
             if(!(await customConfirm("この立て替えを精算済みにしますか？\n(※チームのお金から返金したことになります)"))) return;
             try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', id), { isSettled: true });
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', id), { 
+                    isSettled: true,
+                    settledDate: getTodayString() // NEW: 精算日を記録
+                });
                 showToast("精算済みに変更しました");
             } catch (e) { showToast("エラーが発生しました"); }
         }
@@ -1395,25 +1406,41 @@
 
         // レポート生成機能
         function generateReport() {
-            let totalIn = 0; let totalOut = 0; 
+            let currentCash = 0;
+            let unsettledTotal = 0;
+            let totalIn = 0; 
+            let totalOut = 0; 
             let inByCategory = {};
             let outByCategory = {};
             
+            // 計算ロジックをダッシュボードと同じく「手元現金」と「未精算」に分ける
             allFinance.forEach(f => {
                 if (f.type === 'income') {
                     totalIn += f.amount;
+                    currentCash += f.amount;
                     inByCategory[f.category] = (inByCategory[f.category] || 0) + f.amount;
                 } else {
                     totalOut += f.amount;
                     outByCategory[f.category] = (outByCategory[f.category] || 0) + f.amount;
+                    if (f.isAdvance && !f.isSettled) {
+                        unsettledTotal += f.amount;
+                    } else {
+                        currentCash -= f.amount;
+                    }
                 }
             });
+            
+            const netTotal = currentCash - unsettledTotal;
 
             let reportText = `【ライジングムーン 収支レポート】\n`;
             const d = new Date();
             reportText += `作成日: ${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日\n`;
             reportText += `──────────────\n`;
-            reportText += `💎 現在の貯金残高: ${(totalIn - totalOut).toLocaleString()}円\n`;
+            reportText += `💎 チーム総資産 (実質): ${netTotal.toLocaleString()}円\n`;
+            reportText += `   🏦 手元の現金・口座: ${currentCash.toLocaleString()}円\n`;
+            if (unsettledTotal > 0) {
+                reportText += `   ⚠️ 未精算の立て替え: -${unsettledTotal.toLocaleString()}円\n`;
+            }
             reportText += `──────────────\n\n`;
 
             reportText += `【💰 収入の内訳】（合計: ${totalIn.toLocaleString()}円）\n`;
@@ -1437,7 +1464,7 @@
 
             const unsettled = allFinance.filter(f => f.isAdvance && !f.isSettled);
             if (unsettled.length > 0) {
-                reportText += `\n⚠️ 【未精算の立て替え（返金待ち）】\n`;
+                reportText += `\n⚠️ 【現在返金待ちの立て替え】\n`;
                 unsettled.forEach(u => reportText += `・${u.advancePerson}さん: ${u.amount.toLocaleString()}円 (${u.description})\n`);
             }
             reportText += `\n※詳細な履歴はポータルサイトをご確認ください。`;
@@ -1455,15 +1482,14 @@
         }
 
         function renderFinanceDashboard() {
-            let total = 0;
+            let currentCash = 0;
+            let unsettledTotal = 0;
             const monthlyData = {};
 
             allFinance.forEach(f => {
                 const isInc = f.type === 'income';
-                if(isInc) total += f.amount;
-                else total -= f.amount;
-
-                // グラフ用データの集計
+                
+                // グラフ用データの集計 (発生主義)
                 const d = new Date(f.date);
                 const monthKey = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}`;
                 
@@ -1471,16 +1497,32 @@
                     monthlyData[monthKey] = { income: 0, expense: 0 };
                 }
                 
-                if (!isInc) {
-                    monthlyData[monthKey].expense += f.amount;
-                } else {
+                if (isInc) {
+                    currentCash += f.amount;
                     monthlyData[monthKey].income += f.amount;
+                } else {
+                    monthlyData[monthKey].expense += f.amount;
+                    
+                    // NEW: 未精算の場合は手元現金から引かない
+                    if (f.isAdvance && !f.isSettled) {
+                        unsettledTotal += f.amount;
+                    } else {
+                        currentCash -= f.amount;
+                    }
                 }
             });
 
+            const netTotal = currentCash - unsettledTotal;
+
             // 💰 総資産と目標バーの更新
             const totalEl = document.getElementById('finance-total-balance');
-            if(totalEl) totalEl.innerText = total.toLocaleString();
+            if(totalEl) totalEl.innerText = netTotal.toLocaleString();
+            
+            const cashEl = document.getElementById('finance-cash-balance');
+            if(cashEl) cashEl.innerText = currentCash.toLocaleString();
+
+            const unsettledEl = document.getElementById('finance-unsettled-balance');
+            if(unsettledEl) unsettledEl.innerText = unsettledTotal.toLocaleString();
 
             const bar = document.getElementById('finance-goal-bar');
             const text = document.getElementById('finance-goal-text');
@@ -1490,15 +1532,15 @@
             document.getElementById('display-goal-amount').innerText = financeGoal.amount.toLocaleString();
 
             if(bar && text && pctText) {
-                if(total >= financeGoal.amount) {
+                if(netTotal >= financeGoal.amount) {
                     bar.style.width = '100%';
                     text.innerText = "目標達成済み！🎉";
                     pctText.innerText = "100% 達成";
                     bar.className = "bg-gradient-to-r from-emerald-400 to-emerald-500 h-full transition-all duration-1000 ease-out relative shadow-[0_0_8px_rgba(52,211,153,0.5)]";
                 } else {
-                    const pct = Math.max(0, (total / financeGoal.amount) * 100);
+                    const pct = Math.max(0, (netTotal / financeGoal.amount) * 100);
                     bar.style.width = `${pct}%`;
-                    text.innerText = `あと ${(financeGoal.amount - total).toLocaleString()}円`;
+                    text.innerText = `あと ${(financeGoal.amount - netTotal).toLocaleString()}円`;
                     pctText.innerText = `${Math.floor(pct)}% 達成`;
                     bar.className = "bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 h-full transition-all duration-1000 ease-out relative";
                 }
