@@ -284,7 +284,7 @@
                             <div class="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm"><i data-lucide="piggy-bank" class="w-5 h-5 text-emerald-100"></i></div>
                             <h3 class="text-sm font-bold tracking-widest uppercase">チーム総資産 (実質)</h3>
                         </div>
-                        <!-- 💰 金額の分離表示 (NEW) -->
+                        <!-- 💰 金額の分離表示 -->
                         <div class="flex flex-col gap-1 mb-6 md:mb-0">
                             <div class="flex items-baseline gap-1">
                                 <span class="text-3xl font-bold opacity-80">¥</span>
@@ -674,7 +674,7 @@
                             </button>
                         </div>
                         <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
-                            <h4 class="font-bold text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200 pb-2">現在公開中の大会リスト</h4>
+                            <h4 class="font-bold text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200 pb-2 mb-3">現在公開中の大会リスト</h4>
                             <div id="admin-tournament-list" class="space-y-2 custom-scroll max-h-[400px] overflow-y-auto pr-1"></div>
                         </div>
                     </div>
@@ -918,9 +918,10 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // ★ Firebaseの接続先を「ライジングムーン専用」に固定
         const appId = 'pickleball-club-portal';
         const firebaseConfig = {
             apiKey: "AIzaSyC7y6-LjoxTOt_I7FelZ0ZAH7LiHF-Sj3g",
@@ -946,9 +947,10 @@
         
         let financeGoal = { title: "ポータブルネット購入", amount: 10000 }; 
         let teamPaypayLink = "";
+        let nationalHolidays = {}; // 🎌 祝日データ保存用
 
         // グラフ用の変数
-        let attendanceDayChartInstance = null; // NEW: 曜日別参加人数グラフ
+        let attendanceDayChartInstance = null; // 曜日別参加人数グラフ
         let trendChartInstance = null;
 
         // 本日の日付から現在年・月を決定
@@ -1102,8 +1104,18 @@
 
         const initAuth = async () => {
             try {
-                await signInAnonymously(auth);
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    try {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } catch (tokenErr) {
+                        console.warn("Custom token failed, falling back to anonymous auth.", tokenErr);
+                        await signInAnonymously(auth);
+                    }
+                } else {
+                    await signInAnonymously(auth);
+                }
             } catch (err) {
+                console.error("Auth error:", err);
                 user = { uid: 'local-test-user', isAnonymous: true };
                 onUserLoaded(user);
             }
@@ -1145,7 +1157,7 @@
                 snapshot.forEach(doc => allSchedules.push({ id: doc.id, ...doc.data() }));
                 allSchedules.sort((a, b) => new Date(a.date) - new Date(b.date)); 
                 refreshAllUI();
-            });
+            }, (err) => console.error(err));
 
             onSnapshot(attendanceRef, (snapshot) => {
                 allAttendance = [];
@@ -1154,7 +1166,7 @@
                 renderFeeChecklist(); 
                 renderAttendanceRanking();
                 if (currentOpenScheduleId) showDetailModal(currentOpenScheduleId);
-            });
+            }, (err) => console.error(err));
 
             onSnapshot(newsRef, (snapshot) => {
                 allNews = [];
@@ -1162,7 +1174,7 @@
                 allNews.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 renderNews();
                 renderAdminNewsList();
-            });
+            }, (err) => console.error(err));
 
             onSnapshot(financeRef, (snapshot) => {
                 allFinance = [];
@@ -1170,7 +1182,7 @@
                 allFinance.sort((a, b) => new Date(b.date) - new Date(a.date));
                 renderFinanceDashboard();
                 renderAdminFinanceList();
-            });
+            }, (err) => console.error(err));
 
             onSnapshot(tournamentsRef, (snapshot) => {
                 allTournaments = [];
@@ -1179,13 +1191,13 @@
                 renderTournamentCards();
                 renderAdminTournamentList();
                 renderCalendar(); 
-            });
+            }, (err) => console.error(err));
 
             onSnapshot(feesRef, (snapshot) => {
                 allFeeChecks = {};
                 snapshot.forEach(doc => { allFeeChecks[doc.id] = doc.data(); });
                 renderFeeChecklist();
-            });
+            }, (err) => console.error(err));
 
             onSnapshot(membersRef, (snapshot) => {
                 allMembers = [];
@@ -1195,7 +1207,28 @@
                 renderFeeChecklist();
                 updateMemberSelects();
                 renderAttendanceRanking();
-            });
+            }, (err) => console.error(err));
+
+            // 🏢 体育館システムの休館日データを取得
+            const closedRef = collection(db, 'artifacts', kaitekiAppId, 'public', 'data', 'closed_days');
+            onSnapshot(closedRef, (snapshot) => {
+                allClosedDays = [];
+                snapshot.forEach(doc => allClosedDays.push({ id: doc.id, ...doc.data() }));
+                refreshAllUI();
+            }, (err) => console.error("Closed days fetch error:", err));
+
+            // 🏢 体育館システムの予約データ（金森枠）を取得
+            const kaitekiResRef = collection(db, 'artifacts', kaitekiAppId, 'public', 'data', 'reservations');
+            onSnapshot(kaitekiResRef, (snapshot) => {
+                myKaitekiReservations = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.status !== 'cancelled' && data.name && data.name.includes('金森')) {
+                        myKaitekiReservations.push({ id: doc.id, ...data });
+                    }
+                });
+                refreshAllUI();
+            }, (err) => console.error("Kaiteki reservations fetch error:", err));
 
             const finDateEl = document.getElementById('fin-date');
             if(finDateEl) finDateEl.value = getTodayString();
@@ -1867,13 +1900,50 @@
                 const dayCell = document.createElement('button');
                 dayCell.className = `h-16 sm:h-28 rounded-2xl flex flex-col justify-between items-stretch p-1.5 transition-all duration-200 text-xs font-bold relative border border-slate-100 bg-white hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 overflow-hidden group`;
 
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'flex flex-col sm:flex-row justify-between items-start sm:items-center w-full';
+
                 const dateNum = document.createElement('span');
                 dateNum.innerText = day;
-                dateNum.className = 'text-left inline-block w-8 h-8 leading-8 text-center rounded-full text-slate-700 transition-colors';
+                dateNum.className = 'text-center inline-block w-5 h-5 sm:w-7 sm:h-7 leading-5 sm:leading-7 rounded-full text-slate-700 transition-colors font-black shrink-0';
 
                 const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
-                if (dayOfWeek === 0) dateNum.classList.add('!text-rose-500');
-                if (dayOfWeek === 6) dateNum.classList.add('!text-sky-500');
+                const holidayName = nationalHolidays[dateString];
+
+                // 🎌 日曜または「祝日」なら赤色にする
+                if (dayOfWeek === 0 || holidayName) dateNum.classList.add('!text-rose-500');
+                if (dayOfWeek === 6 && !holidayName) dateNum.classList.add('!text-sky-500');
+                
+                headerDiv.appendChild(dateNum);
+
+                // 🎌 祝日名があれば表示する
+                if (holidayName) {
+                    const holSpan = document.createElement('span');
+                    holSpan.innerText = holidayName;
+                    holSpan.className = 'text-[7px] sm:text-[9px] text-rose-500 font-bold truncate w-full text-left sm:text-right px-0.5 sm:px-1 mt-0.5 sm:mt-0 leading-tight';
+                    headerDiv.appendChild(holSpan);
+                }
+
+                dayCell.appendChild(headerDiv);
+
+                // 🏢 体育館の状況をチェック
+                const isGymClosed = allClosedDays.some(cd => cd.date === dateString);
+                const gymReservation = myKaitekiReservations.find(r => r.date === dateString);
+
+                // 🏢 体育館の状況バッジを追加
+                const badgesHtml = [];
+                if (isGymClosed) {
+                    badgesHtml.push(`<div class="bg-slate-700 text-white text-[8px] sm:text-[9px] font-bold rounded px-1 py-0.5 text-center shadow-sm w-full truncate">休館日</div>`);
+                    dayCell.classList.add('bg-slate-50', 'opacity-90');
+                } else if (gymReservation) {
+                    badgesHtml.push(`<div class="bg-blue-500 text-white text-[8px] sm:text-[9px] font-bold rounded px-1 py-0.5 text-center shadow-sm w-full truncate" title="${gymReservation.startTime}-${gymReservation.endTime} 確保済">体育館確保済</div>`);
+                }
+                if (badgesHtml.length > 0) {
+                    const statusDiv = document.createElement('div');
+                    statusDiv.className = 'flex flex-col gap-0.5 w-full px-1 mt-1 mb-auto';
+                    statusDiv.innerHTML = badgesHtml.join('');
+                    dayCell.appendChild(statusDiv);
+                }
 
                 const schedule = allSchedules.find(s => s.date === dateString);
                 const tournament = allTournaments.find(t => t.date === dateString);
@@ -1881,12 +1951,12 @@
                 if (tournament) {
                     dayCell.classList.add('bg-amber-50/80', '!border-amber-300', 'hover:shadow-md');
                     dateNum.classList.add('!bg-amber-500', '!text-white', 'shadow-sm');
+                    if (holidayName || dayOfWeek === 0 || dayOfWeek === 6) dateNum.classList.remove('!text-rose-500', '!text-sky-500');
                     
                     const badgeDiv = document.createElement('div');
                     badgeDiv.className = 'mt-auto w-full px-0.5 pb-0.5 transition-transform group-hover:scale-105';
                     badgeDiv.innerHTML = `<div class="bg-amber-400 text-slate-900 text-[10px] sm:text-xs font-black rounded-lg py-1 text-center shadow-sm">🏆 大会</div>`;
                     
-                    dayCell.appendChild(dateNum);
                     dayCell.appendChild(badgeDiv);
                     dayCell.onclick = () => showTournamentDetailModal(tournament.id);
                 } else if (schedule) {
@@ -1894,15 +1964,19 @@
                     if (schedule.label.includes('定期')) {
                         dayCell.classList.add('bg-emerald-50/50', '!border-emerald-200');
                         dateNum.classList.add('!bg-emerald-500', '!text-white', 'shadow-sm');
+                        if (holidayName || dayOfWeek === 0 || dayOfWeek === 6) dateNum.classList.remove('!text-rose-500', '!text-sky-500');
                     } else if (schedule.label.includes('土曜')) {
                         dayCell.classList.add('bg-sky-50/50', '!border-sky-200');
                         dateNum.classList.add('!bg-sky-500', '!text-white', 'shadow-sm');
+                        if (holidayName || dayOfWeek === 0 || dayOfWeek === 6) dateNum.classList.remove('!text-rose-500', '!text-sky-500');
                     } else if (schedule.label.includes('ハードコート')) {
                         dayCell.classList.add('bg-orange-50/50', '!border-orange-200');
                         dateNum.classList.add('!bg-orange-500', '!text-white', 'shadow-sm');
+                        if (holidayName || dayOfWeek === 0 || dayOfWeek === 6) dateNum.classList.remove('!text-rose-500', '!text-sky-500');
                     } else {
                         dayCell.classList.add('bg-violet-50/50', '!border-violet-200');
                         dateNum.classList.add('!bg-violet-500', '!text-white', 'shadow-sm');
+                        if (holidayName || dayOfWeek === 0 || dayOfWeek === 6) dateNum.classList.remove('!text-rose-500', '!text-sky-500');
                     }
 
                     const sAtts = allAttendance.filter(a => a.scheduleId === schedule.id);
@@ -1930,11 +2004,9 @@
                         summaryDiv.innerHTML = `<div class="bg-white/60 text-slate-400 text-[9px] sm:text-[10px] font-bold rounded py-1 text-center border border-slate-200/50">未回答</div>`;
                     }
                     
-                    dayCell.appendChild(dateNum);
                     dayCell.appendChild(summaryDiv);
                     dayCell.onclick = () => showDetailModal(schedule.id);
                 } else {
-                    dayCell.appendChild(dateNum);
                     dayCell.onclick = () => showToast(`予定はありません`);
                 }
                 daysContainer.appendChild(dayCell);
@@ -2391,7 +2463,19 @@
             
             document.getElementById('modal-date').innerText = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})`;
             document.getElementById('modal-time').innerHTML = `<i data-lucide="clock" class="w-4 h-4 text-slate-400"></i> ${schedule.time || ''}`;
-            document.getElementById('modal-location').innerText = schedule.location || 'ケミカル体育館';
+            
+            // 🏢 体育館の状況をチェック
+            const isGymClosed = allClosedDays.some(cd => cd.date === schedule.date);
+            const gymReservation = myKaitekiReservations.find(r => r.date === schedule.date);
+
+            // 📍 体育館の状況バッジを追加
+            let locationHtml = schedule.location || 'ケミカル体育館';
+            if (isGymClosed) {
+                locationHtml += ` <span class="ml-2 bg-slate-700 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">休館日</span>`;
+            } else if (gymReservation) {
+                locationHtml += ` <span class="ml-2 bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">予約確保済 (${gymReservation.startTime}-${gymReservation.endTime})</span>`;
+            }
+            document.getElementById('modal-location').innerHTML = locationHtml;
 
             const sAtts = allAttendance.filter(a => a.scheduleId === id);
             const atts = sAtts.filter(a => a.status === '出席');
@@ -2756,8 +2840,20 @@
             }
         }
 
+        // 🎌 オープンデータAPIから日本の祝日データを取得
+        async function fetchHolidays() {
+            try {
+                const res = await fetch('https://holidays-jp.github.io/api/v1/date.json');
+                nationalHolidays = await res.json();
+                renderCalendar(); // 取得後にカレンダーを再描画して祝日を反映
+            } catch (err) {
+                console.error("祝日データの取得に失敗しました", err);
+            }
+        }
+
         initAuth();
         fetchWeather(); // ウィジェットの読み込みを実行
+        fetchHolidays(); // 祝日データの読み込みを実行
         lucide.createIcons();
     </script>
 </body>
