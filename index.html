@@ -936,6 +936,19 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // 🏢 ケミカル体育館予約システムとの連動用
+        const kaitekiAppId = 'kaiteki-gym-production-v2';
+        const kaitekiConfig = {
+            apiKey: "AIzaSyCTDD_TMng6EclbLiMoc7-36QRowhQrvew",
+            authDomain: "kaiteki-gym.firebaseapp.com",
+            projectId: "kaiteki-gym",
+            storageBucket: "kaiteki-gym.firebasestorage.app",
+            messagingSenderId: "88315814584",
+            appId: "1:88315814584:web:14eb104398bb05cf0bca4d"
+        };
+        const kaitekiApp = initializeApp(kaitekiConfig, "kaitekiGym");
+        const kaitekiDb = getFirestore(kaitekiApp);
+
         let user = null;
         let allSchedules = [];
         let allAttendance = [];
@@ -948,6 +961,9 @@
         let financeGoal = { title: "ポータブルネット購入", amount: 10000 }; 
         let teamPaypayLink = "";
         let nationalHolidays = {}; // 🎌 祝日データ保存用
+        
+        let allClosedDays = []; // 🏢 体育館の休館日データ
+        let myKaitekiReservations = []; // 🏢 体育館の予約データ(金森枠)
 
         // グラフ用の変数
         let attendanceDayChartInstance = null; // 曜日別参加人数グラフ
@@ -1210,7 +1226,7 @@
             }, (err) => console.error(err));
 
             // 🏢 体育館システムの休館日データを取得
-            const closedRef = collection(db, 'artifacts', kaitekiAppId, 'public', 'data', 'closed_days');
+            const closedRef = collection(kaitekiDb, 'artifacts', kaitekiAppId, 'public', 'data', 'closed_days');
             onSnapshot(closedRef, (snapshot) => {
                 allClosedDays = [];
                 snapshot.forEach(doc => allClosedDays.push({ id: doc.id, ...doc.data() }));
@@ -1218,7 +1234,7 @@
             }, (err) => console.error("Closed days fetch error:", err));
 
             // 🏢 体育館システムの予約データ（金森枠）を取得
-            const kaitekiResRef = collection(db, 'artifacts', kaitekiAppId, 'public', 'data', 'reservations');
+            const kaitekiResRef = collection(kaitekiDb, 'artifacts', kaitekiAppId, 'public', 'data', 'reservations');
             onSnapshot(kaitekiResRef, (snapshot) => {
                 myKaitekiReservations = [];
                 snapshot.forEach(doc => {
@@ -1579,7 +1595,7 @@
                 }
             }
 
-            // 📊 グラフの描画 (月別収支推移のみ)
+            // 📊 グラフの描画 (月別収推移のみ)
             const trendCtx = document.getElementById('trendChart');
 
             if (trendCtx) {
@@ -1930,17 +1946,17 @@
                 const isGymClosed = allClosedDays.some(cd => cd.date === dateString);
                 const gymReservation = myKaitekiReservations.find(r => r.date === dateString);
 
-                // 🏢 体育館の状況バッジを追加
+                // 🏢 体育館の状況バッジを追加 (モバイルでも見やすいように文字数を減らして絵文字追加)
                 const badgesHtml = [];
                 if (isGymClosed) {
-                    badgesHtml.push(`<div class="bg-slate-700 text-white text-[8px] sm:text-[9px] font-bold rounded px-1 py-0.5 text-center shadow-sm w-full truncate">休館日</div>`);
+                    badgesHtml.push(`<div class="bg-slate-700 text-white text-[9px] font-black rounded-sm px-0.5 py-0.5 text-center shadow-sm w-full truncate tracking-tighter" title="休館日">❌ 休館</div>`);
                     dayCell.classList.add('bg-slate-50', 'opacity-90');
                 } else if (gymReservation) {
-                    badgesHtml.push(`<div class="bg-blue-500 text-white text-[8px] sm:text-[9px] font-bold rounded px-1 py-0.5 text-center shadow-sm w-full truncate" title="${gymReservation.startTime}-${gymReservation.endTime} 確保済">体育館確保済</div>`);
+                    badgesHtml.push(`<div class="bg-blue-500 text-white text-[9px] font-black rounded-sm px-0.5 py-0.5 text-center shadow-sm w-full truncate tracking-tighter" title="${gymReservation.startTime}-${gymReservation.endTime} 確保済">✅ 確保</div>`);
                 }
                 if (badgesHtml.length > 0) {
                     const statusDiv = document.createElement('div');
-                    statusDiv.className = 'flex flex-col gap-0.5 w-full px-1 mt-1 mb-auto';
+                    statusDiv.className = 'flex flex-col gap-0.5 w-full px-0.5 mt-0.5 mb-auto';
                     statusDiv.innerHTML = badgesHtml.join('');
                     dayCell.appendChild(statusDiv);
                 }
@@ -2471,9 +2487,9 @@
             // 📍 体育館の状況バッジを追加
             let locationHtml = schedule.location || 'ケミカル体育館';
             if (isGymClosed) {
-                locationHtml += ` <span class="ml-2 bg-slate-700 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">休館日</span>`;
+                locationHtml += ` <span class="ml-2 bg-slate-700 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">❌ 休館</span>`;
             } else if (gymReservation) {
-                locationHtml += ` <span class="ml-2 bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">予約確保済 (${gymReservation.startTime}-${gymReservation.endTime})</span>`;
+                locationHtml += ` <span class="ml-2 bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">✅ 確保済 (${gymReservation.startTime}-${gymReservation.endTime})</span>`;
             }
             document.getElementById('modal-location').innerHTML = locationHtml;
 
