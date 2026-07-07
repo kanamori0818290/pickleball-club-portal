@@ -144,7 +144,7 @@
         <!-- 📅 1. カレンダービュー -->
         <section id="view-calendar" class="space-y-8 animate-fade-in">
             <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
-                <div class="flex justify-between items-center mb-8">
+                <div class="flex justify-between items-center mb-6">
                     <button onclick="prevMonth()" class="p-2.5 hover:bg-slate-100 rounded-xl transition text-slate-600 border border-slate-200 shadow-sm hover:shadow group">
                         <i data-lucide="chevron-left" class="w-5 h-5 group-hover:-translate-x-0.5 transition-transform"></i>
                     </button>
@@ -152,6 +152,14 @@
                     <button onclick="nextMonth()" class="p-2.5 hover:bg-slate-100 rounded-xl transition text-slate-600 border border-slate-200 shadow-sm hover:shadow group">
                         <i data-lucide="chevron-right" class="w-5 h-5 group-hover:translate-x-0.5 transition-transform"></i>
                     </button>
+                </div>
+
+                <!-- 💡 凡例（マークの意味） -->
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-6 mb-6 text-[10px] sm:text-xs font-bold text-slate-600 bg-slate-50 py-2.5 px-4 rounded-xl border border-slate-100">
+                    <span class="text-slate-400 mr-1 hidden sm:flex items-center"><i data-lucide="info" class="w-4 h-4"></i></span>
+                    <div class="flex items-center gap-1.5"><span class="text-[12px] sm:text-[14px] leading-none mt-0.5">✅</span> <span class="tracking-tight">体育館確保済</span></div>
+                    <div class="flex items-center gap-1.5"><span class="text-[12px] sm:text-[14px] leading-none mt-0.5">❌</span> <span class="tracking-tight">休館日</span></div>
+                    <div class="flex items-center gap-1.5"><span class="text-[12px] sm:text-[14px] leading-none mt-0.5">🏆</span> <span class="tracking-tight">大会・イベント</span></div>
                 </div>
 
                 <div class="calendar-grid text-center text-xs font-bold text-slate-400 border-b-2 border-slate-100 pb-3 mb-4 tracking-widest uppercase">
@@ -1915,7 +1923,7 @@
 
             for (let i = 0; i < firstDayIndex; i++) {
                 const empty = document.createElement('div');
-                empty.className = 'h-24 sm:h-28 border border-transparent';
+                empty.className = 'h-20 sm:h-28 border border-transparent';
                 daysContainer.appendChild(empty);
             }
 
@@ -1923,7 +1931,7 @@
                 const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
                 const dayCell = document.createElement('button');
-                dayCell.className = `h-24 sm:h-28 rounded-2xl flex flex-col justify-between items-stretch p-1 sm:p-1.5 transition-all duration-200 text-xs font-bold relative border border-slate-100 bg-white hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 overflow-hidden group`;
+                dayCell.className = `h-20 sm:h-28 rounded-xl sm:rounded-2xl flex flex-col justify-between items-stretch p-1 sm:p-1.5 transition-all duration-200 text-xs font-bold relative border border-slate-100 bg-white hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 overflow-hidden group`;
 
                 const headerDiv = document.createElement('div');
                 headerDiv.className = 'flex flex-col sm:flex-row justify-between items-start sm:items-center w-full';
@@ -2006,7 +2014,7 @@
                     const badgeDiv = document.createElement('div');
                     badgeDiv.className = 'mt-auto w-full px-0.5 pb-0.5 transition-transform group-hover:scale-105';
                     // 📱 モバイルはトロフィーのみ表示
-                    badgeDiv.innerHTML = `<div class="bg-amber-400 text-slate-900 text-[10px] sm:text-xs font-black rounded py-0.5 sm:py-1 text-center shadow-sm truncate">🏆<span class="hidden sm:inline"> 大会</span></div>`;
+                    badgeDiv.innerHTML = `<div class="bg-amber-400 text-slate-900 text-[10px] sm:text-xs font-black rounded py-0.5 sm:py-1 text-center shadow-sm truncate leading-none">🏆<span class="hidden sm:inline"> 大会</span></div>`;
                     
                     dayCell.appendChild(badgeDiv);
                     dayCell.onclick = () => showTournamentDetailModal(tournament.id);
@@ -2039,20 +2047,20 @@
                     
                     if(sAtts.length > 0) {
                         summaryDiv.innerHTML = `
-                            <div class="flex flex-col sm:flex-row justify-center items-center bg-white rounded sm:rounded-lg p-0.5 sm:px-2 sm:py-1 border border-slate-200 shadow-sm gap-0 sm:gap-2">
-                                <div class="flex items-center gap-0.5 text-emerald-600 leading-none">
+                            <div class="flex flex-col sm:flex-row justify-center items-center bg-white rounded sm:rounded-lg py-0.5 sm:px-2 sm:py-1 border border-slate-200 shadow-sm gap-0 sm:gap-2">
+                                <div class="flex items-center gap-0.5 text-emerald-600 leading-none mb-0.5 sm:mb-0">
                                     <span class="text-[8px] sm:text-[10px] font-bold opacity-80">出</span>
                                     <span class="text-[10px] sm:text-sm font-black">${atts}</span>
                                 </div>
                                 <div class="hidden sm:block w-px h-3 bg-slate-200"></div>
-                                <div class="flex items-center gap-0.5 text-rose-500 leading-none mt-0.5 sm:mt-0">
+                                <div class="flex items-center gap-0.5 text-rose-500 leading-none">
                                     <span class="text-[8px] sm:text-[10px] font-bold opacity-80">欠</span>
                                     <span class="text-[10px] sm:text-sm font-black">${absents}</span>
                                 </div>
                             </div>
                         `;
                     } else {
-                        summaryDiv.innerHTML = `<div class="bg-white/60 text-slate-400 text-[8px] sm:text-[10px] font-bold rounded py-0.5 sm:py-1 text-center border border-slate-200/50">未回答</div>`;
+                        summaryDiv.innerHTML = `<div class="bg-white/60 text-slate-400 text-[9px] sm:text-[10px] font-bold rounded py-0.5 sm:py-1 text-center border border-slate-200/50">未回答</div>`;
                     }
                     
                     dayCell.appendChild(summaryDiv);
