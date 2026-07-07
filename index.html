@@ -157,9 +157,9 @@
                 <!-- 💡 凡例（マークの意味） -->
                 <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-6 mb-6 text-[10px] sm:text-xs font-bold text-slate-600 bg-slate-50 py-2.5 px-4 rounded-xl border border-slate-100">
                     <span class="text-slate-400 mr-1 hidden sm:flex items-center"><i data-lucide="info" class="w-4 h-4"></i></span>
-                    <div class="flex items-center gap-1.5"><span class="text-[12px] sm:text-[14px] leading-none mt-0.5">✅</span> <span class="tracking-tight">体育館確保済</span></div>
                     <div class="flex items-center gap-1.5"><span class="text-[12px] sm:text-[14px] leading-none mt-0.5">❌</span> <span class="tracking-tight">休館日</span></div>
                     <div class="flex items-center gap-1.5"><span class="text-[12px] sm:text-[14px] leading-none mt-0.5">🏆</span> <span class="tracking-tight">大会・イベント</span></div>
+                    <div class="text-slate-400 font-medium text-[9px] sm:text-[10px] w-full sm:w-auto">※練習枠が表示されている日は体育館が確保済です</div>
                 </div>
 
                 <div class="calendar-grid text-center text-xs font-bold text-slate-400 border-b-2 border-slate-100 pb-3 mb-4 tracking-widest uppercase">
@@ -1010,7 +1010,7 @@
         window.closeModal = closeModal;
         window.addNews = addNews;
         window.deleteNews = deleteNews;
-        window.toggleSchedLocationInput = toggleSchedLocationInput; // NEW
+        window.toggleSchedLocationInput = toggleSchedLocationInput;
         
         window.setFinanceType = setFinanceType;
         window.addFinanceRecord = addFinanceRecord;
@@ -1266,6 +1266,41 @@
             const finDateEl = document.getElementById('fin-date');
             if(finDateEl) finDateEl.value = getTodayString();
         };
+
+        // 🎯 手動スケジュールと体育館の予約を合体させて、出欠のベースにする
+        function mergeSchedules() {
+            let combined = JSON.parse(JSON.stringify(allSchedules)); // ディープコピー
+            
+            myKaitekiReservations.forEach(gymRes => {
+                const existingManualIndex = combined.findIndex(s => s.date === gymRes.date);
+                const d = new Date(gymRes.date);
+                const isWeekend = d.getDay() === 0 || d.getDay() === 6 || nationalHolidays[gymRes.date];
+                const newLabel = isWeekend ? '土曜特別枠(自動連携)' : '平日定期枠(自動連携)';
+                const newLocation = `ケミカル体育館 ${gymRes.courts ? `(${Array.isArray(gymRes.courts) ? gymRes.courts.join(',') : gymRes.courts})` : ''}`;
+                const newTime = `${gymRes.startTime} ~ ${gymRes.endTime}`;
+
+                if (existingManualIndex !== -1) {
+                    // 既存の手動スケジュールがある場合は上書き
+                    combined[existingManualIndex].time = newTime;
+                    combined[existingManualIndex].label = newLabel;
+                    combined[existingManualIndex].location = newLocation;
+                    combined[existingManualIndex].isFromGym = true; 
+                } else {
+                    // 新規追加
+                    combined.push({
+                        id: `gym_${gymRes.id}`, 
+                        date: gymRes.date,
+                        time: newTime,
+                        label: newLabel,
+                        location: newLocation,
+                        isFromGym: true 
+                    });
+                }
+            });
+            
+            combined.sort((a, b) => new Date(a.date) - new Date(b.date));
+            return combined;
+        }
 
         function refreshAllUI() {
             renderCalendar();
@@ -1923,15 +1958,17 @@
 
             for (let i = 0; i < firstDayIndex; i++) {
                 const empty = document.createElement('div');
-                empty.className = 'h-20 sm:h-28 border border-transparent';
+                empty.className = 'h-24 sm:h-28 border border-transparent';
                 daysContainer.appendChild(empty);
             }
+
+            const combined = mergeSchedules();
 
             for (let day = 1; day <= totalDays; day++) {
                 const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
                 const dayCell = document.createElement('button');
-                dayCell.className = `h-20 sm:h-28 rounded-xl sm:rounded-2xl flex flex-col justify-between items-stretch p-1 sm:p-1.5 transition-all duration-200 text-xs font-bold relative border border-slate-100 bg-white hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 overflow-hidden group`;
+                dayCell.className = `h-24 sm:h-28 rounded-2xl flex flex-col justify-between items-stretch p-1 sm:p-1.5 transition-all duration-200 text-xs font-bold relative border border-slate-100 bg-white hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 overflow-hidden group`;
 
                 const headerDiv = document.createElement('div');
                 headerDiv.className = 'flex flex-col sm:flex-row justify-between items-start sm:items-center w-full';
@@ -1952,29 +1989,19 @@
                 
                 dateWrap.appendChild(dateNum);
 
-                const schedule = allSchedules.find(s => s.date === dateString);
+                const schedule = combined.find(s => s.date === dateString);
                 const tournament = allTournaments.find(t => t.date === dateString);
 
                 const isOtherLocation = schedule && schedule.location && !schedule.location.includes('体育館');
-
-                // 🏢 体育館の状況をチェック
                 const isGymClosed = allClosedDays.some(cd => cd.date === dateString);
-                const gymReservation = myKaitekiReservations.find(r => r.date === dateString);
 
-                // 📱 モバイル用: 日付の横に ✅ ❌ を表示
-                if (!isOtherLocation) {
-                    if (isGymClosed) {
-                        const mBadge = document.createElement('span');
-                        mBadge.className = 'text-[10px] sm:hidden leading-none ml-0.5';
-                        mBadge.innerText = '❌';
-                        dateWrap.appendChild(mBadge);
-                        if (!schedule) dayCell.classList.add('bg-slate-50', 'opacity-90');
-                    } else if (gymReservation) {
-                        const mBadge = document.createElement('span');
-                        mBadge.className = 'text-[10px] sm:hidden leading-none ml-0.5';
-                        mBadge.innerText = '✅';
-                        dateWrap.appendChild(mBadge);
-                    }
+                // 📱 モバイル用: 日付の横に ❌ を表示
+                if (!isOtherLocation && isGymClosed) {
+                    const mBadge = document.createElement('span');
+                    mBadge.className = 'text-[10px] sm:hidden leading-none ml-0.5';
+                    mBadge.innerText = '❌';
+                    dateWrap.appendChild(mBadge);
+                    if (!schedule) dayCell.classList.add('bg-slate-50', 'opacity-90');
                 }
 
                 headerDiv.appendChild(dateWrap);
@@ -1991,12 +2018,8 @@
 
                 // 💻 PC用: 体育館の状況バッジを追加 (モバイルでは隠す)
                 const badgesHtml = [];
-                if (!isOtherLocation) {
-                    if (isGymClosed) {
-                        badgesHtml.push(`<div class="hidden sm:block bg-slate-700 text-white text-[9px] font-black rounded-sm px-0.5 py-0.5 text-center shadow-sm w-full truncate tracking-tighter" title="休館日">❌ 休館</div>`);
-                    } else if (gymReservation) {
-                        badgesHtml.push(`<div class="hidden sm:block bg-blue-500 text-white text-[9px] font-black rounded-sm px-0.5 py-0.5 text-center shadow-sm w-full truncate tracking-tighter" title="${gymReservation.startTime}-${gymReservation.endTime} 確保済">✅ 確保</div>`);
-                    }
+                if (!isOtherLocation && isGymClosed) {
+                    badgesHtml.push(`<div class="hidden sm:block bg-slate-700 text-white text-[9px] font-black rounded-sm px-0.5 py-0.5 text-center shadow-sm w-full truncate tracking-tighter" title="休館日">❌ 休館</div>`);
                 }
                 
                 if (badgesHtml.length > 0) {
@@ -2085,8 +2108,9 @@
         }
 
         function updateNextPracticeWidget() {
+            const combined = mergeSchedules();
             const now = new Date();
-            const future = allSchedules.filter(s => new Date(s.date + ' ' + (s.time ? s.time.split('~')[0].trim() : '00:00')) > now);
+            const future = combined.filter(s => new Date(s.date + ' ' + (s.time ? s.time.split('~')[0].trim() : '00:00')) > now);
             const dateWidget = document.getElementById('next-practice-date');
             
             if (future.length === 0) {
@@ -2104,7 +2128,8 @@
         // ==========================================
         function shareToLine() {
             if (!currentOpenScheduleId) return;
-            const schedule = allSchedules.find(s => s.id === currentOpenScheduleId);
+            const combined = mergeSchedules();
+            const schedule = combined.find(s => s.id === currentOpenScheduleId);
             if (!schedule) return;
 
             const d = new Date(schedule.date);
@@ -2222,7 +2247,8 @@
             const select = document.getElementById('att-schedule-id');
             if (!select) return;
             select.innerHTML = '';
-            const upcoming = allSchedules.filter(s => s.date >= '2026-06-01');
+            const combined = mergeSchedules();
+            const upcoming = combined.filter(s => s.date >= '2026-06-01');
             upcoming.forEach(s => {
                 const d = new Date(s.date);
                 const dayWeek = ['日','月','火','水','木','金','土'][d.getDay()];
@@ -2322,9 +2348,13 @@
             const monthVal = rankingMonthSelector.value;
             if (!monthVal) return;
 
+            // リストを初期化（前回の結果をクリア）
+            list.innerHTML = '';
+
             let attendanceToCount = allAttendance;
             if (monthVal !== 'all') {
-                const targetSchedules = allSchedules.filter(s => s.date.startsWith(monthVal)).map(s => s.id);
+                const combined = mergeSchedules();
+                const targetSchedules = combined.filter(s => s.date.startsWith(monthVal)).map(s => s.id);
                 attendanceToCount = allAttendance.filter(a => targetSchedules.includes(a.scheduleId));
             }
 
@@ -2379,8 +2409,9 @@
             const dayAttendees = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}; 
 
             const now = new Date();
+            const combined = mergeSchedules();
 
-            allSchedules.forEach(s => {
+            combined.forEach(s => {
                 const d = new Date(s.date);
                 const attsCount = allAttendance.filter(a => a.scheduleId === s.id && a.status === '出席').length;
                 const totalAnswers = allAttendance.filter(a => a.scheduleId === s.id).length;
@@ -2453,7 +2484,8 @@
             if (!list) return;
             list.innerHTML = '';
             
-            allSchedules.filter(s => s.date >= '2026-06-01').forEach(s => {
+            const combined = mergeSchedules();
+            combined.filter(s => s.date >= '2026-06-01').forEach(s => {
                 const sAtts = allAttendance.filter(a => a.scheduleId === s.id);
                 if(sAtts.length === 0) return;
 
@@ -2508,7 +2540,8 @@
 
         function showDetailModal(id) {
             currentOpenScheduleId = id;
-            const schedule = allSchedules.find(s => s.id === id);
+            const combined = mergeSchedules();
+            const schedule = combined.find(s => s.id === id);
             if (!schedule) return;
 
             const d = new Date(schedule.date);
@@ -2523,17 +2556,12 @@
             document.getElementById('modal-date').innerText = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})`;
             document.getElementById('modal-time').innerHTML = `<i data-lucide="clock" class="w-4 h-4 text-slate-400"></i> ${schedule.time || ''}`;
             
-            // 🏢 体育館の状況をチェック
-            const isOtherLocation = schedule.location && !schedule.location.includes('体育館');
-            const isGymClosed = !isOtherLocation && allClosedDays.some(cd => cd.date === schedule.date);
-            const gymReservation = !isOtherLocation && myKaitekiReservations.find(r => r.date === schedule.date);
+            const isGymClosed = allClosedDays.some(cd => cd.date === schedule.date);
 
             // 📍 体育館の状況バッジを追加
             let locationHtml = schedule.location || 'ケミカル体育館';
-            if (isGymClosed) {
+            if (isGymClosed && (!schedule.location || schedule.location.includes('体育館'))) {
                 locationHtml += ` <span class="ml-2 bg-slate-700 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">❌ 休館</span>`;
-            } else if (gymReservation) {
-                locationHtml += ` <span class="ml-2 bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">✅ 確保済 (${gymReservation.startTime}-${gymReservation.endTime})</span>`;
             }
             document.getElementById('modal-location').innerHTML = locationHtml;
 
@@ -2786,16 +2814,29 @@
             const list = document.getElementById('admin-schedule-list');
             if(!list) return;
             list.innerHTML = '';
-            allSchedules.forEach(s => {
+            const combined = mergeSchedules();
+            combined.forEach(s => {
                 const div = document.createElement('div');
                 div.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-sm shadow-sm hover:border-slate-300 group";
-                div.innerHTML = `
-                    <div class="flex-1 truncate">
-                        <span class="text-slate-400 font-bold mr-2">${s.date.substring(5).replace('-','/')}</span>
-                        <span class="font-bold text-slate-700">${s.label}</span>
-                    </div>
-                    <button onclick="deleteSchedule('${s.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-rose-50 px-3 py-1.5 rounded-lg">削除</button>
-                `;
+                
+                if (s.isFromGym) {
+                    div.innerHTML = `
+                        <div class="flex-1 truncate flex items-center gap-2">
+                            <span class="text-slate-400 font-bold">${s.date.substring(5).replace('-','/')}</span>
+                            <span class="bg-blue-100 text-blue-800 text-[9px] px-1.5 py-0.5 rounded-full font-bold shadow-sm shrink-0">予約連動</span>
+                            <span class="font-bold text-slate-700">${s.label}</span>
+                        </div>
+                        <span class="text-[10px] text-slate-400">体育館予約</span>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <div class="flex-1 truncate">
+                            <span class="text-slate-400 font-bold mr-2">${s.date.substring(5).replace('-','/')}</span>
+                            <span class="font-bold text-slate-700">${s.label}</span>
+                        </div>
+                        <button onclick="deleteSchedule('${s.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-rose-50 px-3 py-1.5 rounded-lg">削除</button>
+                    `;
+                }
                 list.appendChild(div);
             });
         }
