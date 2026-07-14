@@ -1502,7 +1502,7 @@
         }
 
         async function settleAdvance(id) {
-            if(!(await customConfirm("この立て替えを精算済みにしますか？\n(※チームのお金から返金したことになります)"))) return;
+            if(!(await customConfirm("この立て替えを精算済みにしますか？\n(※チームの銀行から返金したことになります)"))) return;
             try {
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', id), { 
                     isSettled: true,
@@ -1602,14 +1602,10 @@
                 } else if (f.type === 'expense') {
                     totalOut += f.amount;
                     outByCategory[f.category] = (outByCategory[f.category] || 0) + f.amount;
-                    if (f.isAdvance) {
-                        if (!f.isSettled) {
-                            unsettledTotal += f.amount;
-                        } else {
-                            bankBalance -= f.amount; // 精算済は銀行から引く
-                        }
+                    if (f.isAdvance && !f.isSettled) {
+                        unsettledTotal += f.amount;
                     } else {
-                        bankBalance -= f.amount; // 通常支出は銀行から引く
+                        bankBalance -= f.amount;
                     }
                 } else if (f.type === 'transfer') {
                     currentCash -= f.amount;
@@ -1699,14 +1695,10 @@
                         currentCash += f.amount;
                     }
                 } else if (f.type === 'expense') {
-                    if (f.isAdvance) {
-                        if (!f.isSettled) {
-                            unsettledTotal += f.amount;
-                        } else {
-                            bankBalance -= f.amount; // 精算済は銀行から引く
-                        }
+                    if (f.isAdvance && !f.isSettled) {
+                        unsettledTotal += f.amount;
                     } else {
-                        bankBalance -= f.amount; // 通常支出は銀行から引く
+                        bankBalance -= f.amount;
                     }
                 } else if (f.type === 'transfer') {
                     currentCash -= f.amount;
@@ -1874,6 +1866,66 @@
                 listEl.appendChild(div);
             });
             lucide.createIcons();
+        }
+
+        // 🌟 新機能：出欠と会計をクロスチェックし、ビジターの未集金を警告する
+        function checkVisitorFees() {
+            const alertContainer = document.getElementById('visitor-alert-container');
+            const alertList = document.getElementById('visitor-alert-list');
+            if (!alertContainer || !alertList) return;
+
+            alertList.innerHTML = '';
+            let hasAlerts = false;
+
+            const combined = mergeSchedules();
+            const todayStr = getTodayString();
+            
+            // 本登録メンバーの名前リスト
+            const memberNames = allMembers.map(m => m.name);
+
+            combined.forEach(s => {
+                // 未来の予定は集金が発生していないので無視
+                if (s.date > todayStr) return;
+
+                // このスケジュールの「出席」データを取得
+                const sAtts = allAttendance.filter(a => a.scheduleId === s.id && a.status === '出席');
+                if (sAtts.length === 0) return;
+
+                // 本登録メンバー名簿に「ない」人 ＝ ビジターとして抽出
+                const visitors = sAtts.filter(a => !memberNames.includes(a.name));
+                
+                if (visitors.length > 0) {
+                    // その日の会計データに「ビジター参加費」の収入が記録されているかチェック
+                    const visitorIncome = allFinance.filter(f => f.date === s.date && f.category === 'ビジター参加費' && f.type === 'income');
+                    
+                    // もしビジターがいるのに、収入記録がゼロなら警告
+                    if (visitorIncome.length === 0) {
+                        hasAlerts = true;
+                        const d = new Date(s.date);
+                        const div = document.createElement('div');
+                        div.className = "bg-white p-3 rounded-xl border border-rose-100 shadow-sm";
+                        div.innerHTML = `
+                            <div class="font-bold text-rose-700 mb-1 flex items-center gap-1">
+                                <span class="bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded text-[10px]">${d.getMonth()+1}/${d.getDate()} 練習</span>
+                                未登録アラート
+                            </div>
+                            <div class="text-rose-600 leading-relaxed">
+                                ビジターが <span class="font-bold text-rose-700">${visitors.length}名</span> 参加していますが、帳簿に「ビジター参加費」の収入が記録されていません。
+                            </div>
+                            <div class="text-[10px] text-slate-500 mt-1 bg-slate-50 p-1.5 rounded border border-slate-100">
+                                該当する方: ${visitors.map(v => v.name).join(', ')}
+                            </div>
+                        `;
+                        alertList.appendChild(div);
+                    }
+                }
+            });
+
+            if (hasAlerts) {
+                alertContainer.classList.remove('hidden');
+            } else {
+                alertContainer.classList.add('hidden');
+            }
         }
 
         function renderAdminFinanceList() {
@@ -2229,7 +2281,7 @@
                                     <span class="text-[10px] sm:text-sm font-black">${atts}</span>
                                 </div>
                                 <div class="hidden sm:block w-px h-3 bg-slate-200"></div>
-                                <div class="flex items-center gap-0.5 text-rose-500 leading-none">
+                                <div class="flex items-center gap-0.5 text-rose-500 leading-none mt-0.5 sm:mt-0">
                                     <span class="text-[8px] sm:text-[10px] font-bold opacity-80">欠</span>
                                     <span class="text-[10px] sm:text-sm font-black">${absents}</span>
                                 </div>
@@ -2512,16 +2564,23 @@
             }
 
             const counts = {};
+            const memberNames = allMembers.map(m => m.name);
+            
+            // メンバー名簿にある人は0回からスタートさせる
             allMembers.forEach(m => counts[m.name] = 0);
             
             attendanceToCount.forEach(a => {
-                if (a.status === '出席' && counts.hasOwnProperty(a.name)) {
+                if (a.status === '出席') {
+                    if (!counts.hasOwnProperty(a.name)) {
+                        counts[a.name] = 0; // 名簿にないビジターのカウントを初期化
+                    }
                     counts[a.name]++;
                 }
             });
 
+            // 回数が多い順に並び替え
             const ranking = Object.entries(counts)
-                .map(([name, count]) => ({ name, count }))
+                .map(([name, count]) => ({ name, count, isVisitor: !memberNames.includes(name) }))
                 .sort((a, b) => b.count - a.count);
 
             if (ranking.length === 0 || ranking[0].count === 0) {
@@ -2540,10 +2599,15 @@
                 if (index === 1) rankBadge = `<span class="w-6 text-xl" title="2位">🥈</span>`;
                 if (index === 2) rankBadge = `<span class="w-6 text-xl" title="3位">🥉</span>`;
 
+                const visitorBadge = item.isVisitor ? `<span class="bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded text-[10px] ml-2 font-bold shadow-sm">ビジター</span>` : '';
+
                 div.innerHTML = `
                     <div class="flex items-center gap-3">
                         ${rankBadge}
-                        <span class="font-bold text-slate-700">${item.name}</span>
+                        <div class="flex items-center">
+                            <span class="font-bold text-slate-700">${item.name}</span>
+                            ${visitorBadge}
+                        </div>
                     </div>
                     <div class="font-black text-slate-800">
                         ${item.count} <span class="text-xs font-medium text-slate-500">回</span>
@@ -2638,6 +2702,8 @@
             list.innerHTML = '';
             
             const combined = mergeSchedules();
+            const memberNames = allMembers.map(m => m.name);
+
             combined.filter(s => s.date >= '2026-06-01').forEach(s => {
                 const sAtts = allAttendance.filter(a => a.scheduleId === s.id);
                 if(sAtts.length === 0) return;
@@ -2682,9 +2748,18 @@
                     </div>
 
                     <div class="space-y-1 text-xs">
-                        ${atts.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-emerald-500 shrink-0 mt-0.5">🟢</span><span class="text-slate-700 leading-relaxed w-full">${atts.map(a=>`<span class="inline-flex items-center"><span class="font-bold">${a.name}</span>${a.timeMemo ? `<span class="bg-indigo-50 border border-indigo-100 text-indigo-600 px-1 py-0.5 rounded text-[9px] ml-1.5 shadow-sm">${a.timeMemo}</span>` : ''}${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''}${a.comment ? `<span class="text-[10px] text-slate-400 ml-1">(${a.comment})</span>` : ''} <button onclick="deleteAttendance('${a.id}', '${a.name}')" class="ml-1 text-rose-300 hover:text-rose-500"><i data-lucide="x" class="w-3 h-3"></i></button></span>`).join(', ')}</span></div>` : ''}
-                        ${maybes.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-amber-400 shrink-0 mt-0.5">🟡</span><span class="text-slate-600 leading-relaxed w-full">${maybes.map(a=>`<span class="inline-flex items-center">${a.name}${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''} <button onclick="deleteAttendance('${a.id}', '${a.name}')" class="ml-1 text-rose-300 hover:text-rose-500"><i data-lucide="x" class="w-3 h-3"></i></button></span>`).join(', ')}</span></div>` : ''}
-                        ${absents.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-rose-400 shrink-0 mt-0.5">🔴</span><span class="text-slate-400 leading-relaxed w-full">${absents.map(a=>`<span class="inline-flex items-center">${a.name}${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''} <button onclick="deleteAttendance('${a.id}', '${a.name}')" class="ml-1 text-rose-300 hover:text-rose-500"><i data-lucide="x" class="w-3 h-3"></i></button></span>`).join(', ')}</span></div>` : ''}
+                        ${atts.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-emerald-500 shrink-0 mt-0.5">🟢</span><span class="text-slate-700 leading-relaxed w-full">${atts.map(a=>{
+                            const isVisitor = !memberNames.includes(a.name);
+                            return `<span class="inline-flex items-center"><span class="font-bold">${a.name}</span>${isVisitor ? `<span class="bg-orange-100 text-orange-600 px-1 py-0.5 rounded text-[9px] ml-1 shadow-sm font-bold">ビジター</span>` : ''}${a.timeMemo ? `<span class="bg-indigo-50 border border-indigo-100 text-indigo-600 px-1 py-0.5 rounded text-[9px] ml-1.5 shadow-sm">${a.timeMemo}</span>` : ''}${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''}${a.comment ? `<span class="text-[10px] text-slate-400 ml-1">(${a.comment})</span>` : ''} <button onclick="deleteAttendance('${a.id}', '${a.name}')" class="ml-1 text-rose-300 hover:text-rose-500"><i data-lucide="x" class="w-3 h-3"></i></button></span>`
+                        }).join(', ')}</span></div>` : ''}
+                        ${maybes.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-amber-400 shrink-0 mt-0.5">🟡</span><span class="text-slate-600 leading-relaxed w-full">${maybes.map(a=>{
+                            const isVisitor = !memberNames.includes(a.name);
+                            return `<span class="inline-flex items-center">${a.name}${isVisitor ? `<span class="bg-orange-100 text-orange-600 px-1 py-0.5 rounded text-[9px] ml-1 shadow-sm font-bold">ビジター</span>` : ''}${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''} <button onclick="deleteAttendance('${a.id}', '${a.name}')" class="ml-1 text-rose-300 hover:text-rose-500"><i data-lucide="x" class="w-3 h-3"></i></button></span>`
+                        }).join(', ')}</span></div>` : ''}
+                        ${absents.length > 0 ? `<div class="flex gap-2 items-start"><span class="text-rose-400 shrink-0 mt-0.5">🔴</span><span class="text-slate-400 leading-relaxed w-full">${absents.map(a=>{
+                            const isVisitor = !memberNames.includes(a.name);
+                            return `<span class="inline-flex items-center">${a.name}${isVisitor ? `<span class="bg-orange-100 text-orange-600 px-1 py-0.5 rounded text-[9px] ml-1 shadow-sm font-bold">ビジター</span>` : ''}${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''} <button onclick="deleteAttendance('${a.id}', '${a.name}')" class="ml-1 text-rose-300 hover:text-rose-500"><i data-lucide="x" class="w-3 h-3"></i></button></span>`
+                        }).join(', ')}</span></div>` : ''}
                     </div>
                 `;
                 list.appendChild(div);
@@ -2735,18 +2810,21 @@
                 document.getElementById('modal-bar-no').style.width = '0%';
             }
             
+            const memberNames = allMembers.map(m => m.name);
             const list = document.getElementById('modal-attendance-list');
             list.innerHTML = '';
             if(sAtts.length === 0){
                 list.innerHTML = '<div class="text-center text-slate-400 py-4">まだ回答がありません</div>';
             } else {
                 sAtts.forEach(a => {
+                    const isVisitor = !memberNames.includes(a.name);
                     const item = document.createElement('div');
                     item.className = "flex justify-between items-center border-b border-slate-100 py-2 last:border-0";
                     let dot = a.status==='出席'?'🟢':a.status==='未定'?'🟡':'🔴';
                     item.innerHTML = `
                         <div class="flex-1">
                             <span class="font-bold text-slate-700">${dot} ${a.name}</span>
+                            ${isVisitor ? `<span class="bg-orange-100 text-orange-600 px-1 py-0.5 rounded text-[9px] ml-1 font-bold shadow-sm">ビジター</span>` : ''}
                             ${a.timeMemo ? `<span class="bg-indigo-50 border border-indigo-100 text-indigo-600 px-1 py-0.5 rounded text-[9px] ml-1.5 shadow-sm">${a.timeMemo}</span>` : ''}
                             ${a.isProxy ? `<span class="bg-slate-100 text-slate-400 px-1 py-0.5 rounded text-[9px] ml-1">代理</span>` : ''}
                             ${a.comment ? `<p class="text-[10px] text-slate-400 ml-5 mt-0.5">${a.comment}</p>` : ''}
