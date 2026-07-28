@@ -606,6 +606,69 @@
                     </div>
                 </div>
 
+                <!-- 📋 練習プログラムの設定 -->
+                <div class="space-y-5 border-t border-slate-200 pt-8">
+                    <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
+                        <span class="p-1.5 bg-fuchsia-100 text-fuchsia-600 rounded-lg"><i data-lucide="clipboard-list" class="w-5 h-5"></i></span>
+                        練習プログラム（メニュー）の設定
+                    </h3>
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <p class="text-sm text-slate-500 font-medium mb-2">カレンダーや出欠画面に「本日はどの基礎練習メニューをやるか」を表示できます。</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-500 mb-1.5">対象の練習日</label>
+                                <div class="relative">
+                                    <select id="admin-menu-date" onchange="handleMenuDateChange()" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-fuchsia-500 font-medium appearance-none cursor-pointer">
+                                    </select>
+                                    <i data-lucide="chevron-down" class="w-4 h-4 absolute right-4 top-4 text-slate-400 pointer-events-none"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-500 mb-1.5">プログラムの選択 (ベース)</label>
+                                <div class="relative">
+                                    <select id="admin-menu-program" onchange="generateMenuPreview()" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-fuchsia-500 font-medium appearance-none cursor-pointer">
+                                        <option value="">未設定（解除する）</option>
+                                        <option value="A">プログラムA (総合基礎 ＆ フットワーク)</option>
+                                        <option value="B">プログラムB (ネット際制圧 ＆ 反射神経)</option>
+                                        <option value="C">プログラムC (3rdショット ＆ 前進強化)</option>
+                                        <option value="RANDOM">🎲 おまかせ自動生成 (日替わり)</option>
+                                        <option value="BLANK">📝 オリジナル (自由に手入力する)</option>
+                                    </select>
+                                    <i data-lucide="chevron-down" class="w-4 h-4 absolute right-4 top-4 text-slate-400 pointer-events-none"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 📝 編集・プレビューエリア -->
+                        <div id="admin-menu-editor" class="hidden mt-4 space-y-4 border-t border-slate-200 pt-4 animate-fade-in">
+                            <div id="blank-hint" class="hidden bg-fuchsia-50 text-fuchsia-800 text-xs p-3 rounded-xl border border-fuchsia-100 mb-2">
+                                <i data-lucide="info" class="w-4 h-4 inline -mt-0.5 mr-1"></i>
+                                <strong>オリジナル作成：</strong> 下のテキストボックスに、練習のメニュー名とやり方をキーボードで自由に打ち込んで作成してください。（※LINE等で文章を打つ要領です）
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-500 mb-1.5">メニューのタイトル</label>
+                                <input type="text" id="admin-menu-custom-title" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-fuchsia-500 bg-slate-50 focus:bg-white font-bold">
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-end mb-1.5">
+                                    <label class="block text-sm font-bold text-slate-500">練習内容</label>
+                                    <span class="text-[10px] text-slate-400 font-bold bg-slate-100 px-2 py-0.5 rounded">1行目: メニュー名 / 2行目以降: 説明文（空行で区切り）</span>
+                                </div>
+                                <textarea id="admin-menu-custom-content" rows="7" placeholder="（例）&#10;ボレーボレー&#10;パドルの真ん中で捉えて胸元へ返す&#10;&#10;クロスディンク&#10;膝を曲げて低い姿勢を保つ" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-fuchsia-500 bg-slate-50 focus:bg-white leading-relaxed custom-scroll"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 mt-4">
+                            <button id="btn-menu-delete" onclick="deletePracticeMenu()" class="hidden bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-4 py-4 rounded-xl text-base transition-colors shadow-sm border border-rose-200 shrink-0" title="メニューを解除">
+                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                            </button>
+                            <button onclick="savePracticeMenu()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl text-base transition-colors shadow-md flex items-center justify-center gap-2">
+                                <i data-lucide="save" class="w-5 h-5 text-fuchsia-400"></i> <span id="admin-menu-save-text">カレンダーに設定を反映する</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 📅 スケジュール管理 -->
                 <div class="space-y-5 border-t border-slate-200 pt-8">
                     <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
@@ -828,6 +891,24 @@
                     <div class="p-1.5 bg-white rounded-lg shadow-sm shrink-0"><i data-lucide="map-pin" class="w-4 h-4 text-sky-500"></i></div>
                     <span id="modal-location" class="font-bold"></span>
                 </div>
+                
+                <!-- 📋 練習プログラム表示エリア -->
+                <div id="modal-practice-menu-container" class="hidden bg-fuchsia-50 border border-fuchsia-100 rounded-xl cursor-pointer hover:bg-fuchsia-100 transition-colors shadow-sm overflow-hidden" onclick="toggleMenuDetails()">
+                    <div class="p-3 flex justify-between items-center text-fuchsia-800">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                            <span class="text-[10px] font-bold">本日の練習:</span>
+                            <span id="modal-practice-menu-title" class="text-sm font-black tracking-tight"></span>
+                        </div>
+                        <div class="bg-white p-1 rounded-md shadow-sm">
+                            <i data-lucide="chevron-down" id="modal-practice-menu-icon" class="w-4 h-4 transition-transform text-fuchsia-600"></i>
+                        </div>
+                    </div>
+                    <div id="modal-practice-menu-details" class="hidden px-4 pb-3 border-t border-fuchsia-100/50 bg-white/50 text-xs text-fuchsia-800 font-medium">
+                        <ul id="modal-practice-menu-list" class="space-y-1 mt-2"></ul>
+                    </div>
+                </div>
+
                 <div class="space-y-2">
                     <div class="flex justify-between text-[11px] font-bold text-slate-500">
                         <span>現在の参加状況</span>
@@ -959,7 +1040,6 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ★ Firebaseの接続先を「ライジングムーン専用」に固定
         const appId = 'pickleball-club-portal';
         const firebaseConfig = {
             apiKey: "AIzaSyC7y6-LjoxTOt_I7FelZ0ZAH7LiHF-Sj3g",
@@ -974,7 +1054,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // 🏢 ケミカル体育館予約システムとの連動用
         const kaitekiAppId = 'kaiteki-gym-production-v2';
         const kaitekiConfig = {
             apiKey: "AIzaSyCTDD_TMng6EclbLiMoc7-36QRowhQrvew",
@@ -996,21 +1075,82 @@
         let allFeeChecks = {}; 
         let allMembers = [];
         
+        // 📋 練習メニューのデータ定義（ワンポイントアドバイス付き）
+        let allPracticeMenus = {}; 
+        const practicePrograms = {
+            'A': {
+                title: 'プログラムA (総合基礎 ＆ フットワーク)',
+                items: [
+                    { name: '⏱️ 1. ボレーボレー（5分）', desc: 'パドルの真ん中で捉え、相手の胸元へ優しく返す「コントロールと感覚作り」が目的です。' },
+                    { name: '⏱️ 2. クロス・ディンク（各5分）', desc: '膝を曲げて低い姿勢を保ち、手首ではなく「肩を支点」にしてボールを前へ押し出します。' },
+                    { name: '⏱️ 3. 3rdショット ドロップ（10分）', desc: 'ネットの上10〜30cmの空間を通すイメージで、ボールを「前へ運ぶ」ように打ちます。' },
+                    { name: '⏱️ 4. トランジション リセット（10分）', desc: '慌てて打ち返さず、パドルを低く構えて当てるだけ（ブロック）の意識を持ち、勢いを殺します。' },
+                    { name: '⏱️ 5. ディンク 1対2（15分）', desc: '1人側は打った後に必ず構え直す（スプリットステップ）ことを意識し、苦しい時は高く浮かせます。' }
+                ]
+            },
+            'B': {
+                title: 'プログラムB (ネット際制圧 ＆ 反射神経)',
+                items: [
+                    { name: '⏱️ 1. ウォームアップ ディンク（10分）', desc: 'クロスはネットの中央（一番低い部分）を通せるためミスが減ります。丁寧に足を動かしましょう。' },
+                    { name: '⏱️ 2. スピードアップ＆ブロック（10分）', desc: '攻撃側は「高い球だけ」を打ち、守備側はパドルを体の前で動かさずにボールを当てて吸収します。' },
+                    { name: '⏱️ 3. ボレー・ファイアファイト（10分）', desc: 'パドルを常に体の正面（胸の高さ）で構え、テイクバック（振りかぶり）をゼロにします。' },
+                    { name: '⏱️ 4. ドロップボレー展開（10分）', desc: '強く打つと見せかけてパドルのグリップを緩め、ボールの勢いを殺して足元に落とします。' },
+                    { name: '⏱️ 5. ディンク・ミニゲーム（10分）', desc: '相手の正面ばかりに打たず、左右に揺さぶったり深さを変えたりしてミスを誘う配球を意識します。' }
+                ]
+            },
+            'C': {
+                title: 'プログラムC (3rdショット ＆ 前進強化)',
+                items: [
+                    { name: '⏱️ 1. 3rdショット ドロップ（10分）', desc: 'スイングを途中で止めず、目標（キッチンの中）に向かってフォロースルーを長く取ります。' },
+                    { name: '⏱️ 2. ドライブ ＆ 5thドロップ（10分）', desc: 'ドライブは一発で決めず「相手に苦しいボレーをさせて甘い返球を引き出す」のが目的です。' },
+                    { name: '⏱️ 3. リセットしながら「前進」（10分）', desc: '一気に走り込まず「打つ → 1,2歩進む → 相手が打つ瞬間に止まる → 打つ」のリズムで前進します。' },
+                    { name: '⏱️ 4. ロブ ＆ スマッシュ（10分）', desc: 'ロブを追う時は後ろ歩きせず、体を横に向けて（クロスステップ等で）素早く下がります。' },
+                    { name: '⏱️ 5. 実戦: 3rdまで確定ラリー（10分）', desc: '「いかに早くキッチンに付くか」「いかに3rdを沈めて前進するか」の基本戦術を徹底します。' }
+                ]
+            }
+        };
+
+        // 🎲 おまかせ生成用のドリルプール
+        const drillPool = {
+            cat1: [
+                { name: 'ボレーボレー（5〜10分）', desc: 'パドルの真ん中で捉え、相手の胸元へ優しく返す「コントロールと感覚作り」が目的です。' },
+                { name: 'クロス・ディンク（10分）', desc: '膝を曲げて低い姿勢を保ち、手首ではなく「肩を支点」にしてボールを前へ押し出します。' },
+                { name: 'ウォームアップ ディンク（10分）', desc: 'クロスはネットの中央（一番低い部分）を通せるためミスが減ります。丁寧に足を動かしましょう。' }
+            ],
+            cat2: [
+                { name: '3rdショット ドロップ（10分）', desc: 'ネットの上10〜30cmの空間を通すイメージで、ボールを「前へ運ぶ」ように打ちます。' },
+                { name: 'トランジション リセット（10分）', desc: '慌てて打ち返さず、パドルを低く構えて当てるだけ（ブロック）の意識を持ち、勢いを殺します。' },
+                { name: 'ドライブ ＆ 5thドロップ（10分）', desc: 'ドライブは一発で決めず「相手に苦しいボレーをさせて甘い返球を引き出す」のが目的です。' },
+                { name: 'リセットしながら「前進」（10分）', desc: '一気に走り込まず「打つ → 1,2歩進む → 相手が打つ瞬間に止まる → 打つ」のリズムで前進します。' }
+            ],
+            cat3: [
+                { name: 'スピードアップ＆ブロック（10分）', desc: '攻撃側は「高い球だけ」を打ち、守備側はパドルを体の前で動かさずにボールを当てて吸収します。' },
+                { name: 'ボレー・ファイアファイト（10分）', desc: 'パドルを常に体の正面（胸の高さ）で構え、テイクバック（振りかぶり）をゼロにします。' },
+                { name: 'ドロップボレー展開（10分）', desc: '強く打つと見せかけてパドルのグリップを緩め、ボールの勢いを殺して足元に落とします。' }
+            ],
+            cat4: [
+                { name: 'ディンク 1対2（10分）', desc: '1人側は打った後に必ず構え直す（スプリットステップ）ことを意識し、苦しい時は高く浮かせます。' },
+                { name: 'ロブ ＆ スマッシュ（10分）', desc: 'ロブを追う時は後ろ歩きせず、体を横に向けて（クロスステップ等で）素早く下がります。' }
+            ],
+            cat5: [
+                { name: 'ディンク・ミニゲーム（10分）', desc: '相手の正面ばかりに打たず、左右に揺さぶったり深さを変えたりしてミスを誘う配球を意識します。' },
+                { name: '実戦: 3rdまで確定ラリー（10分）', desc: '「いかに早くキッチンに付くか」「いかに3rdを沈めて前進するか」の基本戦術を徹底します。' }
+            ]
+        };
+        
         let financeGoal = { title: "ポータブルネット購入", amount: 10000 }; 
         let teamPaypayLink = "";
-        let nationalHolidays = {}; // 🎌 祝日データ保存用
+        let nationalHolidays = {}; 
         
-        let allClosedDays = []; // 🏢 体育館の休館日データ
-        let myKaitekiReservations = []; // 🏢 体育館の予約データ(金森枠)
+        let allClosedDays = []; 
+        let myKaitekiReservations = []; 
 
-        // グラフ用の変数
-        let attendanceDayChartInstance = null; // 曜日別参加人数グラフ
+        let attendanceDayChartInstance = null; 
         let trendChartInstance = null;
 
-        // 本日の日付から現在年・月を決定
         const todayDateObj = new Date();
         let currentYear = todayDateObj.getFullYear();
-        let currentMonth = todayDateObj.getMonth(); // 0-11
+        let currentMonth = todayDateObj.getMonth(); 
         let selectedStatus = '出席'; 
         let selectedModalStatus = '出席'; 
         let currentOpenScheduleId = null; 
@@ -1040,8 +1180,6 @@
         window.editFinanceRecord = editFinanceRecord;
         window.cancelFinanceEdit = cancelFinanceEdit;
         window.settleAdvance = settleAdvance;
-        
-        // NEW: 銀行送金機能
         window.depositToBank = depositToBank;
         window.depositAllToBank = depositAllToBank;
 
@@ -1064,13 +1202,26 @@
 
         window.addMember = addMember;
         window.deleteMember = deleteMember;
-
         window.toggleAttNameInput = toggleAttNameInput;
         window.renderAttendanceRanking = renderAttendanceRanking;
-        
         window.deleteAttendance = deleteAttendance;
 
-        // 確認モーダル用カスタム関数
+        window.updateAdminMenuDateSelect = updateAdminMenuDateSelect;
+        window.generateMenuPreview = generateMenuPreview;
+        window.savePracticeMenu = savePracticeMenu;
+        window.deletePracticeMenu = deletePracticeMenu;
+        window.handleMenuDateChange = handleMenuDateChange;
+        window.toggleMenuDetails = toggleMenuDetails;
+        window.showToast = showToast;
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            if (!t) return;
+            document.getElementById('toast-message').innerText = msg;
+            t.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => { t.classList.add('translate-y-24', 'opacity-0'); }, 3000);
+        }
+
         function customConfirm(message) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('confirm-modal');
@@ -1100,7 +1251,6 @@
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
 
-        // 月謝とランキングのプルダウンを現在から3ヶ月先まで自動生成する
         function populateMonthSelectors() {
             const feeSelector = document.getElementById('fee-month-selector');
             const rankingSelector = document.getElementById('ranking-month-selector');
@@ -1115,7 +1265,6 @@
                 rankingSelector.appendChild(allOpt);
             }
             
-            // 2026年6月を起点にする
             const startYear = 2026;
             const startMonth = 6;
             
@@ -1123,7 +1272,6 @@
             const currentY = d.getFullYear();
             const currentM = d.getMonth() + 1;
             
-            // 現在から3ヶ月先までをターゲットにする
             let endY = currentY;
             let endM = currentM + 3;
             if (endM > 12) { endM -= 12; endY++; }
@@ -1152,7 +1300,6 @@
                 if (m > 12) { m = 1; y++; }
             }
             
-            // 今日の年月値をセット
             const currentVal = `${currentY}-${String(currentM).padStart(2, '0')}`;
             if (feeSelector && feeSelector.querySelector(`option[value="${currentVal}"]`)) {
                 feeSelector.value = currentVal;
@@ -1168,14 +1315,12 @@
                     try {
                         await signInWithCustomToken(auth, __initial_auth_token);
                     } catch (tokenErr) {
-                        console.warn("Custom token failed, falling back to anonymous auth.", tokenErr);
                         await signInAnonymously(auth);
                     }
                 } else {
                     await signInAnonymously(auth);
                 }
             } catch (err) {
-                console.error("Auth error:", err);
                 user = { uid: 'local-test-user', isAnonymous: true };
                 onUserLoaded(user);
             }
@@ -1201,6 +1346,7 @@
             const tournamentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'tournaments');
             const feesRef = collection(db, 'artifacts', appId, 'public', 'data', 'fees'); 
             const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
+            const menusRef = collection(db, 'artifacts', appId, 'public', 'data', 'practice_menus');
 
             try {
                 const goalDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'finance_goal'));
@@ -1212,11 +1358,19 @@
                 }
             } catch (err) {}
 
+            onSnapshot(menusRef, (snapshot) => {
+                allPracticeMenus = {};
+                snapshot.forEach(doc => { allPracticeMenus[doc.id] = doc.data(); });
+                if(typeof updateAdminMenuDateSelect === 'function') updateAdminMenuDateSelect();
+                refreshAllUI();
+            }, (err) => console.error(err));
+
             onSnapshot(schedulesRef, (snapshot) => {
                 allSchedules = [];
                 snapshot.forEach(doc => allSchedules.push({ id: doc.id, ...doc.data() }));
                 allSchedules.sort((a, b) => new Date(a.date) - new Date(b.date)); 
                 refreshAllUI();
+                updateAdminMenuDateSelect();
             }, (err) => console.error(err));
 
             onSnapshot(attendanceRef, (snapshot) => {
@@ -1269,7 +1423,6 @@
                 renderAttendanceRanking();
             }, (err) => console.error(err));
 
-            // 🏢 体育館システムの休館日データを取得
             const closedRef = collection(kaitekiDb, 'artifacts', kaitekiAppId, 'public', 'data', 'closed_days');
             onSnapshot(closedRef, (snapshot) => {
                 allClosedDays = [];
@@ -1277,7 +1430,6 @@
                 refreshAllUI();
             }, (err) => console.error("Closed days fetch error:", err));
 
-            // 🏢 体育館システムの予約データ（金森枠）を取得
             const kaitekiResRef = collection(kaitekiDb, 'artifacts', kaitekiAppId, 'public', 'data', 'reservations');
             onSnapshot(kaitekiResRef, (snapshot) => {
                 myKaitekiReservations = [];
@@ -1288,15 +1440,15 @@
                     }
                 });
                 refreshAllUI();
+                updateAdminMenuDateSelect();
             }, (err) => console.error("Kaiteki reservations fetch error:", err));
 
             const finDateEl = document.getElementById('fin-date');
             if(finDateEl) finDateEl.value = getTodayString();
         };
 
-        // 🎯 手動スケジュールと体育館の予約を合体させて、出欠のベースにする
         function mergeSchedules() {
-            let combined = JSON.parse(JSON.stringify(allSchedules)); // ディープコピー
+            let combined = JSON.parse(JSON.stringify(allSchedules)); 
             
             myKaitekiReservations.forEach(gymRes => {
                 const existingManualIndex = combined.findIndex(s => s.date === gymRes.date);
@@ -1307,13 +1459,11 @@
                 const newTime = `${gymRes.startTime} ~ ${gymRes.endTime}`;
 
                 if (existingManualIndex !== -1) {
-                    // 既存の手動スケジュールがある場合は上書き
                     combined[existingManualIndex].time = newTime;
                     combined[existingManualIndex].label = newLabel;
                     combined[existingManualIndex].location = newLocation;
                     combined[existingManualIndex].isFromGym = true; 
                 } else {
-                    // 新規追加
                     combined.push({
                         id: `gym_${gymRes.id}`, 
                         date: gymRes.date,
@@ -1333,7 +1483,7 @@
             renderCalendar();
             updateAttendanceFormSchedules();
             renderAttendanceSummary();
-            renderAttendanceChart(); // 曜日別グラフの描画
+            renderAttendanceChart(); 
             renderAdminScheduleList();
             updateNextPracticeWidget();
         }
@@ -1354,6 +1504,186 @@
             });
             lucide.createIcons();
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // ==========================================
+        // 📋 練習メニューの管理ロジック
+        // ==========================================
+        function updateAdminMenuDateSelect() {
+            const select = document.getElementById('admin-menu-date');
+            if(!select) return;
+            const currentVal = select.value;
+            select.innerHTML = '';
+            const combined = mergeSchedules();
+            const future = combined.filter(s => s.date >= getTodayString());
+            
+            if (future.length === 0) {
+                select.innerHTML = '<option value="">今後の予定がありません</option>';
+                return;
+            }
+
+            future.forEach(s => {
+                const d = new Date(s.date);
+                const opt = document.createElement('option');
+                opt.value = s.date;
+                
+                let currentMenu = '';
+                if (allPracticeMenus[s.date]) {
+                    const progName = allPracticeMenus[s.date].program === 'Custom' ? '📝 カスタム設定済' : `Prog.${allPracticeMenus[s.date].program}`;
+                    currentMenu = ` 【✅ ${progName}】`;
+                }
+                
+                opt.innerText = `${d.getMonth()+1}/${d.getDate()}(${['日','月','火','水','木','金','土'][d.getDay()]}) ${s.time ? s.time.split('~')[0] : ''}${currentMenu}`;
+                select.appendChild(opt);
+            });
+
+            if (currentVal && Array.from(select.options).some(o => o.value === currentVal)) {
+                select.value = currentVal;
+            } else if (select.options.length > 0) {
+                select.value = select.options[0].value;
+            }
+            
+            handleMenuDateChange();
+        }
+
+        function handleMenuDateChange() {
+            const date = document.getElementById('admin-menu-date').value;
+            const delBtn = document.getElementById('btn-menu-delete');
+            const editor = document.getElementById('admin-menu-editor');
+            const titleInput = document.getElementById('admin-menu-custom-title');
+            const contentInput = document.getElementById('admin-menu-custom-content');
+            const programSelect = document.getElementById('admin-menu-program');
+            const hint = document.getElementById('blank-hint');
+
+            if(hint) hint.classList.add('hidden');
+
+            if(date && allPracticeMenus[date]) {
+                if(delBtn) delBtn.classList.remove('hidden');
+                editor.classList.remove('hidden');
+                
+                const menuData = allPracticeMenus[date];
+                titleInput.value = menuData.title || '';
+                
+                let itemsToDisplay = [];
+                // 新しい形式（直接編集したもの）か、古い形式（A, Bなどプログラム名だけ登録されているもの）かを判定
+                if (menuData.items && Array.isArray(menuData.items)) {
+                    itemsToDisplay = menuData.items;
+                } else if (menuData.program && practicePrograms[menuData.program]) {
+                    itemsToDisplay = practicePrograms[menuData.program].items;
+                    if (!titleInput.value) titleInput.value = practicePrograms[menuData.program].title;
+                }
+
+                // 編集しやすいように、あらかじめ付いている番号の絵文字などは削除してテキストボックスへ入れる
+                contentInput.value = itemsToDisplay.map(i => {
+                    const name = i.name.replace(/⏱️ \d+\. /g, '');
+                    return `${name}\n${i.desc}`;
+                }).join('\n\n');
+                
+                programSelect.value = "BLANK"; 
+            } else {
+                if(delBtn) delBtn.classList.add('hidden');
+                programSelect.value = "";
+                editor.classList.add('hidden');
+            }
+        }
+        
+        function generateMenuPreview() {
+            const prog = document.getElementById('admin-menu-program').value;
+            const editor = document.getElementById('admin-menu-editor');
+            const titleInput = document.getElementById('admin-menu-custom-title');
+            const contentInput = document.getElementById('admin-menu-custom-content');
+            const hint = document.getElementById('blank-hint');
+
+            if (!prog) {
+                editor.classList.add('hidden');
+                return;
+            }
+            
+            editor.classList.remove('hidden');
+
+            if (hint) {
+                if (prog === 'BLANK') hint.classList.remove('hidden');
+                else hint.classList.add('hidden');
+            }
+
+            if (prog === 'BLANK') {
+                titleInput.value = "オリジナルメニュー";
+                contentInput.value = "";
+            } else if (prog === 'RANDOM') {
+                titleInput.value = "🎲 日替わり おまかせプログラム";
+                const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+                const items = [
+                    getRandom(drillPool.cat1), getRandom(drillPool.cat2), getRandom(drillPool.cat3), getRandom(drillPool.cat4), getRandom(drillPool.cat5)
+                ];
+                contentInput.value = items.map(i => `${i.name}\n${i.desc}`).join('\n\n');
+            } else if (practicePrograms[prog]) {
+                titleInput.value = practicePrograms[prog].title;
+                contentInput.value = practicePrograms[prog].items.map(i => {
+                    const name = i.name.replace(/⏱️ \d+\. /g, ''); // 番号を消してプレビュー
+                    return `${name}\n${i.desc}`;
+                }).join('\n\n');
+            }
+        }
+
+        async function savePracticeMenu() {
+            const date = document.getElementById('admin-menu-date').value;
+            const prog = document.getElementById('admin-menu-program').value;
+            if(!date) return showToast("対象の練習日を選択してください");
+
+            if (!prog) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'practice_menus', date));
+                showToast("メニュー設定を解除しました");
+                document.getElementById('admin-menu-program').value = "";
+                handleMenuDateChange();
+                return;
+            }
+
+            const title = document.getElementById('admin-menu-custom-title').value.trim();
+            const contentStr = document.getElementById('admin-menu-custom-content').value.trim();
+            
+            if(!title || !contentStr) return showToast("タイトルと内容を入力してください");
+
+            // 空行で区切って、配列データに変換する
+            const blocks = contentStr.split(/\n\s*\n/);
+            const items = blocks.map(block => {
+                const lines = block.split('\n');
+                const name = lines[0].trim();
+                const desc = lines.slice(1).join('\n').trim();
+                return { name, desc };
+            }).filter(i => i.name); // 空ブロックを弾く
+
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'practice_menus', date), {
+                program: 'Custom',
+                title: title,
+                items: items,
+                timestamp: new Date().toISOString()
+            });
+            showToast(`カレンダーにメニューを反映しました！`);
+            handleMenuDateChange();
+        }
+
+        async function deletePracticeMenu() {
+            const date = document.getElementById('admin-menu-date').value;
+            if(!date) return;
+            if(!(await customConfirm("この日の練習メニュー設定をカレンダーから解除（削除）しますか？"))) return;
+            
+            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'practice_menus', date));
+            showToast("メニュー設定を解除しました");
+            handleMenuDateChange(); 
+        }
+        
+        function toggleMenuDetails() {
+            const detailsDiv = document.getElementById('modal-practice-menu-details');
+            const icon = document.getElementById('modal-practice-menu-icon');
+            if (!detailsDiv || !icon) return;
+            
+            if (detailsDiv.classList.contains('hidden')) {
+                detailsDiv.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                detailsDiv.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
         }
 
         // ==========================================
@@ -1393,7 +1723,6 @@
             }
         }
 
-        // 特定の会計レコードを編集フォームにロードする
         function editFinanceRecord(id) {
             const record = allFinance.find(f => f.id === id);
             if (!record) return;
@@ -1410,7 +1739,6 @@
                 document.getElementById('fin-advance-person').value = record.advancePerson || '';
             }
 
-            // UIを「編集モード中」にする
             document.getElementById('finance-edit-badge').classList.remove('hidden');
             document.getElementById('fin-btn-text').innerText = "帳簿データを更新する";
             const submitBtn = document.getElementById('fin-submit-btn');
@@ -1421,7 +1749,6 @@
             lucide.createIcons();
         }
 
-        // 編集モードをキャンセルする
         function cancelFinanceEdit() {
             document.getElementById('fin-edit-id').value = "";
             document.getElementById('finance-edit-badge').classList.add('hidden');
@@ -1429,7 +1756,6 @@
             const submitBtn = document.getElementById('fin-submit-btn');
             submitBtn.className = "w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl text-base transition-colors flex items-center justify-center gap-2 shadow-lg relative z-10 mt-2";
             
-            // フォームをリセット
             document.getElementById('fin-amount').value = '';
             document.getElementById('fin-desc').value = '';
             document.getElementById('fin-date').value = getTodayString();
@@ -1468,7 +1794,7 @@
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', finId), {
                     type, date, amount, category, description: desc, 
                     isAdvance, advancePerson, isSettled: false,
-                    isDeposited: false, // 銀行送金フラグ
+                    isDeposited: false, 
                     timestamp: new Date().toISOString()
                 });
 
@@ -1495,14 +1821,13 @@
             if(!(await customConfirm("削除しますか？"))) return;
             await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', id));
             showToast("削除しました");
-            // もし編集中だったデータを消した場合はフォームもリセット
             if (document.getElementById('fin-edit-id').value === id) {
                 cancelFinanceEdit();
             }
         }
 
         async function settleAdvance(id) {
-            if(!(await customConfirm("この立て替えを精算済みにしますか？\n(※チームの銀行から返金したことになります)"))) return;
+            if(!(await customConfirm("この立て替えを精算済みにしますか？\n(※チームのお金から返金したことになります)"))) return;
             try {
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', id), { 
                     isSettled: true,
@@ -1512,7 +1837,6 @@
             } catch (e) { showToast("エラーが発生しました"); }
         }
 
-        // 🏦 銀行送金（ワンタップ）機能
         async function depositToBank(id) {
             if(!(await customConfirm("この収入を「銀行へ入金済」にしますか？"))) return;
             try {
@@ -1542,7 +1866,6 @@
             } catch (e) { showToast("エラーが発生しました"); }
         }
 
-        // PayPayリンク設定
         async function savePaypayLink() {
             const link = document.getElementById('admin-paypay-link').value.trim();
             try {
@@ -1580,7 +1903,6 @@
             } catch(err) { showToast("更新に失敗しました"); }
         }
 
-        // レポート生成機能
         function generateReport() {
             let currentCash = 0;
             let bankBalance = 0;
@@ -1605,7 +1927,7 @@
                     if (f.isAdvance && !f.isSettled) {
                         unsettledTotal += f.amount;
                     } else {
-                        bankBalance -= f.amount;
+                        bankBalance -= f.amount; 
                     }
                 } else if (f.type === 'transfer') {
                     currentCash -= f.amount;
@@ -1672,7 +1994,6 @@
             const monthlyData = {};
 
             allFinance.forEach(f => {
-                // グラフ用データの集計（資金移動は除外）
                 if (f.type !== 'transfer') {
                     const d = new Date(f.date);
                     const monthKey = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -1698,7 +2019,7 @@
                     if (f.isAdvance && !f.isSettled) {
                         unsettledTotal += f.amount;
                     } else {
-                        bankBalance -= f.amount;
+                        bankBalance -= f.amount; 
                     }
                 } else if (f.type === 'transfer') {
                     currentCash -= f.amount;
@@ -1708,7 +2029,6 @@
 
             const netTotal = currentCash + bankBalance - unsettledTotal;
 
-            // 💰 総資産と目標バーの更新
             const totalEl = document.getElementById('finance-total-balance');
             if(totalEl) totalEl.innerText = netTotal.toLocaleString();
             
@@ -1743,11 +2063,8 @@
                 }
             }
 
-            // 📊 グラフの描画 (月別収推移のみ)
             const trendCtx = document.getElementById('trendChart');
-
             if (trendCtx) {
-                // 月別推移（棒グラフ）
                 const sortedMonths = Object.keys(monthlyData).sort();
                 const incTrend = sortedMonths.map(m => monthlyData[m].income);
                 const expTrend = sortedMonths.map(m => monthlyData[m].expense);
@@ -1811,7 +2128,6 @@
                 });
             }
 
-
             const listEl = document.getElementById('finance-history-list');
             if(!listEl) return;
             listEl.innerHTML = '';
@@ -1866,66 +2182,6 @@
                 listEl.appendChild(div);
             });
             lucide.createIcons();
-        }
-
-        // 🌟 新機能：出欠と会計をクロスチェックし、ビジターの未集金を警告する
-        function checkVisitorFees() {
-            const alertContainer = document.getElementById('visitor-alert-container');
-            const alertList = document.getElementById('visitor-alert-list');
-            if (!alertContainer || !alertList) return;
-
-            alertList.innerHTML = '';
-            let hasAlerts = false;
-
-            const combined = mergeSchedules();
-            const todayStr = getTodayString();
-            
-            // 本登録メンバーの名前リスト
-            const memberNames = allMembers.map(m => m.name);
-
-            combined.forEach(s => {
-                // 未来の予定は集金が発生していないので無視
-                if (s.date > todayStr) return;
-
-                // このスケジュールの「出席」データを取得
-                const sAtts = allAttendance.filter(a => a.scheduleId === s.id && a.status === '出席');
-                if (sAtts.length === 0) return;
-
-                // 本登録メンバー名簿に「ない」人 ＝ ビジターとして抽出
-                const visitors = sAtts.filter(a => !memberNames.includes(a.name));
-                
-                if (visitors.length > 0) {
-                    // その日の会計データに「ビジター参加費」の収入が記録されているかチェック
-                    const visitorIncome = allFinance.filter(f => f.date === s.date && f.category === 'ビジター参加費' && f.type === 'income');
-                    
-                    // もしビジターがいるのに、収入記録がゼロなら警告
-                    if (visitorIncome.length === 0) {
-                        hasAlerts = true;
-                        const d = new Date(s.date);
-                        const div = document.createElement('div');
-                        div.className = "bg-white p-3 rounded-xl border border-rose-100 shadow-sm";
-                        div.innerHTML = `
-                            <div class="font-bold text-rose-700 mb-1 flex items-center gap-1">
-                                <span class="bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded text-[10px]">${d.getMonth()+1}/${d.getDate()} 練習</span>
-                                未登録アラート
-                            </div>
-                            <div class="text-rose-600 leading-relaxed">
-                                ビジターが <span class="font-bold text-rose-700">${visitors.length}名</span> 参加していますが、帳簿に「ビジター参加費」の収入が記録されていません。
-                            </div>
-                            <div class="text-[10px] text-slate-500 mt-1 bg-slate-50 p-1.5 rounded border border-slate-100">
-                                該当する方: ${visitors.map(v => v.name).join(', ')}
-                            </div>
-                        `;
-                        alertList.appendChild(div);
-                    }
-                }
-            });
-
-            if (hasAlerts) {
-                alertContainer.classList.remove('hidden');
-            } else {
-                alertContainer.classList.add('hidden');
-            }
         }
 
         function renderAdminFinanceList() {
@@ -2127,7 +2383,6 @@
                     month: monthVal, name: name, isPaid: isPaid, timestamp: new Date().toISOString()
                 });
                 
-                // 会計への自動連動
                 if (isPaid) {
                     await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'finance', finDocId), {
                         type: 'income',
@@ -2137,7 +2392,7 @@
                         description: `${name}さん ${monthVal}分会費 (自動反映)`,
                         isAdvance: false,
                         isSettled: false,
-                        isDeposited: false, // 銀行送金フラグ
+                        isDeposited: false, 
                         timestamp: new Date().toISOString()
                     });
                     showToast(`${name}さんの月謝を会計に自動登録しました`);
@@ -2188,7 +2443,6 @@
                 const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
                 const holidayName = nationalHolidays[dateString];
 
-                // 🎌 日曜または「祝日」なら赤色にする
                 if (dayOfWeek === 0 || holidayName) dateNum.classList.add('!text-rose-500');
                 if (dayOfWeek === 6 && !holidayName) dateNum.classList.add('!text-sky-500');
                 
@@ -2199,19 +2453,26 @@
 
                 const isOtherLocation = schedule && schedule.location && !schedule.location.includes('体育館');
                 const isGymClosed = allClosedDays.some(cd => cd.date === dateString);
+                
+                const menuData = allPracticeMenus[dateString];
+                const menuProg = menuData ? (menuData.program === 'Custom' ? '🎲' : menuData.program) : null;
 
-                // 📱 モバイル用: 日付の横に ❌ を表示
+                // 📱 モバイル用バッジ
                 if (!isOtherLocation && isGymClosed) {
                     const mBadge = document.createElement('span');
                     mBadge.className = 'text-[10px] sm:hidden leading-none ml-0.5';
                     mBadge.innerText = '❌';
                     dateWrap.appendChild(mBadge);
                     if (!schedule) dayCell.classList.add('bg-slate-50', 'opacity-90');
+                } else if (menuProg) {
+                    const mBadge = document.createElement('span');
+                    mBadge.className = 'text-[10px] sm:hidden leading-none ml-0.5 text-fuchsia-500 bg-fuchsia-50 px-1 rounded-sm font-black border border-fuchsia-100';
+                    mBadge.innerText = menuProg;
+                    dateWrap.appendChild(mBadge);
                 }
 
                 headerDiv.appendChild(dateWrap);
 
-                // 🎌 祝日名があれば表示する
                 if (holidayName) {
                     const holSpan = document.createElement('span');
                     holSpan.innerText = holidayName;
@@ -2221,10 +2482,13 @@
 
                 dayCell.appendChild(headerDiv);
 
-                // 💻 PC用: 体育館の状況バッジを追加 (モバイルでは隠す)
+                // 💻 PC用バッジを追加
                 const badgesHtml = [];
                 if (!isOtherLocation && isGymClosed) {
                     badgesHtml.push(`<div class="hidden sm:block bg-slate-700 text-white text-[9px] font-black rounded-sm px-0.5 py-0.5 text-center shadow-sm w-full truncate tracking-tighter" title="休館日">❌ 休館</div>`);
+                } else if (menuData) {
+                    const pcBadgeText = menuData.program === 'Custom' ? '🎲 日替わり' : `📋 Prog.${menuProg}`;
+                    badgesHtml.push(`<div class="hidden sm:block bg-fuchsia-500 text-white text-[9px] font-black rounded-sm px-0.5 py-0.5 text-center shadow-sm w-full truncate tracking-tighter" title="練習メニュー設定済">${pcBadgeText}</div>`);
                 }
                 
                 if (badgesHtml.length > 0) {
@@ -2241,13 +2505,11 @@
                     
                     const badgeDiv = document.createElement('div');
                     badgeDiv.className = 'mt-auto w-full px-0.5 pb-0.5 transition-transform group-hover:scale-105';
-                    // 📱 モバイルはトロフィーのみ表示
                     badgeDiv.innerHTML = `<div class="bg-amber-400 text-slate-900 text-[10px] sm:text-xs font-black rounded py-0.5 sm:py-1 text-center shadow-sm truncate leading-none">🏆<span class="hidden sm:inline"> 大会</span></div>`;
                     
                     dayCell.appendChild(badgeDiv);
                     dayCell.onclick = () => showTournamentDetailModal(tournament.id);
                 } else if (schedule) {
-                    // ハードコート枠の追加と色分け
                     if (schedule.label.includes('定期')) {
                         dayCell.classList.add('bg-emerald-50/50', '!border-emerald-200');
                         dateNum.classList.add('!bg-emerald-500', '!text-white', 'shadow-sm');
@@ -2408,7 +2670,6 @@
                 }
             });
 
-            // 出席のときだけ遅刻・早退メモ欄を表示
             const memoContainer = document.getElementById('att-time-memo-container');
             if (memoContainer) {
                 if (status === '出席') memoContainer.classList.remove('hidden');
@@ -2473,7 +2734,6 @@
             const comment = document.getElementById('att-comment').value.trim();
             const isProxy = document.getElementById('att-is-proxy') ? document.getElementById('att-is-proxy').checked : false;
 
-            // 遅刻早退メモの取得（出席の時だけ）
             const timeMemoInput = document.getElementById('att-time-memo');
             const timeMemo = (selectedStatus === '出席' && timeMemoInput) ? timeMemoInput.value.trim() : '';
 
@@ -2553,7 +2813,6 @@
             const monthVal = rankingMonthSelector.value;
             if (!monthVal) return;
 
-            // リストを初期化（前回の結果をクリア）
             list.innerHTML = '';
 
             let attendanceToCount = allAttendance;
@@ -2566,19 +2825,17 @@
             const counts = {};
             const memberNames = allMembers.map(m => m.name);
             
-            // メンバー名簿にある人は0回からスタートさせる
             allMembers.forEach(m => counts[m.name] = 0);
             
             attendanceToCount.forEach(a => {
                 if (a.status === '出席') {
                     if (!counts.hasOwnProperty(a.name)) {
-                        counts[a.name] = 0; // 名簿にないビジターのカウントを初期化
+                        counts[a.name] = 0; 
                     }
                     counts[a.name]++;
                 }
             });
 
-            // 回数が多い順に並び替え
             const ranking = Object.entries(counts)
                 .map(([name, count]) => ({ name, count, isVisitor: !memberNames.includes(name) }))
                 .sort((a, b) => b.count - a.count);
@@ -2617,7 +2874,6 @@
             });
         }
 
-        // 📊 曜日別の参加人数グラフを描画する機能
         function renderAttendanceChart() {
             const ctx = document.getElementById('attendanceDayChart');
             if (!ctx) return;
@@ -2633,7 +2889,6 @@
                 const attsCount = allAttendance.filter(a => a.scheduleId === s.id && a.status === '出席').length;
                 const totalAnswers = allAttendance.filter(a => a.scheduleId === s.id).length;
                 
-                // 過去の日程、または既に出欠回答がある未来の日程のみを集計対象にする
                 if (d <= now || totalAnswers > 0) {
                     const day = d.getDay();
                     dayCounts[day]++;
@@ -2647,7 +2902,6 @@
             for (let i=0; i<7; i++) {
                 const avg = dayCounts[i] > 0 ? (dayAttendees[i] / dayCounts[i]).toFixed(1) : 0;
                 averages.push(avg);
-                // グラフの色分け（日曜は赤、土曜は青、平日は緑）
                 if (i === 0) colors.push('#f43f5e'); 
                 else if (i === 6) colors.push('#0ea5e9');
                 else colors.push('#10b981');
@@ -2728,11 +2982,18 @@
                                      (s.label.includes('土曜') ? 'bg-sky-100 text-sky-800' : 
                                      (s.label.includes('ハードコート') ? 'bg-orange-100 text-orange-800' : 'bg-violet-100 text-violet-800'));
 
+                let currentMenuBadge = '';
+                const menuData = allPracticeMenus[s.date];
+                if (menuData) {
+                    const badgeText = menuData.program === 'Custom' ? '🎲 日替わり' : `📋 Prog.${menuData.program}`;
+                    currentMenuBadge = `<span class="bg-fuchsia-100 text-fuchsia-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-fuchsia-200 ml-2">${badgeText}</span>`;
+                }
+
                 div.innerHTML = `
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3 mb-4">
                         <div>
                             <span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded ${bgColorClass} mb-1">${s.label}</span>
-                            <h4 class="text-base font-black text-slate-800">${d.getMonth() + 1}/${d.getDate()}(${dayWeek}) <span class="text-sm text-slate-500 font-bold ml-1">${s.time || ''}</span></h4>
+                            <h4 class="text-base font-black text-slate-800">${d.getMonth() + 1}/${d.getDate()}(${dayWeek}) <span class="text-sm text-slate-500 font-bold ml-1">${s.time || ''}</span>${currentMenuBadge}</h4>
                         </div>
                         <div class="flex gap-1 text-[11px] font-bold">
                             <span class="bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-md text-emerald-700">出: ${atts.length}</span>
@@ -2786,12 +3047,53 @@
             
             const isGymClosed = allClosedDays.some(cd => cd.date === schedule.date);
 
-            // 📍 体育館の状況バッジを追加
             let locationHtml = schedule.location || 'ケミカル体育館';
             if (isGymClosed && (!schedule.location || schedule.location.includes('体育館'))) {
                 locationHtml += ` <span class="ml-2 bg-slate-700 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">❌ 休館</span>`;
             }
             document.getElementById('modal-location').innerHTML = locationHtml;
+
+            // 📋 練習メニューの表示制御 (ワンポイントアドバイス付き)
+            const menuData = allPracticeMenus[schedule.date];
+            const menuContainer = document.getElementById('modal-practice-menu-container');
+            const detailsDiv = document.getElementById('modal-practice-menu-details');
+            const icon = document.getElementById('modal-practice-menu-icon');
+            const listUl = document.getElementById('modal-practice-menu-list');
+
+            if (menuData) {
+                let mTitle = '';
+                let mItems = [];
+                if (menuData.program === 'Custom') {
+                    mTitle = menuData.title;
+                    mItems = menuData.items;
+                } else if (practicePrograms[menuData.program]) {
+                    mTitle = practicePrograms[menuData.program].title;
+                    mItems = practicePrograms[menuData.program].items;
+                }
+
+                if (mItems.length > 0) {
+                    document.getElementById('modal-practice-menu-title').innerText = mTitle;
+                    
+                    listUl.innerHTML = mItems.map((i, idx) => {
+                        let dName = i.name;
+                        // カスタム編集で名前から絵文字が消えている場合は、見やすく復元する
+                        if (!dName.includes('⏱️')) {
+                            dName = `⏱️ ${idx + 1}. ${dName}`;
+                        }
+                        return `
+                        <li class="mb-2.5 last:mb-0">
+                            <div class="font-bold text-fuchsia-900">${dName}</div>
+                            <div class="text-[10.5px] text-fuchsia-800/90 mt-0.5 leading-relaxed pl-2.5 border-l-[3px] border-fuchsia-300 bg-white/60 py-1 rounded-r-sm shadow-sm">${i.desc}</div>
+                        </li>
+                    `}).join('');
+                    
+                    detailsDiv.classList.add('hidden');
+                    icon.style.transform = 'rotate(0deg)';
+                    menuContainer.classList.remove('hidden');
+                }
+            } else {
+                menuContainer.classList.add('hidden');
+            }
 
             const sAtts = allAttendance.filter(a => a.scheduleId === id);
             const atts = sAtts.filter(a => a.status === '出席');
@@ -2878,17 +3180,12 @@
                     <div class="space-y-4">
                         <div class="flex justify-between items-start gap-2 border-b border-slate-100 pb-3">
                             <div>
-                                <span class="text-[10px] bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full font-bold border border-indigo-100">RISING MOON 🏆</span>
-                                <h3 class="text-lg font-black text-slate-800 mt-2 leading-tight">${t.title}</h3>
+                                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 mb-1 inline-block">${d.getFullYear()}年</span>
+                                <h3 class="font-black text-slate-800 text-lg leading-tight mt-0.5">${d.getMonth() + 1}/${d.getDate()}(${dayWeek})<br><span class="text-base">${t.title}</span></h3>
                             </div>
-                            <div class="shrink-0 text-right">${deadlineBadge}</div>
+                            ${deadlineBadge}
                         </div>
-
-                        <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
-                            <div class="text-slate-600 flex items-center gap-2">
-                                <i data-lucide="calendar" class="w-4 h-4 text-slate-400 bg-slate-50 p-0.5 rounded"></i>
-                                <span><strong>開催日:</strong> <br>${d.getMonth() + 1}月${d.getDate()}日 (${dayWeek})</span>
-                            </div>
+                        <div class="grid grid-cols-2 gap-3 text-xs">
                             <div class="text-slate-600 flex items-center gap-2">
                                 <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 bg-slate-50 p-0.5 rounded"></i>
                                 <span class="truncate"><strong>場所:</strong> <br>${t.location}</span>
@@ -2907,6 +3204,9 @@
                             </div>
                         </div>
                     </div>
+                    <button onclick="showTournamentDetailModal('${t.id}')" class="w-full py-3 mt-4 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold rounded-xl transition-colors shadow-sm text-sm border border-amber-200">
+                        詳細を見る
+                    </button>
                 `;
                 container.appendChild(card);
             });
@@ -3136,13 +3436,6 @@
             });
         }
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            document.getElementById('toast-message').innerText = msg;
-            t.classList.remove('translate-y-24', 'opacity-0');
-            setTimeout(() => { t.classList.add('translate-y-24', 'opacity-0'); }, 3000);
-        }
-
         // 🌬️ オープンデータAPI(無料/登録不要)から天気と風速を取得
         async function fetchWeather() {
             try {
@@ -3200,8 +3493,8 @@
         }
 
         initAuth();
-        fetchWeather(); // ウィジェットの読み込みを実行
-        fetchHolidays(); // 祝日データの読み込みを実行
+        fetchWeather(); 
+        fetchHolidays(); 
         lucide.createIcons();
     </script>
 </body>
